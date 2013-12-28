@@ -100,8 +100,10 @@ public:
 	}
 
 
-	bool readParams(std::ifstream &in)
+	bool readParams(char *fileName)
 	{
+		std::ifstream in(fileName);
+		
 		if (!in.good())
 			return false;
 

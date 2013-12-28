@@ -7,6 +7,32 @@
 #include "IK.h"
 
 
+
+void Plan::clearForRecord() {
+	for(int i = 0; i < 3; i++) {
+		nomPlanForRecord[i] = 0.0;
+	}
+	for(int i = 0; i < 7; i++) {
+		nomNowForRecord[i] = 0.0;
+	}
+
+}
+
+void Plan::addToLog(Logger &logger) {
+	logger.add_datapoint("PN.nomPln[X]","m",&(nomPlanForRecord[0]));
+	logger.add_datapoint("PN.nomPln[Y]","m",&(nomPlanForRecord[1]));
+	logger.add_datapoint("PN.nomPln[YAW]","r",&(nomPlanForRecord[2]));
+
+	logger.add_datapoint("PN.nom[X]","m",&(nomNowForRecord[0]));
+	logger.add_datapoint("PN.nom[Y]","m",&(nomNowForRecord[1]));
+	logger.add_datapoint("PN.nom[YAW]","r",&(nomNowForRecord[2]));
+	logger.add_datapoint("PN.z_d[X]","m",&(nomNowForRecord[3]));
+	logger.add_datapoint("PN.z_d[Y]","m",&(nomNowForRecord[4]));
+	logger.add_datapoint("PN.com[X]","m",&(nomNowForRecord[5]));
+	logger.add_datapoint("PN.com[Y]","m",&(nomNowForRecord[6]));
+}
+
+
 Plan::Plan() {
 	MAX_SPEED = 0.02;
 	MAX_ACCEL = 0.01;
@@ -72,6 +98,7 @@ Plan::Plan(const char *config) {
 }
 
 void Plan::driveFutureRobot(double vForward, double vLeft, double dTheta) {
+	
 	//drive virtual point
 	double oldYaw = nomYaw.back();
 	double newYaw = oldYaw+dTheta*TIME_STEP;
@@ -81,10 +108,17 @@ void Plan::driveFutureRobot(double vForward, double vLeft, double dTheta) {
 	double newY = nomP[X].back() + (vForward*sin(oldYaw) + vLeft*cos(oldYaw))*TIME_STEP;
 	nomP[Y].push_back(newY);
 
+	nomPlanForRecord[0] = newX;
+	nomPlanForRecord[1] = newY;
+	nomPlanForRecord[2] = newYaw;
+
+
 	int nextTDind = prevTDind + (DS_TIME+SS_TIME)/TIME_STEP;
 	if(allSteps.size() == 2)		nextTDind = prevTDind + (DS0_TIME+SS_TIME)/TIME_STEP;		//long first DS
 
 	int curInd = nomYaw.size();
+
+	//printf("drive %d %d, %g %g %g\n", curInd, nextTDind, vForward, vLeft, dTheta);
 	double time = curInd*TIME_STEP;
 	if(curInd >= nextTDind) {	//time for a new step
 		steps[nextTD].back()->lo = time-SS_TIME;	//beginning of swing
@@ -102,148 +136,11 @@ void Plan::driveFutureRobot(double vForward, double vLeft, double dTheta) {
 	}
 }
 
-/*
-//curveByDist returns rad/m
-void Plan::genStepsFromStand(double (*curveByDist)(double p), double totDist, bool exact, bool match, double desSpeed, int firstFoot, bool decel) {
-	//figure out the full speed (use MAX_SPEED as default)
-	double fullSpeed = desSpeed;
-	if(fullSpeed < 0)			fullSpeed = MAX_SPEED;
-	if(fullSpeed > MAX_SPEED)	fullSpeed = MAX_SPEED;
 
-	double time = 0.0;
-	double speed = 0.0;
-	double dist = 0.0;
-	int nextSwgFoot = firstFoot;
-	bool firstDS = true;
-	double segmentTime = 0.0;
-	while(dist <= totDist) {
-		segmentTime += TIME_STEP;
-		time += TIME_STEP;
-		if(decel && speed > sqrt(2.0*MAX_ACCEL*(totDist-dist))) {		//decelerate at end
-			speed -= MAX_ACCEL;
-			if(speed <= 0)		break;
-		}
-		else if(speed < fullSpeed) {		//accelerate to fullSpeed
-			speed += MAX_ACCEL*TIME_STEP;
-			if(speed > fullSpeed)	speed = fullSpeed;
-		}
-
-		//update nominal trajectory
-		double dTheta_dt = curveByDist(dist)*speed;
-		double oldYaw = nomYaw.back();
-		double newYaw = oldYaw+dTheta_dt*TIME_STEP;
-		nomYaw.push_back(newYaw);
-		double newX = nomP[X].back()+speed*cos(oldYaw)*TIME_STEP;
-		nomP[X].push_back(newX);
-		double newY = nomP[X].back()+speed*sin(oldYaw)*TIME_STEP;
-		nomP[Y].push_back(newY);
-
-		dist += speed*TIME_STEP;
-
-		ContactState oldContact = cs.back();
-		switch(oldContact) {
-		case SSL:
-			if(segmentTime > SS_TIME) {	//right foot touchdown
-				cs.push_back(DSc);
-				segmentTime = 0.0;
-				nextSwgFoot = LEFT;
-				steps[RIGHT].back()->lo = time-SS_TIME;	//beginning of swing
-				Step *s = new Step(newX+sin(newYaw)*STANCE_WIDTH/2.0, newY-cos(newYaw)*STANCE_WIDTH/2.0, newYaw, time, RIGHT);
-				addStep(s);
-			}
-			else	cs.push_back(oldContact);
-			break;
-		case SSR:
-			if(segmentTime > SS_TIME) {	//left foot touchdown
-				cs.push_back(DSc);
-				segmentTime = 0.0;
-				nextSwgFoot = RIGHT;
-				steps[LEFT].back()->lo = time-SS_TIME;	//beginning of swing
-				Step *s = new Step(newX-sin(newYaw)*STANCE_WIDTH/2.0, newY+cos(newYaw)*STANCE_WIDTH/2.0, newYaw, time, LEFT);
-				addStep(s);
-			}
-			else	cs.push_back(oldContact);
-			break;
-		case DSc:
-			if((firstDS && segmentTime > DS0_TIME) || (!firstDS && segmentTime > DS_TIME)) {	//lift off
-				firstDS = false;
-				if(nextSwgFoot == LEFT)		cs.push_back(SSR);
-				else						cs.push_back(SSL);
-				segmentTime = 0.0;
-			}
-			else	cs.push_back(oldContact);
-			break;
-		default:
-			printf("Bad oldContact\n");
-			break;
-		}
-	}
-
-	//walk an exact distance
-	//add a final footstep at the end
-	if(exact && segmentTime > 0.05) {
-		int swgFoot = nextSwgFoot;
-
-		if(cs.back() == DSc) {	//if in DS
-			while((firstDS && segmentTime <= DS0_TIME) || (!firstDS && segmentTime <= DS_TIME)) {	//complete DS
-				segmentTime += TIME_STEP;
-				time += TIME_STEP;
-				nomYaw.push_back(nomYaw.back());
-				nomP[X].push_back(nomP[X].back());
-				nomP[Y].push_back(nomP[Y].back());
-				cs.push_back(DSc);
-			}
-			segmentTime = 0.0;
-		}
-		else {	//if already in SS
-			swgFoot = 1-cs.back();
-		}
-
-		//complete SS
-		while(segmentTime <= SS_TIME) {
-			segmentTime += TIME_STEP;
-			time += TIME_STEP;
-			nomYaw.push_back(nomYaw.back());
-			nomP[X].push_back(nomP[X].back());
-			nomP[Y].push_back(nomP[Y].back());
-			cs.push_back((ContactState)(1-swgFoot));
-		}
-
-		if(swgFoot == LEFT) {
-			Step *s = new Step(nomP[X].back()-sin(nomYaw.back())*STANCE_WIDTH/2.0, nomP[X].back()+cos(nomYaw.back())*STANCE_WIDTH/2.0, nomYaw.back(), time, LEFT);
-			addStep(s);
-		}
-		else {
-			Step *s = new Step(nomP[X].back()+sin(nomYaw.back())*STANCE_WIDTH/2.0, nomP[X].back()-cos(nomYaw.back())*STANCE_WIDTH/2.0, nomYaw.back(), time, RIGHT);
-			addStep(s);
-		}
-
-		//set up in case of match
-		segmentTime = 0.0;
-		time += TIME_STEP;
-		nomYaw.push_back(nomYaw.back());
-		nomP[X].push_back(nomP[X].back());
-		nomP[Y].push_back(nomP[Y].back());
-		cs.push_back(DSc);
-	}
-
-	//finish with matched footsteps
-	if(match) {
-		Step *prev = allSteps.back();
-		double yaw = prev->yaw;
-		Step *s;
-		if(prev->side == LEFT) {
-			s = new Step(prev->x+sin(yaw)*STANCE_WIDTH, prev->y-cos(yaw)*STANCE_WIDTH, yaw, prev->td+DS_TIME+SS_TIME, RIGHT);
-		}
-		else {
-			s = new Step(prev->x-sin(yaw)*STANCE_WIDTH, prev->y+cos(yaw)*STANCE_WIDTH, yaw, prev->td+DS_TIME+SS_TIME, LEFT);
-		}
-		addStep(s);
-	}
-}
-*/
 
 void Plan::addStep(Step *step) {
+	printf("Add step: %d, %g, %g, %g, %g\n",step->side, step->x, step->y, step->yaw, step->td);
+
 	int s = step->side;
 	if(steps[s].size() > 0) {	//if not initializing
 		steps[s].back()->lo = step->td-SS_TIME;		//previous step now ends
@@ -268,14 +165,19 @@ void Plan::addStep(Step *step) {
 		}
 
 		if(com[X].size() < startDDPind) {
-			printf("startDDPind too large %d %d\n", startDDPind, com[X].size());
-			exit(-1);
+			startDDPind = com[X].size()-1;
+			printf("running extra trajectory\n");
 		}
 
+		printf("Planning from %d to %d\n", startDDPind, zmpVec[X].size());
 		//run DDP in both x and y
 		for(int i = 0; i < 2; i++) {
+			printf("dim %d\n", i);
 			double x0[2] = {(com[i])[startDDPind], (comd[i])[startDDPind]};
+			printf("{%g %g}\n",x0[0], x0[1]);
+			printf("%p\n", ddp);
 			ddp->getTrajs(x0, startDDPind, zmpVec[i], com[i], comd[i]);
+			printf("Plan %d complete \n", i);
 		}
 
 		if(com[X].size() != zmpVec[X].size()) {
@@ -383,6 +285,14 @@ bool Plan::isDone(double walkTime) {
 }
 
 void Plan::fillIK_d(IKcmd &IK_d, double t) {
+	int nowInd = (int)floor(t/TIME_STEP);
+	nomNowForRecord[0] = (nomP[X])[nowInd];
+	nomNowForRecord[1] = (nomP[Y])[nowInd];
+	nomNowForRecord[2] = (nomYaw)[nowInd];
+	nomNowForRecord[3] = (zmpVec[X])[nowInd];
+	nomNowForRecord[4] = (zmpVec[Y])[nowInd];
+	nomNowForRecord[5] = (com[X])[nowInd];
+	nomNowForRecord[6] = (com[Y])[nowInd];
 	startDDPind = (t+0.1)/TIME_STEP;
 	//TODO: implement
 }

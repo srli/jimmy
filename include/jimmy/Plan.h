@@ -24,13 +24,13 @@ public:
 	Plan();
 	Plan(const char *config);
 
+	void clearForRecord();
+	void addToLog(Logger &logger);
+
 	void initFeet(double lx, double ly, double lYaw, double rx, double ry, double rYaw);
 	void driveFutureRobot(double vForward, double vLeft, double dTheta);
 	void fillIK_d(IKcmd &IK_d, double t);
 	
-	//DEPRECATED
-	//void genStepsFromStand(double (*curveByDist)(double p), double totDist, bool exact=true, bool match=true, double desSpeed=-1, int firstFoot=LEFT, bool decel=true);
-
 	void printSteps(char *fileName);
 	void printNom(char *fileName);
 
@@ -60,6 +60,10 @@ public:
 
 	void addStep(Step *step);
 	void clearVectors();
+
+private:
+	double nomPlanForRecord[3];
+	double nomNowForRecord[7];
 };
 
 #endif

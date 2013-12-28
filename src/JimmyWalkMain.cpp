@@ -22,6 +22,8 @@ static double modeTime;	//time since start of current mode
 static double modeT0;		//time this mode started;
 static double modeDur;		//intended duration of current mode
 
+static double vForward, vLeft, dTheta;
+
 bool isReady() {
 	//TODO: wait until arbotix has moved robot to stand-prep
 	return true;
@@ -29,12 +31,16 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 10.0)	return -1;
+	if(curTime > 30.0)	return -1;
+	if(curTime > 10.0 && curTime < 25.0)		return 1;
 
 	return 0;
 }
 
 void getDriveCommand(double *vForward, double *vLeft, double *dTheta) {
+	*vForward = 0.02;
+	*vLeft = 0.0;
+	*dTheta = 0.0;
 	//TODO: implement retrieving these command from the user
 }
 
@@ -71,16 +77,25 @@ void initWalk() {
 }
 
 void init() {
+	printf("Start init\n");
 	mode = IDLE;
 	isIdle = false;
 	curTime = 0.0;
 	modeTime = 0.0;
 	modeT0 = 0.0;
 	modeDur = 0.0;
-	plan = Plan("../../config/plan.cf");
+	plan = Plan("/home/ewhitman/groovy_workspace/jimmy/conf/plan.cf");
+	IK.readParams("/home/ewhitman/groovy_workspace/jimmy/conf/IK.cf");
 	logger.init(plan.TIME_STEP);
+	logger.add_datapoint("curTime","s",&curTime);
+	logger.add_datapoint("modeTime","s",&modeTime);
+	logger.add_datapoint("mode","-",(int*)(&mode));
+	logger.add_datapoint("CMD.vForward","m/s",&vForward);
+	logger.add_datapoint("CMD.vLeft","m/s",&vLeft);
+	logger.add_datapoint("CMD.dTheta","m/s",&dTheta);
 	IK_d.addToLog(logger);
 	IK.addToLog(logger);
+	plan.addToLog(logger);
 	IK_d.setToRS(IK.ikrs);
 	IK_d.setVel0();
 }
@@ -136,19 +151,19 @@ double nomPose[3] = {0.0, 0.0, 0.40};
 void idleCon() {
 	//CoM pos
 	for(int i = 0; i <3; i++) {
-		IK_d.com[i] += 0.002*(nomPose[i]-IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0);
+		IK_d.com[i] += 0.004*(nomPose[i]-IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0);
 	}
 	
 	//foot orientation
 	for(int s = 0; s < 2; s++) {
 		Eigen::Quaterniond desQ = IK_d.footQ[s];
 		flattenQuat(desQ);
-		IK_d.footQ[s] = mySlerp(IK_d.footQ[s], desQ, 0.002);
+		IK_d.footQ[s] = mySlerp(IK_d.footQ[s], desQ, 0.004);
 	}
 
 	//torso orientation
 	Eigen::Quaterniond desBodyQ = mySlerp(IK_d.footQ[LEFT], IK_d.footQ[RIGHT], 0.5);
-	IK_d.rootQ = mySlerp(IK_d.rootQ, desBodyQ, 0.002);
+	IK_d.rootQ = mySlerp(IK_d.rootQ, desBodyQ, 0.004);
 }
 
 void walkCon() {
@@ -162,12 +177,14 @@ void gestureCon() {
 }
 
 
-double vForward, vLeft, dTheta;
-
 void controlLoop() {
 	//handle mode switching
 	stateMachine();
 	modeTime = curTime-modeT0;
+
+	//whipe out record values
+	vForward = vLeft = dTheta = 0.0;
+	plan.clearForRecord();
 	
 	//do actual control
 	switch(mode) {
@@ -197,7 +214,6 @@ void controlLoop() {
 
 	double neckEA[3];
 	getNeckCommand(neckEA);
-	//TODO: constrain neck angles to commanded angles
 
 	double theta_d[N_J], thetad_d[N_J];
 	IK.IK(IK_d, theta_d, thetad_d);
@@ -222,6 +238,7 @@ int main( int argc, char **argv ) {
 			exit(-1);
 		}
 	}
-  return 0;
+
+	return 374832748;
 }
 

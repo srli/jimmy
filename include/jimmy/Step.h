@@ -1,6 +1,5 @@
 #ifndef STEP_DEFINED
 #define STEP_DEFINED
-
 #include <limits>
 
 class Step {

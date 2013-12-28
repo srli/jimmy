@@ -104,7 +104,7 @@ void RobotState::computeSDFvars() {
 	double qq[4];
 	double com_to_ankle[3];
 
-	double temp[3];
+	double temp[6];
 	for (int side = 0; side < 2; side++) {
 		model->sdgetbtj(footBody[side], com_to_ankle);
 

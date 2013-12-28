@@ -122,25 +122,30 @@ bool LipmConstHeightPlanner::getCOMTraj(const Traj<1,1> &zmpTraj, const double *
 
 bool LipmConstHeightPlanner::getTrajs(const double *x0, int startIdx, const std::vector<double> &zmp_d, std::vector<double> &com_p, std::vector<double> &com_v)
 {
+	printf("hi1\n");
+	//prefer to do this inside the function for safety
+	com_p.resize(zmp_d.size());
+	com_v.resize(zmp_d.size());
+printf("hi2\n");
   Traj<1,1> in, out;
   double p;
   for (size_t i = startIdx; i < zmp_d.size(); i++) {
     p = zmp_d[i];
     in.append(i*_dt, 0, &p, NULL, NULL, NULL);
   }
-  
+  printf("hi3\n");
   bool res = getCOMTraj(in, x0, out);
   if (!res) 
     return false;
- 
+ printf("hi4\n");
   //com_p.resize(out.size());
   //com_v.resize(out.size());
-
+ printf("hi5\n");
   for (size_t i = 0; i < out.size(); i++) {
     com_p[startIdx+i] = out[i].x[0];
     com_v[startIdx+i] = out[i].x[1];
   }
-
+  printf("hi6\n");
   return true;
 } 
 

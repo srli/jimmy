@@ -36,6 +36,9 @@ public:
 			comd[i] = rs.comd[i];
 			rootW[i] = rs.rootW[i];
 		}
+		com[Z] = rs.root[Z];
+		comd[Z] = rs.rootd[Z];
+
 		rootQ = rs.rootQ;
 
 		for(int i = 0; i < 2; i++) {

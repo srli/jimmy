@@ -188,12 +188,15 @@ void gestureCon() {
 
 
 void controlLoop() {
+
 	//handle mode switching
 	stateMachine();
+
 	modeTime = curTime-modeT0;
 
 	//whipe out record values
 	vForward = vLeft = dTheta = 0.0;
+
 	plan.clearForRecord();
 	
 	//do actual control
@@ -235,16 +238,20 @@ void controlLoop() {
 int main( int argc, char **argv ) {
 	wallClockStart = get_time();
 	init();
+	printf("Waiting for Arbotix\n");
 	while(!isReady()) {
 		//do nothing
 	}
+	printf("Starting\n");
 	while(true) {
 		double wallNow = get_time();
 		wallClockT = wallNow-wallClockStart;
 		wallClockDT = wallNow-wallClockLast;
 		wallClockLast = wallNow;
 		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
+
 		controlLoop();
+
 		logger.saveData();
 		//TODO:  wait until plan.TIME_STEP
 

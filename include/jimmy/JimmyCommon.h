@@ -10,6 +10,30 @@ const int N_Q = N_U+1;
 
 const int TOTAL_JOINTS = 23;    // real
 
+//these can be moved
+const int zeroTicks[20] = {
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2560, 1024, 1707,
+	2048, 1536, 3072, 2389
+};
+
+const int tickSign[20] = {
+	-1,  1, -1, -1,  1, -1,
+	-1, -1,  1, -1,  1, -1,
+	 1,  1, -1, -1,
+	-1,  1, -1,  1
+};
+
+const double standPrepPose[20] = {
+	0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0,
+	0, -0.2, 0, 0,
+	0,  0.2, 0, 0
+};
+
+
+
 enum Joint{
 	L_HZ=0,
 	L_HFE,

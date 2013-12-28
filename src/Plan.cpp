@@ -12,7 +12,7 @@ void Plan::clearForRecord() {
 	for(int i = 0; i < 3; i++) {
 		nomPlanForRecord[i] = 0.0;
 	}
-	for(int i = 0; i < 7; i++) {
+	for(int i = 0; i < 5; i++) {
 		nomNowForRecord[i] = 0.0;
 	}
 

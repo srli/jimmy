@@ -52,6 +52,7 @@ RobotState::RobotState() {
 	model = new Jimmy();
 	model->sdinit();
 	fillZeros();
+	for(int i = 0; i < 20; i++)	joints[i] = standPrepPose[i];
 	computeSDFvars();
 	root[Z] = -(foot[LEFT][Z]+foot[RIGHT][Z])/2.0;
 	computeSDFvars();

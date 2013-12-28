@@ -70,8 +70,11 @@ public:
 			if(dist > closest)	closest = dist;
 		}
 		if(closest > -0.13) {
-			x += slideAxis[X];
-			y += slideAxis[Y];
+			double dist = 0.13+closest;
+			printf("Dist = %g;  Sliding from {%g %g} by %g",closest, x, y, dist);
+			x += slideAxis[X]*dist;
+			y += slideAxis[Y]*dist;
+			printf(" to {%g %g}\n",x,y);
 		}
 
 	}

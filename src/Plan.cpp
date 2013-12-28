@@ -150,6 +150,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 	int s = step->side;
 	if(steps[s].size() > 0) {	//if not initializing
+		step->adjustClearOf(allSteps.back());
 		steps[s].back()->lo = step->td-SS_TIME;		//previous step now ends
 		foot[s][X].addMove(steps[s].back()->lo, step->td, step->x);
 		foot[s][Y].addMove(steps[s].back()->lo, step->td, step->y);

@@ -31,14 +31,14 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 include_directories("${PROJECT_SOURCE_DIR}/include/jimmy")
 
-add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "src/SDModel_common.cpp" "src/Jimmy.cpp" "src/Logger.cpp" "src/RobotState.cpp" "src/TrajEW.cpp" "src/mrdplot.c" "src/sdlib.c")
+add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "src/SDModel_common.cpp" "src/Jimmy.cpp" "src/Logger.cpp" "src/RobotState.cpp" "src/TrajEW.cpp" "src/mrdplot.c" "src/sdlib.c" "src/ControlUtils.cpp" "src/soautils.c" "src/serial.cpp")
   set_target_properties(jimmylib PROPERTIES COMPILE_FLAGS "-O4")
 
 rosbuild_add_executable(test_jimmy src/JimmyWalkMain.cpp)
-  target_link_libraries(test_jimmy jimmylib)
+  target_link_libraries(test_jimmy jimmylib rt)
 
 rosbuild_add_executable(test_lipm src/lipm_test.cpp)
-  target_link_libraries(test_lipm jimmylib)
+  target_link_libraries(test_lipm jimmylib rt)
 
-rosbuild_add_executable(test_serial src/test_as_client.cpp src/soautils.c src/serial.cpp)
-  target_link_libraries(test_serial rt)
+rosbuild_add_executable(test_serial src/test_serial.cpp)
+  target_link_libraries(test_serial jimmylib rt)

@@ -2,16 +2,23 @@
 #define __ARBOTIX_COMM_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
-#define NUM_JOINTS    23
+#define NUM_JOINTS              23
 #define ARBOTIX_START_FLAG      0x34
+
+#include <string.h>
 
 class ArbotixCommData 
 {
   public:
     enum CMDType {
-      SetJointAngle = 0,
-      GetJointAngle
+      SetJointAngle = 0,    // sent from computer 
+      RequestJointAngle,
+      SetGain,
+      
+      GetJointAngle,        // sent from arbotix
+      IsRead
     };
 
     uint8_t start;

@@ -9,7 +9,7 @@
 
 #include "soautils.h"
 
-#define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 0
 
 int open_port( const char *dev ) {
 
@@ -172,22 +172,20 @@ int send_data(int id, const void *command, int commandLength)
 }
 
 /*
-int receive_data(int id, char *response, int responseLength) {
+int receive_data(int id, void *response, int responseLength, bool special_flag, char special_start) {
   int n_to_read = responseLength;
   int n_read = 0;
   int n;
-  //printf("reading %d\n", len);
-  while (n_to_read > 0) {
-    if ((n = read(id, response+n_read, n_to_read)) < 0) {
-      printf("readn %d, %s\n", id, strerror(errno));
-      return -1;
-    }   
-    n_to_read -= n;
-    n_read += n;
 
-    //printf("read %d %d\n", n_read, len);
+  char inchar;
+  while (n_read < responseLength) {
+    n = read(id, &inchar, 1);
+    if (special_flag && n_read == 0 && inchar != special_start)
+      continue;
+    ((char *)response)[n_read++] = inchar;
   }
-  return 0;
+
+  return n_read;
 }
 */
 
@@ -197,32 +195,32 @@ int receive_data(int id, void *response, int responseLength, bool special_flag, 
   char inchar;
 
   struct timeval timeout;
-  fd_set readfs;    /* file descriptor set */
+  fd_set readfs;    // file descriptor set
   //    struct termios portOptions;
   int maxPorts;
   int portCount;
-  int TIMEOUT = 50000;      /* time to wait for port to respond, in microseconds */
-  int MAXATTEMPTS = 200;    /* maximum number of attempts to read characters */
-  int WAITCHARTIME = 1000;  /* time to wait for a char to arrive. */
+  int TIMEOUT = 50000;      // time to wait for port to respond, in microseconds
+  int MAXATTEMPTS = 200;    // maximum number of attempts to read characters
+  int WAITCHARTIME = 1000;  // time to wait for a char to arrive.
 
-  /* select will wait for port to respond or timeout */
+  // select will wait for port to respond or timeout
   maxPorts = id+1;
-  timeout.tv_usec = TIMEOUT;  /* microseconds */
-  timeout.tv_sec  = 0;        /* seconds */
+  timeout.tv_usec = TIMEOUT;  // microseconds
+  timeout.tv_sec  = 0;        // seconds
   FD_ZERO(&readfs);
-  FD_SET(id, &readfs);  /* set testing for id */
+  FD_SET(id, &readfs);  // set testing for id
   if (SERIAL_DEBUG) printf("waiting for port to respond\n");
-  portCount = select(maxPorts, &readfs, NULL, NULL, &timeout);  /* block until input becomes available */
+  portCount = select(maxPorts, &readfs, NULL, NULL, &timeout);  // block until input becomes available
   if ((portCount==0) || (!FD_ISSET(id, &readfs))) {
     if (SERIAL_DEBUG) printf(" - timeout expired!\n");
     return -1;
   }
   if (SERIAL_DEBUG) printf("time remaining %d ms.\n", (int)(timeout.tv_usec/1000));
 
-  /* Read data into the response buffer.
-   * until we get enough data or exceed the maximum
-   * number of attempts
-   */
+  // Read data into the response buffer.
+   // until we get enough data or exceed the maximum
+   //number of attempts
+   //
   bytesRead = 0;
   attempts = 0;
   while (bytesRead < responseLength && attempts++ < MAXATTEMPTS) {
@@ -236,7 +234,7 @@ int receive_data(int id, void *response, int responseLength, bool special_flag, 
       ((char *)response)[bytesRead++] = inchar;
     }
     else
-      usleep(WAITCHARTIME);  /* sleep a while for next byte. */
+      usleep(WAITCHARTIME);  // sleep a while for next byte.
   }
   if (SERIAL_DEBUG) printf("\nattempts %d", attempts);
   if (SERIAL_DEBUG) printf("\nreceiveData: bytes read: %d   expected: %d\n", bytesRead, responseLength);

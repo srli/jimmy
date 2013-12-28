@@ -8,7 +8,17 @@
 #include <jimmy/serial.h>
 #include <jimmy/arbotix_comm.h>
 #include <time.h>
+#include <algorithm>
+#include <jimmy/Utils.h>
 
+inline int16_t rad2tick(double r)
+{
+}
+
+inline double tick2rad(int16_t t)
+{
+}
+ 
 inline double get_time() {
   struct timespec the_tp;
   clock_gettime( CLOCK_MONOTONIC, &the_tp );
@@ -27,6 +37,7 @@ int16_t buf2int(const char *buf)
 bool procDataFromRobot(char *buf, int &idx)
 {
 
+  return false;
 }
 
 int main(int argc, char **argv ) 
@@ -44,8 +55,8 @@ int main(int argc, char **argv )
   double dt_acc = 0;
   int ctr;
   
-  // recv speed test
   /*
+  // recv speed test
   for (ctr = 0; ctr < 1000; ctr++) {
     t0 = get_time();
     numBytes = receive_data(port, &dfr, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
@@ -64,14 +75,27 @@ int main(int argc, char **argv )
   */
 
   // send speed test
-  for (ctr = 0; ctr < NUM_JOINTS; ctr++) {
+  dtr.seq_id = 0;
+  double T0 = get_time();
+  uint8_t seqSum = 0;
+
+  //double dt = 0.01;
+  for (ctr = 0; ctr < 1000; ctr++) {
+    seqSum += dtr.seq_id;
+
     t0 = get_time();
+
+    dtr.joints[0] = rad2tick(sin(2*M_PI*(t0-T0)));
+    dtr.joints[1] = rad2tick(sin(2*M_PI*(t0-T0)));
+    dtr.joints[2] = rad2tick(sin(2*M_PI*(t0-T0)));
+    dtr.genCheckSum();
+
     numBytes = send_data(port, &dtr, sizeof(ArbotixCommData));
     if (numBytes != sizeof(ArbotixCommData))
       printf("send error\n");
     
-    dtr.seq_id++;
-    
+    dtr.seq_id++;    
+
     //for (int j = 0; j < NUM_JOINTS; j++)
     //  printf("joint %d %d\n", j, dfr.joints[j]);
 
@@ -85,10 +109,13 @@ int main(int argc, char **argv )
   numBytes = receive_data(port, &dfr, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
   if (numBytes != sizeof(ArbotixCommData))
     printf("rec error\n");
-  assert(dfr.validate());
   
   for (int i = 0; i < NUM_JOINTS; i++)
     printf("%d\n", dfr.joints[i]);
+  
+  assert(dfr.validate());
+
+  printf("%d %d\n", seqSum, dfr.seq_id);
 
   /*
   for (int i = 0; i < 10; i++) {

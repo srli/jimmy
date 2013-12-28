@@ -19,7 +19,7 @@ class ArbotixCommData
       SetGain,
       
       GetJointAngle,        // sent from arbotix
-      IsRead
+      IsReady
     };
 
     uint8_t start;

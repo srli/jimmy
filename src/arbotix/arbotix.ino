@@ -27,21 +27,21 @@ int seq_sum = 0;
 
 // servo ids
 int servoIds[NUM_JOINTS] = {
-  1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1,
-  1, 1, 1, 1,
-  19, 20, 27
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
+  1, 20, 27
 };
 
 void reset() {
   state = ST_STAND_PREP;
   stateTime0 = millis();
   lastCMDtime = 0;
-  
+
   msgIdx = 0;
   seq_sum = 0;
-  
+
   setupStandPrep();
 }
 
@@ -49,7 +49,6 @@ void setupStandPrep()
 {
   for (int i = 0; i < NUM_JOINTS; i++) {
     joints0[i] = GetPosition(servoIds[i]);
-    joints1[i] = 2048;
   }
   t0 = millis();
   t1 = t0 + STAND_PREP_DURATION;
@@ -62,7 +61,7 @@ void interpJoints()
     dt = 1;
   if (dt < 0)
     dt = 0;
-    
+
   int d;
   for (int i = 0; i < NUM_JOINTS; i++) {
     d = joints0[i] + (int)(dt * (float)(joints1[i] - joints0[i]));
@@ -72,17 +71,10 @@ void interpJoints()
 
 void setup() {
   Serial.begin(115200);
-  reset();  
-}
-
-void packJointData()
-{
-  dtc.cmd = ArbotixCommData::GetJointAngle;
   for (int i = 0; i < NUM_JOINTS; i++)
-    dtc.joints[i] = GetPosition(servoIds[i]);
-    
-  dtc.genCheckSum();
-  memcpy(out_buf, &dtc, sizeof(ArbotixCommData));
+    joints1[i] = 2048;
+
+  reset();  
 }
 
 int clamp(int num, int low, int high) {
@@ -101,13 +93,14 @@ int procDataFromComputer()
       Serial.read();
       continue;
     }
-    
+
     in_buf[msgIdx] = Serial.read();
     msgIdx++;
     if (msgIdx == sizeof(ArbotixCommData)) {
       memcpy(&dfc, in_buf, sizeof(ArbotixCommData));
       msgIdx = 0;
-      return 1;
+      
+      return dfc.validate();
     }
   }
   return 0;
@@ -118,48 +111,68 @@ void loop()
 {
   stateTime = millis() - stateTime0;
   
+  // process command
+  if (procDataFromComputer()) {
+    lastCMDtime = millis();
+
+    // parsing commands
+    switch (dfc.cmd) {
+      case ArbotixCommData::SetJointAngle:
+        for (int i = 0; i < NUM_JOINTS; i++)
+          joints1[i] = dfc.joints[i]; 
+        break;
+
+      case ArbotixCommData::RequestJointAngle:
+        dtc.cmd = ArbotixCommData::GetJointAngle;
+        for (int i = 0; i < NUM_JOINTS; i++)
+          dtc.joints[i] = GetPosition(servoIds[i]);
+      
+        dtc.genCheckSum();
+        memcpy(out_buf, &dtc, sizeof(ArbotixCommData));
+        Serial.write(out_buf, sizeof(ArbotixCommData));
+        break;
+
+      case ArbotixCommData::StandPrep:
+        for (int i = 0; i < NUM_JOINTS; i++)
+          joints1[i] = dfc.joints[i];
+        reset();
+        break;
+
+      default:
+        break;
+    }
+    seq_sum += dfc.seq_id;
+    digitalWrite(led, HIGH);
+  }
+  else {
+    digitalWrite(led, LOW);
+  }
+  
   switch (state) {
     case ST_STAND_PREP:
       interpJoints();
       if (stateTime > STAND_PREP_DURATION) {
         stateTime0 = millis();
         state = ST_SERVO;
+  
+        dtc.cmd = ArbotixCommData::IsReady;
+        for (int i = 0; i < NUM_JOINTS; i++)
+          dtc.joints[i] = GetPosition(servoIds[i]);
+      
+        dtc.genCheckSum();
+        memcpy(out_buf, &dtc, sizeof(ArbotixCommData));        
+        Serial.write(out_buf, sizeof(ArbotixCommData));        
       }
       break;
-      
+  
     case ST_SERVO:
-      if (procDataFromComputer()) {
-        lastCMDtime = millis();
-        
-        // parsing commands
-        switch (dfc.cmd) {
-          case ArbotixCommData::SetJointAngle:
-            for (int i = 0; i < NUM_JOINTS; i++)
-              SetPosition(servoIds[i], dfc.joints[i]);        
-            break;
-            
-          case ArbotixCommData::RequestJointAngle:
-            packJointData();
-            Serial.write(out_buf, sizeof(ArbotixCommData));
-            break;
-            
-          case ArbotixCommData::StandPrep:
-            reset();
-            break;
-          
-          default:
-            break;
-        }
-        seq_sum += dfc.seq_id;               
-        digitalWrite(led, HIGH);
-      }
-      else {
-        digitalWrite(led, LOW);
-      }
+      for (int i = 0; i < NUM_JOINTS; i++)
+        SetPosition(servoIds[i], joints1[i]);        
       break;
-      
+  
     default:
       break;
   }
 }
+
 

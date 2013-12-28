@@ -24,10 +24,15 @@ class ControlUtils
     double joints_d[TOTAL_JOINTS];
 
     ControlUtils();
+    ~ControlUtils();
 
-    bool requestJoints();    
-    bool sendJoints_d();
-    bool sendStandPrep();
+    bool waitForReady();
+    bool requestJoints();
+
+    inline bool sendJoints_d() { return sendJoints_d(joints_d); }
+    inline bool sendStandPrep() { return sendStandPrep(joints_d); }
+    bool sendJoints_d(const double *j_d);
+    bool sendStandPrep(const double *j_d);
 
     static int16_t rad2tick(double r);
     static double tick2rad(int16_t t);

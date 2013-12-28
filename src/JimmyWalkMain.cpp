@@ -13,6 +13,7 @@ IKcmd IK_d;
 IKcon IK;
 
 static double neckEAs[3];
+static double theta_d[N_J+3];
 
 const static double neckLims[2][3] = {
 	{-1.4, -0.5, -0.5},
@@ -45,7 +46,7 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 160.0)	return -1;
+	if(curTime > 20.0)	return -1;
 	if(curTime > 10.0 && curTime < 125.0)		return 1;
 
 	return 0;
@@ -235,7 +236,7 @@ void controlLoop() {
 	double neckEA[3];
 	getNeckCommand(neckEA);
 
-	double theta_d[N_J+3], thetad_d[N_J+3];
+	double thetad_d[N_J+3];
 	IK.IK(IK_d, theta_d, thetad_d);
 
 	//conversion from RPY to angles
@@ -248,6 +249,7 @@ void controlLoop() {
 		if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
 		if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
 	}
+
 	//TODO: pass IK commands to motors
 	//TODO: pass neck commands to motors
 }
@@ -292,7 +294,7 @@ int main( int argc, char **argv )
 	wallClockStart = get_time();
 	init();
   //////////////////////////////////////////////
-	printf("Waiting for Arbotix\n");
+	printf("Stand Preping\n");
 	   
   double joints_d[TOTAL_JOINTS] = {0};
   for (int i = 0; i < TOTAL_JOINTS; i++)
@@ -303,6 +305,8 @@ int main( int argc, char **argv )
   //////////////////////////////////////////////
 
 	printf("Starting\n");
+
+  double timeQuota = plan.TIME_STEP;
 	while(true) {
 		double wallNow = get_time();
 		wallClockT = wallNow-wallClockStart;
@@ -312,15 +316,32 @@ int main( int argc, char **argv )
 
 		controlLoop();
 
-    
-
 		logger.saveData();
-		//TODO:  wait until plan.TIME_STEP
 
 		if(getCommand() == -1) {
 			logger.writeToMRDPLOT();
 			exit(-1);
 		}
+    
+    //////////////////////////////////////////////
+    // wait
+    double wall1 = get_time();
+    double dt = wall1 - wallNow;
+    
+    // step up quota for the next time step
+    if (dt > timeQuota) {
+      timeQuota -= (dt - plan.TIME_STEP);
+      printf("takes too long %g\n", dt);
+      utils.sendJoints_d(theta_d);
+    }
+    else {
+      timeQuota = plan.TIME_STEP;
+      int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
+      
+      utils.sendJoints_d(theta_d);
+      usleep(sleep_t);
+    }
+    //////////////////////////////////////////////
 	}
 
 	return 374832748;

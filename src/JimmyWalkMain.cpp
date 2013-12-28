@@ -10,6 +10,13 @@ Logger logger;
 IKcmd IK_d;
 IKcon IK;
 
+static double neckEAs[3];
+
+const static double neckLims[2][3] = {
+	{-1.4, -0.5, -0.5},
+	{1.4, 0.5, 0.5}
+};
+
 enum ConMode {
 	IDLE=0,
 	PRE_WALK,	//wait until we have enough steps queued up
@@ -55,13 +62,10 @@ void constrainDriveCommand(double *vForward, double *vLeft, double *dTheta) {
 }
 
 void getNeckCommand(double *EAs) {
+	double EAsd[3] = {0,0,0};
 	//TODO: implement
-	//EAs[0] = ROLL
-	//EAs[1] = PITCH
-	//EAs[2] = YAW
+	for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;
 }
-
-
 
 
 
@@ -89,6 +93,7 @@ void init() {
 	modeTime = 0.0;
 	modeT0 = 0.0;
 	modeDur = 0.0;
+	for(int i = 0; i < 3; i++)		neckEAs[i] = 0.0;
 
   std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
 	plan = Plan(name.c_str());
@@ -228,9 +233,19 @@ void controlLoop() {
 	double neckEA[3];
 	getNeckCommand(neckEA);
 
-	double theta_d[N_J], thetad_d[N_J];
+	double theta_d[N_J+3], thetad_d[N_J+3];
 	IK.IK(IK_d, theta_d, thetad_d);
 
+	//conversion from RPY to angles
+	theta_d[N_J] = neckEAs[2];
+	theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
+	theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
+
+	//limit angles
+	for(int i = 0; i < 3; i++) {
+		if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
+		if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
+	}
 	//TODO: pass IK commands to motors
 	//TODO: pass neck commands to motors
 }

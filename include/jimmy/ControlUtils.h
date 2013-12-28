@@ -27,6 +27,7 @@ class ControlUtils
 
     bool requestJoints();    
     bool sendJoints_d();
+    bool sendStandPrep();
 
     static int16_t rad2tick(double r);
     static double tick2rad(int16_t t);

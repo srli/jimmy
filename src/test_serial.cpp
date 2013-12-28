@@ -9,12 +9,14 @@ int main()
   double T0 = get_time();
   double dt_acc = 0;
 
+  utils.sendStandPrep();
+
   for (int ctr = 0; ctr < 1000; ctr++) {
     t0 = get_time();
 
-    utils.joints_d[0] = sin(2*M_PI*(t0-T0));
-    utils.joints_d[1] = sin(2*M_PI*(t0-T0));
-    utils.joints_d[2] = sin(2*M_PI*(t0-T0));
+    utils.joints_d[NECK_YAW] = sin(2*M_PI*(t0-T0));
+    utils.joints_d[NECK_1] = sin(2*M_PI*(t0-T0));
+    utils.joints_d[NECK_2] = sin(2*M_PI*(t0-T0));
 
     utils.sendJoints_d();
     
@@ -23,7 +25,6 @@ int main()
     dt_acc += (t1-t0);
   }
   printf("done sending\n");
-  sleep(2);
    
   utils.requestJoints();
   for (int i = 0; i < TOTAL_JOINTS; i++) {

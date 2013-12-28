@@ -1,42 +1,81 @@
 #include <ax12.h>
 #include "/home/sfeng/groovy_workspace/jimmy/include/jimmy/arbotix_comm.h"
 
+#define STAND_PREP_DURATION          5000
+
+#define ST_STAND_PREP                0
+#define ST_SERVO                     1
+
 int led = 0;
-int pos = 0;
-int ang = 0;
-int idx = 0;
 
 ArbotixCommData dtc, dfc;        // data to and from computer
 uint8_t in_buf[200];
 uint8_t out_buf[200];
 
+// linear interp for stand prep
+int joints0[NUM_JOINTS];
+int joints1[NUM_JOINTS];
+unsigned long t0, t1;
+unsigned long stateTime0, stateTime;
+unsigned long lastCMDtime;
+
+int state = 0;
+
+// coms
+int msgIdx = 0;
+int seq_sum = 0;
+
 // servo ids
 int servoIds[NUM_JOINTS] = {
-  19, 20, 27,
   1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1,
   1, 1, 1, 1,
-  1, 1, 1, 1
-  };
-
-void send_int(int16_t num)
-{
-  uint8_t in_buf[sizeof(int16_t)];
-  memcpy(in_buf, &num, sizeof(int16_t));
-  Serial.write(in_buf, sizeof(int16_t));
-}
+  1, 1, 1, 1,
+  19, 20, 27
+};
 
 void reset() {
-  for (int i = 0; i < NUM_JOINTS; i++)
-    SetPosition(servoIds[i], 2048);
+  state = ST_STAND_PREP;
+  stateTime0 = millis();
+  lastCMDtime = 0;
+  
+  msgIdx = 0;
+  seq_sum = 0;
+  
+  setupStandPrep();
+}
+
+void setupStandPrep()
+{
+  for (int i = 0; i < NUM_JOINTS; i++) {
+    joints0[i] = GetPosition(servoIds[i]);
+    joints1[i] = 2048;
+  }
+  t0 = millis();
+  t1 = t0 + STAND_PREP_DURATION;
+}
+
+void interpJoints()
+{
+  float dt = (float)(millis() - t0) / (float)(t1 - t0);
+  if (dt > 1)
+    dt = 1;
+  if (dt < 0)
+    dt = 0;
+    
+  int d;
+  for (int i = 0; i < NUM_JOINTS; i++) {
+    d = joints0[i] + (int)(dt * (float)(joints1[i] - joints0[i]));
+    SetPosition(servoIds[i], d);
+  }
 }
 
 void setup() {
   Serial.begin(115200);
-  reset();
+  reset();  
 }
 
-void packData2Computer()
+void packJointData()
 {
   dtc.cmd = ArbotixCommData::GetJointAngle;
   for (int i = 0; i < NUM_JOINTS; i++)
@@ -58,16 +97,16 @@ int procDataFromComputer()
 {
   while(Serial.available() > 0) {
     // get rid of random bits
-    if (idx == 0 && Serial.peek() != ARBOTIX_START_FLAG) {
+    if (msgIdx == 0 && Serial.peek() != ARBOTIX_START_FLAG) {
       Serial.read();
       continue;
     }
     
-    in_buf[idx] = Serial.read();
-    idx++;
-    if (idx == sizeof(ArbotixCommData)) {
+    in_buf[msgIdx] = Serial.read();
+    msgIdx++;
+    if (msgIdx == sizeof(ArbotixCommData)) {
       memcpy(&dfc, in_buf, sizeof(ArbotixCommData));
-      idx = 0;
+      msgIdx = 0;
       return 1;
     }
   }
@@ -75,103 +114,52 @@ int procDataFromComputer()
 }
 
 
-unsigned long t0, t1;
-int state = 0;
-int seq_sum = 0;
-
 void loop() 
-{  
-  /*
-  for (int i = 0; i < 3; i++) {
-    float rad = sin(2.*3.1415*(float)millis()/1000.);
-    int tick = (rad + 3.1415) * (4096. / (2. * 3.1415));
-    SetPosition(servoIds[i], tick);
-  }
-  */
+{
+  stateTime = millis() - stateTime0;
   
-  
-  //packData2Computer();
-  //Serial.write(out_buf, sizeof(ArbotixCommData));
-  
-  if (procDataFromComputer()) {
-    t0 = millis();
-    state = 1;
-    
-    memcpy(&dfc, in_buf, sizeof(ArbotixCommData));
-    seq_sum += dfc.seq_id;
-    
-    for (int i = 0; i < NUM_JOINTS; i++)   
-      SetPosition(servoIds[i], dfc.joints[i]);
-    
-    digitalWrite(led, HIGH);
-    //Serial.write(out_buf, sizeof(ArbotixCommData));
-  }
-  else {
-    digitalWrite(led, LOW);
-  }
-  
-  t1 = millis();
-  // reset
-  if (t1 - t0 > 1000) {
-    // send resutls
-    if (state != 0) {
-      //memcpy(out_buf, &dfc, sizeof(ArbotixCommData));
-      //memcpy(out_buf, &dtc, sizeof(ArbotixCommData));
+  switch (state) {
+    case ST_STAND_PREP:
+      interpJoints();
+      if (stateTime > STAND_PREP_DURATION) {
+        stateTime0 = millis();
+        state = ST_SERVO;
+      }
+      break;
       
-      packData2Computer();
-      dtc.cmd = ArbotixCommData::GetJointAngle;
-      dtc.seq_id = seq_sum;      
-      dtc.genCheckSum();
-      memcpy(out_buf, &dtc, sizeof(ArbotixCommData));
-      
-      Serial.write(out_buf, sizeof(ArbotixCommData));
-    }
-    state = 0;
-    seq_sum = 0;
-  }
-}
-
-/*
-void loop() 
-{  
-  //packData2Computer();
-  //Serial.write(out_buf, sizeof(ArbotixCommData));
-  
-  if (procDataFromComputer()) {
-    t0 = millis();
-    state = 1;
-    
-    memcpy(in_buf, &dfc, sizeof(ArbotixCommData));
-    
-    dtc.joints[ctr] = dfc.seq_id;
-    if (ctr < NUM_JOINTS-1)
-      ctr++;
-     
-    for (int i = 0; i < NUM_JOINTS; i++)   
-      SetPosition(servoIds[i], clamp(dfc.joints[i], -500, 500));
-    
-    digitalWrite(led, HIGH);
-    //Serial.write(out_buf, sizeof(ArbotixCommData));
-  }
-  else {
-    digitalWrite(led, LOW);
-  }
-  
-  t1 = millis();
-  // reset
-  if (t1 - t0 > 1000) {
-    // send resutls
-    if (state != 0) {
-      dtc.cmd = ArbotixCommData::GetJointAngle;
-      dtc.seq_id = 0;
-      
-      dtc.genCheckSum();
-      memcpy(out_buf, &dtc, sizeof(ArbotixCommData));
+    case ST_SERVO:
+      if (procDataFromComputer()) {
+        lastCMDtime = millis();
+        
+        // parsing commands
+        switch (dfc.cmd) {
+          case ArbotixCommData::SetJointAngle:
+            for (int i = 0; i < NUM_JOINTS; i++)
+              SetPosition(servoIds[i], dfc.joints[i]);        
+            break;
             
-      Serial.write(out_buf, sizeof(ArbotixCommData));
-    }
-    state = 0;
-    ctr = 0;
+          case ArbotixCommData::RequestJointAngle:
+            packJointData();
+            Serial.write(out_buf, sizeof(ArbotixCommData));
+            break;
+            
+          case ArbotixCommData::StandPrep:
+            reset();
+            break;
+          
+          default:
+            break;
+        }
+        seq_sum += dfc.seq_id;               
+        digitalWrite(led, HIGH);
+      }
+      else {
+        digitalWrite(led, LOW);
+      }
+      break;
+      
+    default:
+      break;
   }
 }
-*/
+

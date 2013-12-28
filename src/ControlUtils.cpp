@@ -33,14 +33,20 @@ bool ControlUtils::sendCommand()
 
 bool ControlUtils::requestJoints()
 {
-  int numBytes = receive_data(_port, &_d_from_r, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
-  if (numBytes != sizeof(ArbotixCommData)) {
-    printf("rec error\n");
-    return false;
-  }
-  if (!_d_from_r.validate()) {
-    printf("validate error\n");
-    return false;
+  _d_to_r.cmd = ArbotixCommData::RequestJointAngle;
+  sendCommand();
+
+  bool get = false;
+  
+  while (!get) {
+    int numBytes = receive_data(_port, &_d_from_r, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
+    if (numBytes != sizeof(ArbotixCommData)) {
+      printf("rec error\n");
+    }
+    if (!_d_from_r.validate()) {
+      printf("validate error\n");
+    }
+    get = (numBytes == sizeof(ArbotixCommData) && _d_from_r.validate());
   }
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
@@ -51,11 +57,25 @@ bool ControlUtils::requestJoints()
 
 bool ControlUtils::sendJoints_d()
 {
+  _d_to_r.cmd = ArbotixCommData::SetJointAngle;
   for (int i = 0; i < TOTAL_JOINTS; i++)
     _d_to_r.joints[i] = rad2tick(joints_d[i]);
 
   return sendCommand();
 }
+
+bool ControlUtils::sendStandPrep()
+{
+  _d_to_r.cmd = ArbotixCommData::StandPrep;
+  return sendCommand();
+}
+
+
+
+
+
+
+
 
 int16_t ControlUtils::rad2tick(double r)
 {

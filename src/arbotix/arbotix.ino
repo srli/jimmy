@@ -138,28 +138,3 @@ void loop()
   //delay(10);
 }
 
-/*
-void loop() {
-  int ang = GetPosition(servo);
-  
-  if (Serial.available() > 0) {
-    char cmd = Serial.read();
-    
-    send_int(ang);
-    //Serial.write((const uint8_t *)ang, 4);
-    digitalWrite(led, HIGH-digitalRead(led));
-    
-    if (cmd == 0) {
-      reset();
-    }
-    else if (cmd == 1) {
-      pos += 100;
-      SetPosition(servo, pos);
-    }
-    else if (cmd == -1) {
-      pos -= 100;
-      SetPosition(servo, pos);
-    }    
-  }
-}
-*/

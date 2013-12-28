@@ -43,7 +43,9 @@ int main(int argc, char **argv )
   double t0, t1;
   double dt_acc = 0;
   int ctr;
-
+  
+  // recv speed test
+  /*
   for (ctr = 0; ctr < 1000; ctr++) {
     t0 = get_time();
     numBytes = receive_data(port, &dfr, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
@@ -59,8 +61,27 @@ int main(int argc, char **argv )
     dt_acc += (t1-t0);
   }
   printf("avg dt %g\n", dt_acc / (double)ctr);
+  */
 
   /*
+  // send speed test
+  for (ctr = 0; ctr < 1000; ctr++) {
+    t0 = get_time();
+    numBytes = send_data(port, &dfr, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
+    if (numBytes != sizeof(ArbotixCommData))
+      printf("rec error\n");
+    assert(dfr.validate());
+    
+    //for (int j = 0; j < NUM_JOINTS; j++)
+    //  printf("joint %d %d\n", j, dfr.joints[j]);
+
+    t1 = get_time();
+
+    dt_acc += (t1-t0);
+  }
+  printf("avg dt %g\n", dt_acc / (double)ctr); 
+
+  
   for (int i = 0; i < 10; i++) {
     if (i == 0)
       cmd = 0;

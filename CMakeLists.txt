@@ -37,5 +37,8 @@ add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "
 rosbuild_add_executable(test_jimmy src/JimmyWalkMain.cpp)
   target_link_libraries(test_jimmy jimmylib rt)
 
+rosbuild_add_executable(test_lipm src/lipm_test.cpp)
+  target_link_libraries(test_lipm jimmylib)
+
 rosbuild_add_executable(test_serial src/test_as_client.cpp src/soautils.c src/serial.cpp)
   target_link_libraries(test_serial rt)

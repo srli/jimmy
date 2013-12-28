@@ -9,7 +9,7 @@
 
 #include "soautils.h"
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 int open_port( const char *dev ) {
 

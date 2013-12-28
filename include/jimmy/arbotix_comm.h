@@ -17,8 +17,8 @@ class ArbotixCommData
     uint8_t start;
     uint8_t cmd;
     uint8_t seq_id;
-    int16_t joints[NUM_JOINTS];
     uint8_t checkSum;
+    int16_t joints[NUM_JOINTS];
 
     ArbotixCommData() 
     {

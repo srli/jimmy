@@ -100,7 +100,7 @@ public:
 	}
 
 
-	bool readParams(char *fileName)
+	bool readParams(const char *fileName)
 	{
 		std::ifstream in(fileName);
 		

@@ -69,10 +69,47 @@ int procDataFromComputer()
 
 int dir = 1;
 
+int ctr = 0;
+
+unsigned long t0, t1;
+int state = 0;
+
 void loop() 
-{
-  packData2Computer();
-  Serial.write(out_buf, sizeof(ArbotixCommData));
+{  
+  //packData2Computer();
+  //Serial.write(out_buf, sizeof(ArbotixCommData));
+    
+  if (procDataFromComputer()) {
+    t0 = millis();
+    state = 1;
+    
+    memcpy(in_buf, &dfc, sizeof(ArbotixCommData));
+    
+    dtc.joints[ctr] = dfc.seq_id;
+    if (ctr < NUM_JOINTS-1)
+      ctr++;
+    //SetPosition(1, clamp(dfc.joints[0], -500, 500));
+    
+    digitalWrite(led, HIGH);
+    //Serial.write(out_buf, sizeof(ArbotixCommData));
+  }
+  else {
+    digitalWrite(led, LOW);
+  }
+  
+  t1 = millis();
+  // reset
+  if (t1 - t0 > 1000) {
+    // send resutls
+    if (state != 0) {
+      dtc.cmd = ArbotixCommData::GetJointAngle;
+      dtc.seq_id = 0;
+      dtc.genCheckSum();
+      memcpy(out_buf, &dtc, sizeof(ArbotixCommData));
+      Serial.write(out_buf, sizeof(ArbotixCommData));
+    }
+    state = 0;
+  }
   
   /*
   if (dir == 1) {

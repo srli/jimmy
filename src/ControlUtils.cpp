@@ -8,6 +8,24 @@
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048
 
+const double ControlUtils::ticks_per_rad = (TICK_MAX-TICK_MIN) / (2*M_PI);
+
+const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2560, 1024, 1707,
+	2048, 1536, 3072, 2389,
+  2048, 2048, 2048
+};
+
+const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
+	-1,  1, -1, -1,  1, -1,
+	-1, -1,  1, -1,  1, -1,
+	 1,  1, -1, -1,
+	-1,  1, -1,  1,
+   1,  1,  1
+};
+ 
 ControlUtils::ControlUtils()
 {
   vec_set(joints, 0., TOTAL_JOINTS);
@@ -55,7 +73,7 @@ bool ControlUtils::requestJoints()
   }
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-    joints[i] = tick2rad(_d_from_r.joints[i]);
+    joints[i] = tick2rad(_d_from_r.joints[i], i);
   }
   return true;
 }
@@ -80,7 +98,7 @@ bool ControlUtils::waitForReady()
   }
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-    joints[i] = tick2rad(_d_from_r.joints[i]);
+    joints[i] = tick2rad(_d_from_r.joints[i], i);
   }
   return true;
 }
@@ -89,7 +107,7 @@ bool ControlUtils::sendJoints_d(const double *j)
 {
   _d_to_r.cmd = ArbotixCommData::SetJointAngle;
   for (int i = 0; i < TOTAL_JOINTS; i++)
-    _d_to_r.joints[i] = rad2tick(j[i]);
+    _d_to_r.joints[i] = rad2tick(j[i], i);
   return sendCommand();
 }
 
@@ -97,7 +115,7 @@ bool ControlUtils::sendStandPrep(const double *j)
 {
   _d_to_r.cmd = ArbotixCommData::StandPrep;
   for (int i = 0; i < TOTAL_JOINTS; i++)
-    _d_to_r.joints[i] = rad2tick(j[i]);
+    _d_to_r.joints[i] = rad2tick(j[i], i);
   return sendCommand();
 }
 
@@ -108,14 +126,14 @@ bool ControlUtils::sendStandPrep(const double *j)
 
 
 
-int16_t ControlUtils::rad2tick(double r)
+int16_t ControlUtils::rad2tick(double r, int j)
 {
-  clamp(r, -M_PI, M_PI);
-  return (int16_t)((r + M_PI) * (4096. / (2*M_PI))); 
+  int16_t tmp = (int16_t)(r*ticks_per_rad)*tick_sign[j];
+  return tmp+tick_zeros[j];
 }
 
-double ControlUtils::tick2rad(int16_t t)
+double ControlUtils::tick2rad(int16_t t, int j)
 {
-  clamp(t, (int16_t)0, (int16_t)4096);
-  return (double)(t - 2048) * (2*M_PI / 4096.);
+  int16_t tmp = (t-tick_zeros[j])*tick_sign[j];
+  return (double)tmp/ticks_per_rad;
 }

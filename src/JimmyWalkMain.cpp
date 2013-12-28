@@ -1,6 +1,8 @@
 #include "Plan.h"
 #include "Logger.h"
 #include "IK.h"
+#include "ControlUtils.h"
+#include "Utils.h"
 
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -235,6 +237,8 @@ void controlLoop() {
 	//TODO: pass neck commands to motors
 }
 
+/*
+// no arbotix stuff
 int main( int argc, char **argv ) {
 	wallClockStart = get_time();
 	init();
@@ -251,6 +255,49 @@ int main( int argc, char **argv ) {
 		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
 
 		controlLoop();
+
+		logger.saveData();
+		//TODO:  wait until plan.TIME_STEP
+
+		if(getCommand() == -1) {
+			logger.writeToMRDPLOT();
+			exit(-1);
+		}
+	}
+
+	return 374832748;
+}
+*/
+
+
+int main( int argc, char **argv ) 
+{
+  ControlUtils utils;
+
+	wallClockStart = get_time();
+	init();
+  //////////////////////////////////////////////
+	printf("Waiting for Arbotix\n");
+	   
+  double joints_d[TOTAL_JOINTS] = {0};
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    joints_d[i] = standPrepPose[i];
+
+  utils.sendStandPrep(joints_d);
+  utils.waitForReady();
+  //////////////////////////////////////////////
+
+	printf("Starting\n");
+	while(true) {
+		double wallNow = get_time();
+		wallClockT = wallNow-wallClockStart;
+		wallClockDT = wallNow-wallClockLast;
+		wallClockLast = wallNow;
+		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
+
+		controlLoop();
+
+    
 
 		logger.saveData();
 		//TODO:  wait until plan.TIME_STEP

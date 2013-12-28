@@ -71,18 +71,12 @@ void interpJoints()
 
 void setup() {
   Serial.begin(115200);
+  
+  delay(500);
   for (int i = 0; i < NUM_JOINTS; i++)
-    joints1[i] = 2048;
+    joints1[i] = GetPosition(servoIds[i]);;
 
   reset();  
-}
-
-int clamp(int num, int low, int high) {
-  if (num < low)
-    num = low;
-  if (num > high)
-    num = high;
-  return num;
 }
 
 int procDataFromComputer()
@@ -110,7 +104,7 @@ int procDataFromComputer()
 void loop() 
 {
   stateTime = millis() - stateTime0;
-  
+    
   // process command
   if (procDataFromComputer()) {
     lastCMDtime = millis();
@@ -146,7 +140,7 @@ void loop()
   }
   else {
     digitalWrite(led, LOW);
-  }
+  }  
   
   switch (state) {
     case ST_STAND_PREP:

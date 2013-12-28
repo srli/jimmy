@@ -10,7 +10,7 @@ int main()
   
   double joints_d[TOTAL_JOINTS] = {0};
   for (int i = 0; i < TOTAL_JOINTS; i++)
-    joints_d[i] = -0;
+    joints_d[i] = standPrepPose[i];
 
   utils.sendStandPrep(joints_d);
   utils.waitForReady();

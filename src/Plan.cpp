@@ -48,7 +48,6 @@ Plan::Plan() {
 	endTime = std::numeric_limits<double>::infinity();
 	startDDPind = 0;
 
-	ddp = new LipmConstHeightPlanner(0.45, TIME_STEP);
 }
 
 Plan::Plan(const char *config) {
@@ -175,8 +174,8 @@ void Plan::addStep(Step *step) {
 			printf("dim %d\n", i);
 			double x0[2] = {(com[i])[startDDPind], (comd[i])[startDDPind]};
 			printf("{%g %g}\n",x0[0], x0[1]);
-			printf("%p\n", ddp);
-			ddp->getTrajs(x0, startDDPind, zmpVec[i], com[i], comd[i]);
+	    LipmConstHeightPlanner ddp(0.45, TIME_STEP);
+			ddp.getTrajs(x0, startDDPind, zmpVec[i], com[i], comd[i]);
 			printf("Plan %d complete \n", i);
 		}
 

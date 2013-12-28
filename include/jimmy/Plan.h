@@ -38,7 +38,7 @@ public:
 	bool isDone(double walkTime);
 
 //private:
-	LipmConstHeightPlanner *ddp;
+	//LipmConstHeightPlanner *ddp;
 	std::vector<double> nomP[2];
 	std::vector<double> nomYaw;
 

@@ -2,6 +2,9 @@
 #include "Logger.h"
 #include "IK.h"
 
+#include <ros/ros.h>
+#include <ros/package.h>
+
 Plan plan;
 Logger logger;
 IKcmd IK_d;
@@ -84,8 +87,11 @@ void init() {
 	modeTime = 0.0;
 	modeT0 = 0.0;
 	modeDur = 0.0;
-	plan = Plan("/home/ewhitman/groovy_workspace/jimmy/conf/plan.cf");
-	IK.readParams("/home/ewhitman/groovy_workspace/jimmy/conf/IK.cf");
+
+  std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
+	plan = Plan(name.c_str());
+  name = ros::package::getPath("jimmy") + "/conf/IK.cf";
+	IK.readParams(name.c_str());
 	logger.init(plan.TIME_STEP);
 	logger.add_datapoint("curTime","s",&curTime);
 	logger.add_datapoint("modeTime","s",&modeTime);

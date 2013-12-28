@@ -63,25 +63,34 @@ int main(int argc, char **argv )
   printf("avg dt %g\n", dt_acc / (double)ctr);
   */
 
-  /*
   // send speed test
-  for (ctr = 0; ctr < 1000; ctr++) {
+  for (ctr = 0; ctr < NUM_JOINTS; ctr++) {
     t0 = get_time();
-    numBytes = send_data(port, &dfr, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
+    numBytes = send_data(port, &dtr, sizeof(ArbotixCommData));
     if (numBytes != sizeof(ArbotixCommData))
-      printf("rec error\n");
-    assert(dfr.validate());
+      printf("send error\n");
+    
+    dtr.seq_id++;
     
     //for (int j = 0; j < NUM_JOINTS; j++)
     //  printf("joint %d %d\n", j, dfr.joints[j]);
 
+    usleep(1e4);
     t1 = get_time();
-
     dt_acc += (t1-t0);
   }
-  printf("avg dt %g\n", dt_acc / (double)ctr); 
-
+  printf("done sending\n");
+  sleep(2);
+    
+  numBytes = receive_data(port, &dfr, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
+  if (numBytes != sizeof(ArbotixCommData))
+    printf("rec error\n");
+  assert(dfr.validate());
   
+  for (int i = 0; i < NUM_JOINTS; i++)
+    printf("%d\n", dfr.joints[i]);
+
+  /*
   for (int i = 0; i < 10; i++) {
     if (i == 0)
       cmd = 0;

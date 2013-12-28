@@ -72,5 +72,5 @@ inline double get_time() {
   clock_gettime( CLOCK_MONOTONIC, &the_tp );
   return ((double) (the_tp.tv_sec)) + 1.0e-9*the_tp.tv_nsec;  
 }
- 
+
 #endif

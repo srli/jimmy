@@ -79,8 +79,8 @@ public:
 		IK_REG_WEIGHT(0.1),
 		IK_DQDOT_WEIGHT(0),
 		IK_ARM_WEIGHT(1.0),
-		IK_POS_RATE(2.0),
 		IK_ARM_RATE(10.0),
+		IK_POS_RATE(2.0),
 		QPval(0.0)
 	{ 
 		for(int i = 0; i < 3; i++)	IK_COMxyz_WEIGHT[i] = 1.0;

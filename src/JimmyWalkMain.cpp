@@ -17,6 +17,8 @@ enum ConMode {
 	GESTURE
 };
 
+static double wallClockStart, wallClockLast, wallClockDT, wallClockT;
+
 static bool isIdle;
 static ConMode mode;
 
@@ -34,15 +36,15 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 30.0)	return -1;
-	if(curTime > 10.0 && curTime < 25.0)		return 1;
+	if(curTime > 160.0)	return -1;
+	if(curTime > 10.0 && curTime < 125.0)		return 1;
 
 	return 0;
 }
 
 void getDriveCommand(double *vForward, double *vLeft, double *dTheta) {
-	*vForward = 0.02;
-	*vLeft = 0.0;
+	*vForward = 0.0;
+	*vLeft = 0.02;
 	*dTheta = 0.0;
 	//TODO: implement retrieving these command from the user
 }
@@ -93,6 +95,8 @@ void init() {
   name = ros::package::getPath("jimmy") + "/conf/IK.cf";
 	IK.readParams(name.c_str());
 	logger.init(plan.TIME_STEP);
+	logger.add_datapoint("realT","s",&wallClockT);
+	logger.add_datapoint("realDT","s",&wallClockDT);
 	logger.add_datapoint("curTime","s",&curTime);
 	logger.add_datapoint("modeTime","s",&modeTime);
 	logger.add_datapoint("mode","-",(int*)(&mode));
@@ -151,13 +155,13 @@ void stateMachine() {
 	}
 }
 
-double nomPose[3] = {0.0, 0.0, 0.40};
+double nomPose[3] = {0.0, 0.0, 0.42};
 
 //integrate towards normal body pose
 void idleCon() {
 	//CoM pos
 	for(int i = 0; i <3; i++) {
-		IK_d.com[i] += 0.004*(nomPose[i]-IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0);
+		IK_d.com[i] += 0.004*(nomPose[i]-(IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0));
 	}
 	
 	//foot orientation
@@ -229,11 +233,16 @@ void controlLoop() {
 }
 
 int main( int argc, char **argv ) {
+	wallClockStart = get_time();
 	init();
 	while(!isReady()) {
 		//do nothing
 	}
 	while(true) {
+		double wallNow = get_time();
+		wallClockT = wallNow-wallClockStart;
+		wallClockDT = wallNow-wallClockLast;
+		wallClockLast = wallNow;
 		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
 		controlLoop();
 		logger.saveData();

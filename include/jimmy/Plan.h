@@ -37,8 +37,10 @@ public:
 	void stopHere();
 	bool isDone(double walkTime);
 
+	void init();
+
 //private:
-	//LipmConstHeightPlanner *ddp;
+
 	std::vector<double> nomP[2];
 	std::vector<double> nomYaw;
 
@@ -46,6 +48,7 @@ public:
 	std::vector<Step *> allSteps;
 
 	TrajEW foot[2][3];
+	TrajEW footYaw[2];
 
 	TrajEW zmp_d[2];
 
@@ -58,12 +61,13 @@ public:
 	int prevTDind;		//index of the previous touch down in the nominal trajectory
 	int nextTD;			//which foot will touch down next (LEFT or RIGHT)
 
-	void addStep(Step *step);
+	void addStep(Step *step, double extraTraj=0);
 	void clearVectors();
 
 private:
 	double nomPlanForRecord[3];
-	double nomNowForRecord[7];
+	double nomNowForRecord[5];
+	bool isStopped;
 };
 
 #endif

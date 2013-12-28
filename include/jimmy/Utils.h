@@ -49,12 +49,12 @@ inline void get_rand_vec(double *v, int len, double mag) {
     v[i] = get_rand(mag);
 }
 
-/*
+
 inline double get_time() {
   struct timespec the_tp;
   clock_gettime( CLOCK_MONOTONIC, &the_tp );
   return ((double) (the_tp.tv_sec)) + 1.0e-9*the_tp.tv_nsec;  
 }
-*/
+
  
 #endif

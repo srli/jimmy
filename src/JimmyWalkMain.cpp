@@ -11,6 +11,7 @@ Plan plan;
 Logger logger;
 IKcmd IK_d;
 IKcon IK;
+ControlUtils utils;
 
 const int MAX_POSES = 100;
 const int MAX_GESTURES = 100;
@@ -46,7 +47,8 @@ enum ConMode {
 	IDLE=0,
 	PRE_WALK,	//wait until we have enough steps queued up
 	WALK,
-	GESTURE
+	GESTURE,
+	STAND_PREP
 };
 
 static double wallClockStart, wallClockLast, wallClockDT, wallClockT;
@@ -68,16 +70,20 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 20.0)	return -1;
-	if(curTime > 10.0 && curTime < 125.0)		return 1;
+	if(curTime > 200.0)	return -1;
+	if(curTime > 5.0 && curTime < 155)		return 1;
+	if(curTime > 180.0 && curTime < 180.1) {
+		printf("yoyo\n");
+		return 2;
+	}
 
 	return 0;
 }
 
 void getDriveCommand(double *vForward, double *vLeft, double *dTheta) {
 	*vForward = 0.0;
-	*vLeft = 0.02;
-	*dTheta = 0.0;
+	*vLeft = 0.00;
+	*dTheta = 0.02;
 	//TODO: implement retrieving these command from the user
 }
 
@@ -94,6 +100,15 @@ void getNeckCommand(double *EAs) {
 		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
 		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
 	}
+}
+
+TrajEW spJoints[23];
+
+void initStandPrep() {
+	double initPos[23];
+	utils.getJoints(initPos);
+	for(int i = 0; i < 23; i++)		spJoints[i].freshMove(5.0, initPos[i], standPrepPose[i]);
+	modeDur = 5.0;
 }
 
 TrajEW gestureArms[8];
@@ -237,7 +252,8 @@ void init() {
 	printf("Start init\n");
 	loadPoses();
 	loadGestures();
-	mode = IDLE;
+	mode = STAND_PREP;
+	initStandPrep();
 	isIdle = false;
 	curTime = 0.0;
 	modeTime = 0.0;
@@ -305,6 +321,12 @@ void stateMachine() {
 			mode = IDLE;
 		}
 		break;
+	case STAND_PREP:
+		if(modeTime > modeDur) {
+			modeT0 = curTime;
+			mode = IDLE;
+		}
+		break;
 	default:
 		printf("Bad mode in stateMachine\n");
 		exit(-1);
@@ -350,6 +372,12 @@ void gestureCon() {
 	IK_d.rootQ = EA2quat(rootEA);
 }
 
+void standPrepCon() {
+	double theta_d[23];
+	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
+	utils.setJoints(theta_d);
+}
+
 
 void controlLoop() {
 
@@ -383,36 +411,40 @@ void controlLoop() {
 	case GESTURE:
 		gestureCon();
 		break;
+	case STAND_PREP:
+		standPrepCon();
+		break;
 	default:
 		printf("Bad mode in controlLoop\n");
 		exit(-1);
 		break;
 	}
-	
 
-	double thetad_d[N_J+3];
-	IK.IK(IK_d, theta_d, thetad_d);
 
-	//conversion from RPY to angles
-	theta_d[N_J] = neckEAs[2];
-	theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
-	theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
-	//theta_d[N_J] = sin(2*M_PI*modeTime); //neckEAs[2];
-	//theta_d[N_J+1] = sin(2*M_PI*modeTime); //neckEAs[1]+neckEAs[0];
-	//theta_d[N_J+2] = sin(2*M_PI*modeTime); //neckEAs[1]-neckEAs[0];
+	if(mode != STAND_PREP) {
+		double thetad_d[N_J+3];
+		IK.IK(IK_d, theta_d, thetad_d);
 
-	//limit angles
-	for(int i = 0; i < 3; i++) {
-		thetad_d[N_J+i] = 0.0;
-		if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
-		if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
+		//conversion from RPY to angles
+		theta_d[N_J] = neckEAs[2];
+		theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
+		theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
+		//theta_d[N_J] = sin(2*M_PI*modeTime); //neckEAs[2];
+		//theta_d[N_J+1] = sin(2*M_PI*modeTime); //neckEAs[1]+neckEAs[0];
+		//theta_d[N_J+2] = sin(2*M_PI*modeTime); //neckEAs[1]-neckEAs[0];
+
+		//limit angles
+		for(int i = 0; i < 3; i++) {
+			thetad_d[N_J+i] = 0.0;
+			if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
+			if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
+		}
+
+		utils.setJoints(theta_d);
 	}
-
-	//TODO: pass IK commands to motors
-	//TODO: pass neck commands to motors
 }
 
-/*
+
 // no arbotix stuff
 int main( int argc, char **argv ) {
 	wallClockStart = get_time();
@@ -432,7 +464,6 @@ int main( int argc, char **argv ) {
 		controlLoop();
 
 		logger.saveData();
-		//TODO:  wait until plan.TIME_STEP
 
 		if(getCommand() == -1) {
 			logger.writeToMRDPLOT();
@@ -442,12 +473,12 @@ int main( int argc, char **argv ) {
 
 	return 374832748;
 }
-*/
+/**/
 
-
+/*
 int main( int argc, char **argv ) 
 {
-  ControlUtils utils;
+  
 
 	wallClockStart = get_time();
 	init();
@@ -505,4 +536,5 @@ int main( int argc, char **argv )
 
 	return 374832748;
 }
+/**/
 

@@ -6,24 +6,30 @@ int main()
 {
   ControlUtils utils;
   double t0, t1;
-  double T0 = get_time();
   double dt_acc = 0;
+  
+  double joints_d[TOTAL_JOINTS] = {0};
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    joints_d[i] = standPrepPose[i];
 
-  for (int ctr = 0; ctr < 1000; ctr++) {
+  utils.sendStandPrep(joints_d);
+  utils.waitForReady();
+
+  double T0 = get_time();
+  for (int ctr = 0; ctr < 345; ctr++) {
     t0 = get_time();
 
-    utils.joints_d[0] = sin(2*M_PI*(t0-T0));
-    utils.joints_d[1] = sin(2*M_PI*(t0-T0));
-    utils.joints_d[2] = sin(2*M_PI*(t0-T0));
+    joints_d[NECK_YAW] = 1; //sin(2*M_PI*(t0-T0));
+    joints_d[NECK_1] = 1; //sin(2*M_PI*(t0-T0));
+    joints_d[NECK_2] = 1; //sin(2*M_PI*(t0-T0));
 
-    utils.sendJoints_d();
+    utils.sendJoints_d(joints_d);
     
     usleep(1e4);
     t1 = get_time();
     dt_acc += (t1-t0);
   }
   printf("done sending\n");
-  sleep(2);
    
   utils.requestJoints();
   for (int i = 0; i < TOTAL_JOINTS; i++) {

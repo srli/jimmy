@@ -8,6 +8,24 @@
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048
 
+const double ControlUtils::ticks_per_rad = (TICK_MAX-TICK_MIN) / (2*M_PI);
+
+const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2560, 1024, 1707,
+	2048, 1536, 3072, 2389,
+  2048, 2048, 2048
+};
+
+const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
+	-1,  1, -1, -1,  1, -1,
+	-1, -1,  1, -1,  1, -1,
+	 1,  1, -1, -1,
+	-1,  1, -1,  1,
+   1,  1,  1
+};
+ 
 ControlUtils::ControlUtils()
 {
   vec_set(joints, 0., TOTAL_JOINTS);
@@ -16,6 +34,11 @@ ControlUtils::ControlUtils()
 
   _port = open_port("/dev/ttyUSB0");
   set_comm_parameters(_port, 115200, 8, 0, 1);
+}
+
+ControlUtils::~ControlUtils()
+{
+  close_port(_port);  
 }
 
 bool ControlUtils::sendCommand()
@@ -33,38 +56,84 @@ bool ControlUtils::sendCommand()
 
 bool ControlUtils::requestJoints()
 {
-  int numBytes = receive_data(_port, &_d_from_r, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
-  if (numBytes != sizeof(ArbotixCommData)) {
-    printf("rec error\n");
-    return false;
-  }
-  if (!_d_from_r.validate()) {
-    printf("validate error\n");
-    return false;
+  _d_to_r.cmd = ArbotixCommData::RequestJointAngle;
+  sendCommand();
+
+  bool get = false;
+  
+  while (!get) {
+    int numBytes = receive_data(_port, &_d_from_r, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
+    if (numBytes != sizeof(ArbotixCommData)) {
+      printf("rec error\n");
+    }
+    if (!_d_from_r.validate()) {
+      printf("validate error\n");
+    }
+    get = (numBytes == sizeof(ArbotixCommData) && _d_from_r.validate());
   }
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-    joints[i] = tick2rad(_d_from_r.joints[i]);
+    joints[i] = tick2rad(_d_from_r.joints[i], i);
   }
   return true;
 }
 
-bool ControlUtils::sendJoints_d()
+bool ControlUtils::waitForReady()
 {
-  for (int i = 0; i < TOTAL_JOINTS; i++)
-    _d_to_r.joints[i] = rad2tick(joints_d[i]);
+  bool get = false;
+  sleep(5);
+  
+  while (!get) {
+    int numBytes = receive_data(_port, &_d_from_r, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
+    if (numBytes != sizeof(ArbotixCommData)) {
+      printf("rec error\n");
+    }
+    if (!_d_from_r.validate()) {
+      printf("validate error\n");
+    }
+    printf("n %d, is v %d, cmd %d\n", numBytes, _d_from_r.validate(), _d_from_r.cmd);
+    get = (numBytes == sizeof(ArbotixCommData) && 
+           _d_from_r.validate() &&
+           _d_from_r.cmd == ArbotixCommData::IsReady);
+  }
 
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    joints[i] = tick2rad(_d_from_r.joints[i], i);
+  }
+  return true;
+}
+
+bool ControlUtils::sendJoints_d(const double *j)
+{
+  _d_to_r.cmd = ArbotixCommData::SetJointAngle;
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    _d_to_r.joints[i] = rad2tick(j[i], i);
   return sendCommand();
 }
 
-int16_t ControlUtils::rad2tick(double r)
+bool ControlUtils::sendStandPrep(const double *j)
 {
-  clamp(r, -M_PI, M_PI);
-  return (int16_t)((r + M_PI) * (4096. / (2*M_PI))); 
+  _d_to_r.cmd = ArbotixCommData::StandPrep;
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    _d_to_r.joints[i] = rad2tick(j[i], i);
+  return sendCommand();
 }
 
-double ControlUtils::tick2rad(int16_t t)
+
+
+
+
+
+
+
+int16_t ControlUtils::rad2tick(double r, int j)
 {
-  clamp(t, (int16_t)0, (int16_t)4096);
-  return (double)(t - 2048) * (2*M_PI / 4096.);
+  int16_t tmp = (int16_t)(r*ticks_per_rad)*tick_sign[j];
+  return tmp+tick_zeros[j];
+}
+
+double ControlUtils::tick2rad(int16_t t, int j)
+{
+  int16_t tmp = (t-tick_zeros[j])*tick_sign[j];
+  return (double)tmp/ticks_per_rad;
 }

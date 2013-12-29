@@ -13,12 +13,13 @@ class ArbotixCommData
 {
   public:
     enum CMDType {
-      SetJointAngle = 0,    // sent from computer 
+      StandPrep = 0,
+      SetJointAngle,    // sent from computer 
       RequestJointAngle,
       SetGain,
       
       GetJointAngle,        // sent from arbotix
-      IsRead
+      IsReady
     };
 
     uint8_t start;

@@ -16,12 +16,12 @@ int main()
   utils.waitForReady();
 
   double T0 = get_time();
-  for (int ctr = 0; ctr < 100; ctr++) {
+  for (int ctr = 0; ctr < 345; ctr++) {
     t0 = get_time();
 
-    joints_d[NECK_YAW] = sin(2*M_PI*(t0-T0));
-    joints_d[NECK_1] = sin(2*M_PI*(t0-T0));
-    joints_d[NECK_2] = sin(2*M_PI*(t0-T0));
+    joints_d[NECK_YAW] = 1; //sin(2*M_PI*(t0-T0));
+    joints_d[NECK_1] = 1; //sin(2*M_PI*(t0-T0));
+    joints_d[NECK_2] = 1; //sin(2*M_PI*(t0-T0));
 
     utils.sendJoints_d(joints_d);
     

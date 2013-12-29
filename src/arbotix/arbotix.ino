@@ -25,13 +25,41 @@ int state = 0;
 int msgIdx = 0;
 int seq_sum = 0;
 
+#define ID_R_SHOULDER_PITCH      1
+#define ID_L_SHOULDER_PITCH      2
+#define ID_R_SHOULDER_ROLL       3
+#define ID_L_SHOULDER_ROLL       4
+#define ID_R_ELBOW               5
+#define ID_L_ELBOW               6
+#define ID_R_HIP_YAW             7
+#define ID_L_HIP_YAW             8
+#define ID_R_HIP_ROLL            9
+#define ID_L_HIP_ROLL            10
+#define ID_R_HIP_PITCH           11
+#define ID_L_HIP_PITCH           12
+#define ID_R_KNEE                13
+#define ID_L_KNEE                14
+#define ID_R_ANKLE_PITCH         15
+#define ID_L_ANKLE_PITCH         16
+#define ID_R_ANKLE_ROLL          17
+#define ID_L_ANKLE_ROLL          18
+#define ID_HEAD_PAN              19
+#define ID_HEAD_TILT             20
+#define ID_R_ELBOW_YAW           21
+#define ID_L_ELBOW_YAW           22
+#define ID_R_WRIST_YAW           23
+#define ID_L_WRIST_YAW           24
+#define ID_R_GRIPPER             25
+#define ID_L_GRIPPER             26
+#define ID_HEAD_TILT_2           27
+
 // servo ids
 int servoIds[NUM_JOINTS] = {
-  0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0,
-  0, 0, 0, 0,
-  1, 20, 27
+  ID_L_HIP_YAW, ID_L_HIP_PITCH, ID_L_HIP_ROLL, ID_L_KNEE, ID_L_ANKLE_PITCH, ID_L_ANKLE_ROLL,
+  ID_R_HIP_YAW, ID_R_HIP_PITCH, ID_R_HIP_ROLL, ID_R_KNEE, ID_R_ANKLE_PITCH, ID_R_ANKLE_ROLL,
+  ID_L_SHOULDER_PITCH, ID_L_SHOULDER_ROLL, ID_L_ELBOW_YAW, ID_L_ELBOW, 
+  ID_R_SHOULDER_PITCH, ID_R_SHOULDER_ROLL, ID_R_ELBOW_YAW, ID_R_ELBOW, 
+  ID_HEAD_PAN, ID_HEAD_TILT, ID_HEAD_TILT_2
 };
 
 void reset() {
@@ -103,8 +131,6 @@ int procDataFromComputer()
 
 void loop() 
 {
-  stateTime = millis() - stateTime0;
-    
   // process command
   if (procDataFromComputer()) {
     lastCMDtime = millis();
@@ -142,6 +168,8 @@ void loop()
     digitalWrite(led, LOW);
   }  
   
+  // actual control
+  stateTime = millis() - stateTime0;    
   switch (state) {
     case ST_STAND_PREP:
       interpJoints();

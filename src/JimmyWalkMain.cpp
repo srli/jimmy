@@ -240,9 +240,9 @@ void controlLoop() {
 	IK.IK(IK_d, theta_d, thetad_d);
 
 	//conversion from RPY to angles
-	theta_d[N_J] = neckEAs[2];
-	theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
-	theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
+	theta_d[N_J] = sin(2*M_PI*modeTime); //neckEAs[2];
+	theta_d[N_J+1] = sin(2*M_PI*modeTime); //neckEAs[1]+neckEAs[0];
+	theta_d[N_J+2] = sin(2*M_PI*modeTime); //neckEAs[1]-neckEAs[0];
 
 	//limit angles
 	for(int i = 0; i < 3; i++) {
@@ -306,6 +306,7 @@ int main( int argc, char **argv )
 
 	printf("Starting\n");
 
+  wallClockLast = get_time();
   double timeQuota = plan.TIME_STEP;
 	while(true) {
 		double wallNow = get_time();

@@ -1,140 +1,124 @@
 #include "ControlUtils.h"
 #include "Utils.h"
 #include "arbotix_comm.h"
-#include "serial.h"
 #include <math.h>
 
 #define TICK_MIN          0
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048
 
+#define P_GOAL_POSITION_L	30
+#define P_GOAL_POSITION_H	31
+#define P_PRESENT_POSITION_L	36
+#define P_PRESENT_POSITION_H	37
+#define P_GOAL_SPEED_L		32
+#define P_GOAL_SPEED_H		33
+
 bool ControlUtils::getJoints(double *a)
 {
-  return false;  
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    // Read present position
+    ticks_from[i] = dxl_read_word(_id[i], P_PRESENT_POSITION_L);
+    int CommStatus = dxl_get_result();
+
+    if(CommStatus == COMM_RXSUCCESS)
+      a[i] = tick2rad(ticks_from[i], i);
+    else
+    {
+      return false;
+    }
+    usleep(1000);
+  }
+
+  return true;
 }
 
 bool ControlUtils::setJoints(const double *a)
 {
-  return false;  
+	int CommStatus;
+  // Make syncwrite packet
+  dxl_set_txpacket_id(BROADCAST_ID);
+  dxl_set_txpacket_instruction(INST_SYNC_WRITE);
+  dxl_set_txpacket_parameter(0, P_GOAL_POSITION_L);
+  dxl_set_txpacket_parameter(1, 2);
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    dxl_set_txpacket_parameter(2+3*i, _id[i]);
+    
+    ticks_to[i] = rad2tick(a[i], i);
+    
+    dxl_set_txpacket_parameter(2+3*i+1, dxl_get_lowbyte(ticks_to[i]));
+    dxl_set_txpacket_parameter(2+3*i+2, dxl_get_highbyte(ticks_to[i]));
+  }
+  dxl_set_txpacket_length((2+1)*TOTAL_JOINTS+4);
+
+  dxl_txrx_packet();
+  CommStatus = dxl_get_result();
+  if( CommStatus == COMM_RXSUCCESS )
+  {
+    //PrintErrorCode();
+    return true;
+  }
+  else
+  {
+    //PrintCommStatus(CommStatus);
+    return false;
+  }
 }
 
-const double ControlUtils::ticks_per_rad = (TICK_MAX-TICK_MIN) / (2*M_PI);
 
-const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
-	2048, 2048, 2048, 2048, 2048, 2048,
-	2048, 2048, 2048, 2048, 2048, 2048,
-	2048, 2560, 1024, 1707,
-	2048, 1536, 3072, 2389,
-  2048, 2048, 2048
-};
-
-const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
-	-1,  1, -1, -1,  1, -1,
-	-1, -1,  1, -1,  1, -1,
-	 1,  1, -1, -1,
-	-1,  1, -1,  1,
-   1,  1,  1
-};
- 
 ControlUtils::ControlUtils()
 {
   vec_set(joints, 0., TOTAL_JOINTS);
   vec_set(jointsd, 0., TOTAL_JOINTS);
   vec_set(joints_d, 0., TOTAL_JOINTS);
-
-  _port = open_port("/dev/ttyUSB0");
-  set_comm_parameters(_port, 115200, 8, 0, 1);
+  
+  if( dxl_initialize(0, 1) == 0 )
+	{
+		printf( "Failed to open USB2Dynamixel!\n" );
+		printf( "Press Enter key to terminate...\n" );
+		getchar();
+	  exit(-1);
+  }
+	else
+		printf( "Succeed to open USB2Dynamixel!\n" ); 
 }
 
 ControlUtils::~ControlUtils()
 {
-  close_port(_port);  
+	dxl_terminate();
 }
 
+/*
 bool ControlUtils::sendCommand()
 {
-  _d_to_r.seq_id++;
-  _d_to_r.genCheckSum();
-  
-  int numBytes = send_data(_port, &_d_to_r, sizeof(ArbotixCommData));
-  if (numBytes != sizeof(ArbotixCommData)) {
-    printf("send error\n"); 
-    return false;
-  }
+
   return true;
 }
 
 bool ControlUtils::requestJoints()
 {
-  _d_to_r.cmd = ArbotixCommData::RequestJointAngle;
-  sendCommand();
 
-  bool get = false;
-  
-  while (!get) {
-    int numBytes = receive_data(_port, &_d_from_r, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
-    if (numBytes != sizeof(ArbotixCommData)) {
-      printf("rec error\n");
-    }
-    if (!_d_from_r.validate()) {
-      printf("validate error\n");
-    }
-    get = (numBytes == sizeof(ArbotixCommData) && _d_from_r.validate());
-  }
-
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    ticks_from[i] = _d_from_r.joints[i];
-    joints[i] = tick2rad(_d_from_r.joints[i], i);
-  }
   return true;
 }
 
 bool ControlUtils::waitForReady()
 {
-  bool get = false;
-  sleep(5);
   
-  while (!get) {
-    int numBytes = receive_data(_port, &_d_from_r, sizeof(ArbotixCommData), true, ARBOTIX_START_FLAG);
-    if (numBytes != sizeof(ArbotixCommData)) {
-      printf("rec error\n");
-    }
-    if (!_d_from_r.validate()) {
-      printf("validate error\n");
-    }
-    printf("n %d, is v %d, cmd %d\n", numBytes, _d_from_r.validate(), _d_from_r.cmd);
-    get = (numBytes == sizeof(ArbotixCommData) && 
-           _d_from_r.validate() &&
-           _d_from_r.cmd == ArbotixCommData::IsReady);
-  }
-
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    ticks_from[i] = _d_from_r.joints[i];
-    joints[i] = tick2rad(_d_from_r.joints[i], i);
-  }
   return true;
 }
 
 bool ControlUtils::sendJoints_d(const double *j)
 {
-  _d_to_r.cmd = ArbotixCommData::SetJointAngle;
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    ticks_to[i] = rad2tick(j[i], i);
-    _d_to_r.joints[i] = ticks_to[i];
-  }
+  
   return sendCommand();
 }
 
 bool ControlUtils::sendStandPrep(const double *j)
 {
-  _d_to_r.cmd = ArbotixCommData::StandPrep;
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    ticks_to[i] = rad2tick(j[i], i);
-    _d_to_r.joints[i] = ticks_to[i];
-  }
+  
   return sendCommand();
 }
-
+*/
 
 
 
@@ -153,3 +137,60 @@ double ControlUtils::tick2rad(int16_t t, int j)
   int16_t tmp = (t-tick_zeros[j])*tick_sign[j];
   return (double)tmp/ticks_per_rad;
 }
+
+
+const double ControlUtils::ticks_per_rad = (TICK_MAX-TICK_MIN) / (2*M_PI);
+
+#define ID_R_SHOULDER_PITCH      1
+#define ID_L_SHOULDER_PITCH      2
+#define ID_R_SHOULDER_ROLL       3
+#define ID_L_SHOULDER_ROLL       4
+#define ID_R_ELBOW               5
+#define ID_L_ELBOW               6
+#define ID_R_HIP_YAW             7
+#define ID_L_HIP_YAW             8
+#define ID_R_HIP_ROLL            9
+#define ID_L_HIP_ROLL            10
+#define ID_R_HIP_PITCH           11
+#define ID_L_HIP_PITCH           12
+#define ID_R_KNEE                13
+#define ID_L_KNEE                14
+#define ID_R_ANKLE_PITCH         15
+#define ID_L_ANKLE_PITCH         16
+#define ID_R_ANKLE_ROLL          17
+#define ID_L_ANKLE_ROLL          18
+#define ID_HEAD_PAN              19
+#define ID_HEAD_TILT             20
+#define ID_R_ELBOW_YAW           21
+#define ID_L_ELBOW_YAW           22
+#define ID_R_WRIST_YAW           23
+#define ID_L_WRIST_YAW           24
+#define ID_R_GRIPPER             25
+#define ID_L_GRIPPER             26
+#define ID_HEAD_TILT_2           27
+
+// servo ids
+const int ControlUtils::_id[TOTAL_JOINTS] = {
+  ID_L_HIP_YAW, ID_L_HIP_PITCH, ID_L_HIP_ROLL, ID_L_KNEE, ID_L_ANKLE_PITCH, ID_L_ANKLE_ROLL,
+  ID_R_HIP_YAW, ID_R_HIP_PITCH, ID_R_HIP_ROLL, ID_R_KNEE, ID_R_ANKLE_PITCH, ID_R_ANKLE_ROLL,
+  ID_L_SHOULDER_PITCH, ID_L_SHOULDER_ROLL, ID_L_ELBOW_YAW, ID_L_ELBOW, 
+  ID_R_SHOULDER_PITCH, ID_R_SHOULDER_ROLL, ID_R_ELBOW_YAW, ID_R_ELBOW, 
+  ID_HEAD_PAN, ID_HEAD_TILT, ID_HEAD_TILT_2
+};
+
+const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2048, 2048, 2048, 2048, 2048,
+	2048, 2560, 1024, 1707,
+	2048, 1536, 3072, 2389,
+  2048, 2048, 2048
+};
+
+const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
+	-1,  1, -1, -1,  1, -1,
+	-1, -1,  1, -1,  1, -1,
+	 1,  1, -1, -1,
+	-1,  1, -1,  1,
+   1,  1,  1
+};
+ 

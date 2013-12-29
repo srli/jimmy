@@ -35,13 +35,16 @@ add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "
   set_target_properties(jimmylib PROPERTIES COMPILE_FLAGS "-O4")
 
 rosbuild_add_executable(test_jimmy src/JimmyWalkMain.cpp)
-  target_link_libraries(test_jimmy jimmylib rt)
+  target_link_libraries(test_jimmy jimmylib rt dxl)
 
-rosbuild_add_executable(test_lipm src/lipm_test.cpp)
-  target_link_libraries(test_lipm jimmylib rt)
+rosbuild_add_executable(test_serial src/test_as_client.cpp)
+  target_link_libraries(test_serial jimmylib rt dxl)
 
-rosbuild_add_executable(test_serial src/test_serial.cpp)
-  target_link_libraries(test_serial jimmylib rt)
+#rosbuild_add_executable(test_lipm src/lipm_test.cpp)
+#  target_link_libraries(test_lipm jimmylib rt dxl)
 
-rosbuild_add_executable(test_wiggle src/test_wiggle.cpp)
-  target_link_libraries(test_wiggle jimmylib rt)
+#rosbuild_add_executable(test_serial src/test_serial.cpp)
+#  target_link_libraries(test_serial jimmylib rt dxl)
+
+#rosbuild_add_executable(test_wiggle src/test_wiggle.cpp)
+#  target_link_libraries(test_wiggle jimmylib rt dxl)

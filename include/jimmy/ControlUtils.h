@@ -4,6 +4,7 @@
 #include "arbotix_comm.h"
 #include "JimmyCommon.h"
 #include <stdint.h>
+#include "dynamixel.h"
 
 class ControlUtils 
 {
@@ -14,6 +15,7 @@ class ControlUtils
     ArbotixCommData _d_to_r;             // to arbotix
   
     bool sendCommand();
+    static const int _id[TOTAL_JOINTS]; 
 
   public:
     int16_t ticks_to[TOTAL_JOINTS];
@@ -36,11 +38,13 @@ class ControlUtils
 
     ///////////////////////
     // ERIC
+    bool getJoints() { return getJoints(joints); }
+    bool setJoints() { return setJoints(joints_d); }
     bool getJoints(double *);
     bool setJoints(const double *);
     ///////////////////////
     
-
+    /*
     bool waitForReady();
     bool requestJoints();
 
@@ -48,6 +52,7 @@ class ControlUtils
     inline bool sendStandPrep() { return sendStandPrep(joints_d); }
     bool sendJoints_d(const double *j_d);
     bool sendStandPrep(const double *j_d);
+    */
 
     static int16_t rad2tick(double r, int j);
     static double tick2rad(int16_t t, int j);

@@ -458,8 +458,8 @@ int main( int argc, char **argv )
   for (int i = 0; i < TOTAL_JOINTS; i++)
     joints_d[i] = standPrepPose[i];
 
-  utils.sendStandPrep(joints_d);
-  utils.waitForReady();
+  //utils.sendStandPrep(joints_d);
+  //utils.waitForReady();
   //////////////////////////////////////////////
 
 	printf("Starting\n");
@@ -491,13 +491,13 @@ int main( int argc, char **argv )
     if (dt > timeQuota) {
       timeQuota -= (dt - plan.TIME_STEP);
       printf("takes too long %g\n", dt);
-      utils.sendJoints_d(theta_d);
+      //utils.sendJoints_d(theta_d);
     }
     else {
       timeQuota = plan.TIME_STEP;
       int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
       
-      utils.sendJoints_d(theta_d);
+      //utils.sendJoints_d(theta_d);
       usleep(sleep_t);
     }
     //////////////////////////////////////////////

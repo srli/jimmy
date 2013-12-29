@@ -10,11 +10,33 @@ Logger logger;
 IKcmd IK_d;
 IKcon IK;
 
+const int MAX_POSES = 100;
+const int MAX_GESTURES = 100;
+const int MAX_POSES_PER_GESTURE = 100;
+const int N_VALS_PER_POSE = 17;
+
+static int N_POSES;
+
+static double poses[MAX_POSES][N_VALS_PER_POSE];
+static int gestureSeq[MAX_GESTURES][MAX_POSES_PER_GESTURE];
+static double gestureTime[MAX_GESTURES][MAX_POSES_PER_GESTURE];
+static int gestureNpose[MAX_GESTURES];
+
 static double neckEAs[3];
 
 const static double neckLims[2][3] = {
 	{-1.4, -0.5, -0.5},
 	{1.4, 0.5, 0.5}
+};
+
+const static double neckEAlims[2][3] = {
+	{-1.4, -0.5, -0.5},
+	{1.4, 0.5, 0.5}
+};
+
+const static double poseBodyLims[2][6] = {
+	{-0.1, -0.1, 0.35, -0.3, -0.3, -0.3},
+	{0.1, 0.1, 0.45, 0.3, 0.3, 0.3}
 };
 
 enum ConMode {
@@ -65,6 +87,10 @@ void getNeckCommand(double *EAs) {
 	double EAsd[3] = {0,0,0};
 	//TODO: implement
 	for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;
+	for(int i = 0; i < 3; i++) {
+		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
+		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
+	}
 }
 
 
@@ -85,8 +111,89 @@ void initWalk() {
 	}
 }
 
+void loadPoses() {
+	std::string name = ros::package::getPath("jimmy") + "/conf/poses.cf";
+	std::ifstream in(name.c_str());
+
+	int pose = 0;
+	int i = 0;
+	while (true) {
+		in >> poses[pose][i];
+		i++;
+		if(i >= N_VALS_PER_POSE) {
+			i = 0;
+			pose++;
+		}
+		if (in.eof()) {
+			if(i != 1) {
+				printf("Ran out of data mid pose\n");
+				exit(-1);
+			}	
+			printf("Loaded %d poses\n",pose);
+			break;
+		}
+	}
+	N_POSES = pose;
+
+	//assemble pose limits from other limits
+	double poseLimits[2][N_VALS_PER_POSE];
+	for(int m = 0; m < 2; m++) {
+		for(int i = 0; i < 8; i++)	poseLimits[m][i] = RobotState::jointLimits[m][i+12];
+		for(int i = 0; i < 3; i++)	poseLimits[m][i+8] = neckEAlims[m][i];
+		for(int i = 0; i < 6; i++)	poseLimits[m][i+11] = poseBodyLims[m][i];
+	}
+
+	for(int p = 0; p < pose; p++) {
+		for(int i = 0; i < N_VALS_PER_POSE; i++) {
+			if(poses[p][i] < poseLimits[0][i]) {
+				printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[0][i]);
+				poses[p][i] = poseLimits[0][i];
+			}
+			if(poses[p][i] > poseLimits[1][i]) {
+				printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[1][i]);
+				poses[p][i] = poseLimits[1][i];
+			}
+		}
+	}
+}
+
+void loadGestures() {
+	std::string name = ros::package::getPath("jimmy") + "/conf/gestures.cf";
+	std::ifstream in(name.c_str());
+
+	int gesture = 0;
+	while (true) {
+		in >> gestureNpose[gesture];
+		if (in.eof()) 	break;
+		for(int i = 0; i < gestureNpose[gesture]; i++) {
+			in >> gestureSeq[gesture][i];
+			if(gestureSeq[gesture][i] < 0) {
+				printf("We only use positive pose ID's: %d\n",gestureSeq[gesture][i]);
+				exit(-1);
+			}
+			if(gestureSeq[gesture][i] >= N_POSES) {
+				printf("We only have %d poses stored: %d\n",N_POSES, gestureSeq[gesture][i]);
+				exit(-1);
+			}
+			in >> gestureTime[gesture][i];
+			if(gestureTime[gesture][i] <= 0) {
+				printf("Require a positive time in gesture %d, pose %d: %g\n", gesture, i, gestureTime[gesture][i]);
+				exit(-1);
+			}
+		}
+		if (in.eof()) {
+			printf("Ran out of data mid gesture\n");
+			exit(-1);
+		}
+		gesture++;
+	}
+	printf("Loaded %d gestures\n",gesture);
+}
+
 void init() {
 	printf("Start init\n");
+	loadPoses();
+	loadGestures();
 	mode = IDLE;
 	isIdle = false;
 	curTime = 0.0;
@@ -95,9 +202,9 @@ void init() {
 	modeDur = 0.0;
 	for(int i = 0; i < 3; i++)		neckEAs[i] = 0.0;
 
-  std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
+	std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
 	plan = Plan(name.c_str());
-  name = ros::package::getPath("jimmy") + "/conf/IK.cf";
+	name = ros::package::getPath("jimmy") + "/conf/IK.cf";
 	IK.readParams(name.c_str());
 	logger.init(plan.TIME_STEP);
 	logger.add_datapoint("realT","s",&wallClockT);
@@ -114,6 +221,8 @@ void init() {
 	IK_d.setToRS(IK.ikrs);
 	IK_d.setVel0();
 }
+
+
 
 void stateMachine() {
 	int command;
@@ -182,6 +291,7 @@ void idleCon() {
 }
 
 void walkCon() {
+	for(int i = 0; i < 3; i++)	neckEAs[i] *= 0.995;
 	plan.fillIK_d(IK_d, modeTime);
 }
 
@@ -201,12 +311,12 @@ void controlLoop() {
 
 	//whipe out record values
 	vForward = vLeft = dTheta = 0.0;
-
 	plan.clearForRecord();
 	
 	//do actual control
 	switch(mode) {
 	case IDLE:
+		getNeckCommand(neckEAs);
 		idleCon();
 		break;
 	case PRE_WALK:
@@ -229,9 +339,7 @@ void controlLoop() {
 		exit(-1);
 		break;
 	}
-
-	double neckEA[3];
-	getNeckCommand(neckEA);
+	
 
 	double theta_d[N_J+3], thetad_d[N_J+3];
 	IK.IK(IK_d, theta_d, thetad_d);
@@ -243,6 +351,7 @@ void controlLoop() {
 
 	//limit angles
 	for(int i = 0; i < 3; i++) {
+		thetad_d[N_J+i] = 0.0;
 		if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
 		if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
 	}

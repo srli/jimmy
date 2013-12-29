@@ -16,6 +16,9 @@ class ControlUtils
     bool sendCommand();
 
   public:
+    int16_t ticks_to[TOTAL_JOINTS];
+    int16_t ticks_from[TOTAL_JOINTS];
+
     // conversion stuff
     static const double ticks_per_rad;
     static const int16_t tick_zeros[TOTAL_JOINTS];
@@ -30,6 +33,13 @@ class ControlUtils
 
     ControlUtils();
     ~ControlUtils();
+
+    ///////////////////////
+    // ERIC
+    bool getJoints(double *);
+    bool setJoints(const double *);
+    ///////////////////////
+    
 
     bool waitForReady();
     bool requestJoints();

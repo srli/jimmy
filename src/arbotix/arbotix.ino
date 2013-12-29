@@ -62,6 +62,14 @@ int servoIds[NUM_JOINTS] = {
   ID_HEAD_PAN, ID_HEAD_TILT, ID_HEAD_TILT_2
 };
 
+int skip[NUM_JOINTS] = {
+  1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1,
+  1, 1, 1, 1,
+  0, 0, 0
+};
+
 void reset() {
   state = ST_STAND_PREP;
   stateTime0 = millis();
@@ -76,6 +84,8 @@ void reset() {
 void setupStandPrep()
 {
   for (int i = 0; i < NUM_JOINTS; i++) {
+    if (skip[i])
+      continue;
     joints0[i] = GetPosition(servoIds[i]);
   }
   t0 = millis();
@@ -92,6 +102,8 @@ void interpJoints()
 
   int d;
   for (int i = 0; i < NUM_JOINTS; i++) {
+    if (skip[i])
+      continue;
     d = joints0[i] + (int)(dt * (float)(joints1[i] - joints0[i]));
     SetPosition(servoIds[i], d);
   }
@@ -99,10 +111,14 @@ void interpJoints()
 
 void setup() {
   Serial.begin(115200);
+  ax12Init(1000000);
   
   delay(500);
-  for (int i = 0; i < NUM_JOINTS; i++)
+  for (int i = 0; i < NUM_JOINTS; i++) {
+    if (skip[i])
+      continue;
     joints1[i] = GetPosition(servoIds[i]);;
+  }
 
   reset();  
 }
@@ -144,8 +160,13 @@ void loop()
 
       case ArbotixCommData::RequestJointAngle:
         dtc.cmd = ArbotixCommData::GetJointAngle;
-        for (int i = 0; i < NUM_JOINTS; i++)
-          dtc.joints[i] = GetPosition(servoIds[i]);
+        for (int i = 0; i < NUM_JOINTS; i++) {
+          if (skip[i]) {
+            dtc.joints[i] = -2;
+          }
+          else
+            dtc.joints[i] = GetPosition(servoIds[i]);
+        }
       
         dtc.genCheckSum();
         memcpy(out_buf, &dtc, sizeof(ArbotixCommData));
@@ -178,8 +199,12 @@ void loop()
         state = ST_SERVO;
   
         dtc.cmd = ArbotixCommData::IsReady;
-        for (int i = 0; i < NUM_JOINTS; i++)
+        for (int i = 0; i < NUM_JOINTS; i++) {
+          if (skip[i])
+            continue;
           dtc.joints[i] = GetPosition(servoIds[i]);
+        }
+        
       
         dtc.genCheckSum();
         memcpy(out_buf, &dtc, sizeof(ArbotixCommData));        
@@ -188,13 +213,17 @@ void loop()
       break;
   
     case ST_SERVO:
-      for (int i = 0; i < NUM_JOINTS; i++)
+      for (int i = 0; i < NUM_JOINTS; i++) {
+        if (skip[i])
+          continue;
         SetPosition(servoIds[i], joints1[i]);        
+      }
       break;
   
     default:
       break;
   }
+  
 }
 
 

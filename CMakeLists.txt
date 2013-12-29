@@ -42,3 +42,6 @@ rosbuild_add_executable(test_lipm src/lipm_test.cpp)
 
 rosbuild_add_executable(test_serial src/test_serial.cpp)
   target_link_libraries(test_serial jimmylib rt)
+
+rosbuild_add_executable(test_wiggle src/test_wiggle.cpp)
+  target_link_libraries(test_wiggle jimmylib rt)

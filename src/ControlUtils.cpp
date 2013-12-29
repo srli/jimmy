@@ -8,6 +8,16 @@
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048
 
+bool ControlUtils::getJoints(double *a)
+{
+  return false;  
+}
+
+bool ControlUtils::setJoints(const double *a)
+{
+  return false;  
+}
+
 const double ControlUtils::ticks_per_rad = (TICK_MAX-TICK_MIN) / (2*M_PI);
 
 const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
@@ -73,6 +83,7 @@ bool ControlUtils::requestJoints()
   }
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
+    ticks_from[i] = _d_from_r.joints[i];
     joints[i] = tick2rad(_d_from_r.joints[i], i);
   }
   return true;
@@ -98,6 +109,7 @@ bool ControlUtils::waitForReady()
   }
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
+    ticks_from[i] = _d_from_r.joints[i];
     joints[i] = tick2rad(_d_from_r.joints[i], i);
   }
   return true;
@@ -106,16 +118,20 @@ bool ControlUtils::waitForReady()
 bool ControlUtils::sendJoints_d(const double *j)
 {
   _d_to_r.cmd = ArbotixCommData::SetJointAngle;
-  for (int i = 0; i < TOTAL_JOINTS; i++)
-    _d_to_r.joints[i] = rad2tick(j[i], i);
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    ticks_to[i] = rad2tick(j[i], i);
+    _d_to_r.joints[i] = ticks_to[i];
+  }
   return sendCommand();
 }
 
 bool ControlUtils::sendStandPrep(const double *j)
 {
   _d_to_r.cmd = ArbotixCommData::StandPrep;
-  for (int i = 0; i < TOTAL_JOINTS; i++)
-    _d_to_r.joints[i] = rad2tick(j[i], i);
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    ticks_to[i] = rad2tick(j[i], i);
+    _d_to_r.joints[i] = ticks_to[i];
+  }
   return sendCommand();
 }
 

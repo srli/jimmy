@@ -21,15 +21,12 @@ bool ControlUtils::getJoints(double *a)
     ticks_from[i] = dxl_read_word(_id[i], P_PRESENT_POSITION_L);
     int CommStatus = dxl_get_result();
 
-    printf("%d\n", i);
-
     if(CommStatus == COMM_RXSUCCESS)
       a[i] = tick2rad(ticks_from[i], i);
     else
-    {
       return false;
-    }
-    usleep(10000);
+
+    usleep(5000);
   }
 
   return true;

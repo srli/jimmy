@@ -70,12 +70,8 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 200.0)	return -1;
-	if(curTime > 5.0 && curTime < 155)		return 1;
-	if(curTime > 180.0 && curTime < 180.1) {
-		printf("yoyo\n");
-		return 2;
-	}
+	if(curTime > 30.0)	return -1;
+	if(curTime > 7.0 && curTime < 20)		return 1;
 
 	return 0;
 }
@@ -107,7 +103,7 @@ TrajEW spJoints[23];
 void initStandPrep() {
 	double initPos[23];
 	utils.getJoints(initPos);
-	for(int i = 0; i < 23; i++)		spJoints[i].freshMove(5.0, initPos[i], standPrepPose[i]);
+	for(int i = 0; i < 23; i++)		spJoints[i].freshMove(initPos[i], standPrepPose[i], 5.0);
 	modeDur = 5.0;
 }
 
@@ -252,8 +248,6 @@ void init() {
 	printf("Start init\n");
 	loadPoses();
 	loadGestures();
-	mode = STAND_PREP;
-	initStandPrep();
 	isIdle = false;
 	curTime = 0.0;
 	modeTime = 0.0;
@@ -279,6 +273,8 @@ void init() {
 	plan.addToLog(logger);
 	IK_d.setToRS(IK.ikrs);
 	IK_d.setVel0();
+	mode = STAND_PREP;
+	initStandPrep();
 }
 
 
@@ -293,17 +289,20 @@ void stateMachine() {
 			modeT0 = curTime;
 			mode = PRE_WALK;
 			initWalk();
+			printf("IDLE to INIT_WALK\n");
 		}
 		else if(command > 1) {	//each number corresponds to a gesture
 			modeT0 = curTime;
 			mode = GESTURE;
 			initGesture(command);
+			printf("IDLE to GESTURE\n");
 		}
 		break;
 	case PRE_WALK:
 		if(modeTime > plan.PRE_PLAN_TIME) {
 			modeT0 = curTime;
 			mode = WALK;
+			printf("PRE_WALK to WALK\n");
 		}
 		break;
 	case WALK:
@@ -313,18 +312,21 @@ void stateMachine() {
 		if(plan.isDone(modeTime)) {
 			modeT0 = curTime;
 			mode = IDLE;
+			printf("WALK to IDLE\n");
 		}
 		break;
 	case GESTURE:
 		if(modeTime > modeDur) {
 			modeT0 = curTime;
 			mode = IDLE;
+			printf("GESTURE to IDLE\n");
 		}
 		break;
 	case STAND_PREP:
 		if(modeTime > modeDur) {
 			modeT0 = curTime;
 			mode = IDLE;
+			printf("STAND_PREP to IDLE\n");
 		}
 		break;
 	default:
@@ -444,8 +446,6 @@ void controlLoop() {
 	}
 }
 
-
-// no arbotix stuff
 int main( int argc, char **argv ) {
 	wallClockStart = get_time();
 	init();
@@ -453,8 +453,11 @@ int main( int argc, char **argv ) {
 	while(!isReady()) {
 		//do nothing
 	}
-	printf("Starting\n");
-	while(true) {
+	
+  printf("Starting\n");
+  double timeQuota = plan.TIME_STEP;
+	
+  while(true) {
 		double wallNow = get_time();
 		wallClockT = wallNow-wallClockStart;
 		wallClockDT = wallNow-wallClockLast;
@@ -469,17 +472,31 @@ int main( int argc, char **argv ) {
 			logger.writeToMRDPLOT();
 			exit(-1);
 		}
+
+    ///////////////////////////////////////////////
+    // wait
+    double wall1 = get_time();
+    double dt = wall1 - wallNow;
+    // step up quota for the next time step
+    if (dt > timeQuota) {
+      timeQuota -= (dt - plan.TIME_STEP);
+      printf("takes too long %g\n", dt);
+    }
+    else {
+      timeQuota = plan.TIME_STEP;
+      int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
+      
+      usleep(sleep_t);
+    }
+    ///////////////////////////////////////////////
 	}
 
-	return 374832748;
+	return 0;
 }
-/**/
 
 /*
 int main( int argc, char **argv ) 
 {
-  
-
 	wallClockStart = get_time();
 	init();
   //////////////////////////////////////////////
@@ -536,5 +553,5 @@ int main( int argc, char **argv )
 
 	return 374832748;
 }
-/**/
+*/
 

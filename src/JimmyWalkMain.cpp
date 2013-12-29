@@ -87,23 +87,63 @@ void constrainDriveCommand(double *vForward, double *vLeft, double *dTheta) {
 }
 
 void getNeckCommand(double *EAs) {
-	double EAsd[3] = {0,0,0};
-	//TODO: implement
-	for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;
-	for(int i = 0; i < 3; i++) {
+	double EAsd[3] = {0,0,0};		//desired velocities
+	//TODO: fetch desired velocities from user
+	for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;	//integrate
+	for(int i = 0; i < 3; i++) {						//limit
 		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
 		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
 	}
 }
 
+TrajEW gestureArms[8];
+TrajEW gestureNeck[3];
+TrajEW gestureCoM[3];
+TrajEW gestureRootEA[3];
 
-
-
+const double pi = 3.1415926535897;
 
 void initGesture(int gesture) {
-	//TODO:  implement this function
-	//set up joint trajectories using TrajEW; should be simple quintic splines between hardcoded poses
-	//also set modeDur appropriately so we know when to end the gesture
+	gesture-=2;
+	printf("Starting gesture %d\n", gesture);
+	//initialize with current state
+	for(int i = 0; i < 8; i++) {
+		gestureArms[i].clear();
+		gestureArms[i].addKnot(0, IK_d.armJoints[i], 0, 0);
+	}
+	for(int i = 0; i < 3; i++) {
+		gestureNeck[i].clear();
+		gestureNeck[i].addKnot(0, neckEAs[i], 0, 0);
+	}
+	for(int i = 0; i < 3; i++) {
+		gestureCoM[i].clear();
+		gestureCoM[i].addKnot(0, IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0, 0, 0);
+	}
+	double rootEA[3];
+	quat2EA(IK_d.rootQ, rootEA);
+	for(int i = 0; i < 3; i++) {
+		gestureRootEA[i].clear();
+		gestureRootEA[i].addKnot(0, rootEA[i], 0, 0);
+	}
+
+	Eigen::Quaterniond avgFootQ = mySlerp(IK_d.footQ[LEFT], IK_d.footQ[RIGHT], 0.5);
+	double footYaw = getYaw(avgFootQ);
+	if(footYaw - rootEA[2] > pi)		footYaw -= pi*2.0;
+	if(footYaw - rootEA[2] < -pi)		footYaw += pi*2.0;
+
+	double totTime = 0;
+	//add the poses to the trajectories
+	for(int p = 0; p < gestureNpose[gesture]; p++) {
+		totTime += gestureTime[gesture][p];
+		int pose = gestureSeq[gesture][p];
+		for(int i = 0; i < 8; i++) 	gestureArms[i].addKnot(totTime, poses[pose][i], 0, 0);
+		for(int i = 0; i < 3; i++)	gestureNeck[i].addKnot(totTime, poses[pose][i+8], 0, 0);
+		for(int i = 0; i < 3; i++)	gestureCoM[i].addKnot(totTime, poses[pose][i+11], 0, 0);
+		for(int i = 0; i < 2; i++)	gestureRootEA[i].addKnot(totTime, poses[pose][i+14], 0, 0);
+						gestureRootEA[2].addKnot(totTime, footYaw+poses[pose][16], 0, 0);
+	}
+	//when the gesture ends and returns to IDLE
+	modeDur = totTime;
 }
 
 void initWalk() {
@@ -299,9 +339,15 @@ void walkCon() {
 }
 
 void gestureCon() {
-	//TODO: implement
-	//read trajectories set up in initGesture()
-	//set up IK_d
+	for(int i = 0; i < 8; i++) 	IK_d.armJoints[i] = gestureArms[i].readPos(modeTime);
+	for(int i = 0; i < 3; i++)	neckEAs[i] = gestureNeck[i].readPos(modeTime);
+	for(int i = 0; i < 3; i++) {
+		gestureCoM[i].read(modeTime, &(IK_d.com[i]), &(IK_d.comd[i]), NULL);
+		IK_d.com[i] += (IK_d.foot[LEFT][i] + IK_d.foot[RIGHT][i])/2.0;
+	}
+	double rootEA[3];
+	for(int i = 0; i < 3; i++)	rootEA[i] = gestureRootEA[i].readPos(modeTime);
+	IK_d.rootQ = EA2quat(rootEA);
 }
 
 

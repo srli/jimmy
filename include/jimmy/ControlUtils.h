@@ -1,22 +1,29 @@
 #ifndef __CONTROL_UTILS_H
 #define __CONTROL_UTILS_H
 
-#include "arbotix_comm.h"
 #include "JimmyCommon.h"
 #include <stdint.h>
 #include "dynamixel.h"
 #include <vector>
 
+#define ADDR_GOAL_POSITION_L	       30
+#define ADDR_GOAL_POSITION_H	       31
+#define ADDR_PRESENT_POSITION_L      36
+#define ADDR_PRESENT_POSITION_H	     37
+#define ADDR_GOAL_SPEED_L		         32
+#define ADDR_GOAL_SPEED_H		         33
 
-
+#define ADDR_P_GAIN                  28
+#define ADDR_I_GAIN                  27
+#define ADDR_D_GAIN                  26
+#define ADDR_THERMAL_MAX             11
+#define ADDR_PRESENT_LOAD_L          40
+#define ADDR_PRESENT_LOAD_H          41
+#define ADDR_PRESENT_TEMPERATURE     43
+ 
 class ControlUtils 
 {
   private:
-    int _port;
-
-    ArbotixCommData _d_from_r;           // from arbotix
-    ArbotixCommData _d_to_r;             // to arbotix
-  
     bool sendCommand();
     static const int _id[TOTAL_JOINTS]; 
   
@@ -26,14 +33,14 @@ class ControlUtils
     bool syncWriteWord(int8_t addr, const std::vector<int> &joints, const std::vector<int16_t> &val);
     bool setByte(int8_t gain, int8_t addr, int joint);
     bool getByte(int8_t *gain, int8_t addr, int joint);
+    bool setAllBytes(const int8_t val[TOTAL_JOINTS], int8_t addr);
+    bool getAllBytes(int8_t val[TOTAL_JOINTS], int8_t addr);
 
   public:
     enum CMD_TYPE {
       P_GAIN = 0,
       I_GAIN,
       D_GAIN,
-      THERMAL_MAX,
-      CUR_TEMPERATURE 
     };
 
     int16_t ticks_to[TOTAL_JOINTS];
@@ -62,12 +69,16 @@ class ControlUtils
     bool getJoints(double j[TOTAL_JOINTS]);
     bool setJoints(const double j[TOTAL_JOINTS]);
 
-    bool setGains(const int8_t gain[TOTAL_JOINTS], int type);
-    bool getGains(int8_t gain[TOTAL_JOINTS], int type);
-    bool getLoads(double trq[TOTAL_JOINTS]);
-
-    //bool setGain(int8_t gain, int type, int idx);
-    //bool getGain(int8_t *gain, int type, int idx);
+    inline bool setPGains(const int8_t gains[TOTAL_JOINTS]) { return setAllBytes(gains, ADDR_P_GAIN); }
+    inline bool setIGains(const int8_t gains[TOTAL_JOINTS]) { return setAllBytes(gains, ADDR_I_GAIN); }
+    inline bool setDGains(const int8_t gains[TOTAL_JOINTS]) { return setAllBytes(gains, ADDR_D_GAIN); }
+    inline bool setThermalMax(const int8_t m[TOTAL_JOINTS]) { return setAllBytes(m, ADDR_THERMAL_MAX); }
+    
+    inline bool getPGains(int8_t gains[TOTAL_JOINTS]) { return getAllBytes(gains, ADDR_P_GAIN); }
+    inline bool getIGains(int8_t gains[TOTAL_JOINTS]) { return getAllBytes(gains, ADDR_I_GAIN); }
+    inline bool getDGains(int8_t gains[TOTAL_JOINTS]) { return getAllBytes(gains, ADDR_D_GAIN); }
+    inline bool getThermalMax(int8_t m[TOTAL_JOINTS]) { return getAllBytes(m, ADDR_THERMAL_MAX); }
+    inline bool getCurTemperature(int8_t t[TOTAL_JOINTS]) { return getAllBytes(t, ADDR_PRESENT_TEMPERATURE); }
 
     bool setStanceGain(int side);
 

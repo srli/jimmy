@@ -13,8 +13,8 @@ const int TOTAL_JOINTS = 23;    // real
 const double standPrepPose[TOTAL_JOINTS] = {
 	0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0,
-	0, -0.2, 0, 0,
-	0,  0.2, 0, 0,
+	0, -0.6, 0, 0,
+	0,  0.6, 0, 0,
   0, 0, 0
 };
 

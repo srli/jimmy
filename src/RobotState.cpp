@@ -2,6 +2,32 @@
 #include "Jimmy.h"
 #include "SDModel_common.h"
 #include "sdlib.h"
+ 
+const std::string RobotState::jointNames[TOTAL_JOINTS] = {
+	"L_HZ",
+	"L_HFE",
+	"L_HAA",
+	"L_KFE",
+	"L_AFE",
+	"L_AAA",
+	"R_HZ",
+	"R_HFE",
+	"R_HAA",
+	"R_KFE",
+	"R_AFE",
+	"R_AAA",
+	"L_SFE",
+	"L_SAA",
+	"L_SR",
+	"L_ELB",
+	"R_SFE",
+	"R_SAA",
+	"R_SR",
+	"R_ELB",
+	"N_YAW",
+	"N_TL1",
+	"N_TL2"
+};
 
 const double RobotState::jointLimits[2][N_JOINTS] = 
 {

@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#define SIMULATION
+//#define SIMULATION
 
 Plan plan;
 Logger logger;
@@ -16,33 +16,6 @@ IKcon IK;
 #ifndef SIMULATION
 ControlUtils utils;
 #endif
-
-
-char jointNames[23][100] = {
-	"L_HZ",
-	"L_HFE",
-	"L_HAA",
-	"L_KFE",
-	"L_AFE",
-	"L_AAA",
-	"R_HZ",
-	"R_HFE",
-	"R_HAA",
-	"R_KFE",
-	"R_AFE",
-	"R_AAA",
-	"L_SFE",
-	"L_SAA",
-	"L_SR",
-	"L_ELB",
-	"R_SFE",
-	"R_SAA",
-	"R_SR",
-	"R_ELB",
-	"N_YAW",
-	"N_TL1",
-	"N_TL2"
-};
 
 const int MAX_POSES = 100;
 const int MAX_GESTURES = 100;
@@ -149,8 +122,6 @@ TrajEW gestureNeck[3];
 TrajEW gestureCoM[3];
 TrajEW gestureRootEA[3];
 
-const double pi = 3.1415926535897;
-
 void initGesture(int gesture) {
 	gesture-=2;
 	printf("Starting gesture %d\n", gesture);
@@ -176,8 +147,8 @@ void initGesture(int gesture) {
 
 	Eigen::Quaterniond avgFootQ = mySlerp(IK_d.footQ[LEFT], IK_d.footQ[RIGHT], 0.5);
 	double footYaw = getYaw(avgFootQ);
-	if(footYaw - rootEA[2] > pi)		footYaw -= pi*2.0;
-	if(footYaw - rootEA[2] < -pi)		footYaw += pi*2.0;
+	if(footYaw - rootEA[2] > M_PI)		footYaw -= M_PI*2.0;
+	if(footYaw - rootEA[2] < -M_PI)		footYaw += M_PI*2.0;
 
 	double totTime = 0;
 	//add the poses to the trajectories
@@ -311,18 +282,18 @@ void init() {
   for (int i = 0; i < TOTAL_JOINTS; i++)
     thermal_max[i] = 60;
 #ifndef SIMULATION
-  assert(utils.setGains(thermal_max, ControlUtils::THERMAL_MAX));
-  assert(utils.getGains(thermal_max, ControlUtils::THERMAL_MAX));
+  assert(utils.setThermalMax(thermal_max));
+  assert(utils.getThermalMax(thermal_max));
 #endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
-    printf("thermal %d %d\n", i, thermal_max[i]);
+    printf("max thermal %10s %d\n", RobotState::jointNames[i].c_str(), thermal_max[i]);
 #ifndef SIMULATION
-  assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
-  assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
- 	utils.setStanceGain(2);
+  assert(utils.setPGains(p_gains));
+  assert(utils.getPGains(p_gains));
+ 	assert(utils.setStanceGain(2));
 #endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
-    printf("gains %d %d\n", i, p_gains[i]);
+    printf("gains %10s %d\n", RobotState::jointNames[i].c_str(), p_gains[i]);
 
 	std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
 	plan = Plan(name.c_str());
@@ -332,7 +303,7 @@ void init() {
 	
   char buf[100];
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-    sprintf(buf, "RS.joint[%s]", &(jointNames[i][0]));
+    sprintf(buf, "RS.joint[%s]", RobotState::jointNames[i].c_str());
     logger.add_datapoint(buf,"rad",joints_actual+i); 
   }
   
@@ -350,7 +321,7 @@ void init() {
 	plan.addToLog(logger);
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-    sprintf(buf, "CMD.%s", &(jointNames[i][0]));
+    sprintf(buf, "CMD.%s", RobotState::jointNames[i].c_str());
     logger.add_datapoint(buf,"rad",theta_d+i); 
   }
 	IK_d.setToRS(IK.ikrs);
@@ -521,7 +492,7 @@ void controlLoop() {
 		if(IK_d.foot[RIGHT][Z] - IK_d.foot[LEFT][Z] > 0.01)	stance = LEFT;
 
 #ifndef SIMULATION
-		if(stance != prevStance)	utils.setStanceGain(stance);
+		if(stance != prevStance)	assert(utils.setStanceGain(stance));
 #endif
 		prevStance = stance;
 
@@ -565,9 +536,9 @@ int main( int argc, char **argv ) {
 		if(getCommand() == -1) {
 #ifndef SIMULATION
       int8_t temperature[TOTAL_JOINTS];
-      utils.getGains(temperature, ControlUtils::CUR_TEMPERATURE);
+      utils.getCurTemperature(temperature);
       for (int i = 0; i < TOTAL_JOINTS; i++)
-        printf("%d temp %d\n", i, temperature[i]);
+        printf("%10s temp %d\n", RobotState::jointNames[i].c_str(), temperature[i]);
 #endif
 
 			logger.writeToMRDPLOT();

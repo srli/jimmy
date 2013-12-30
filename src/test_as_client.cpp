@@ -4,6 +4,7 @@
 #include <fstream>
 #include <ros/ros.h>
 #include <ros/package.h>
+#include "RobotState.h"
 
 static double joints0[TOTAL_JOINTS] = {0};
 static double joints1[TOTAL_JOINTS] = {0};
@@ -18,7 +19,7 @@ bool load_pose(std::ifstream &in)
 		in >> joints1[i];
 		if (in.eof())
 			return false;
-		printf("read %d, %g\n", i, joints1[i]);
+		printf("read %10s, %g\n", RobotState::jointNames[i].c_str(), joints1[i]);
 	}
 	return true;
 }
@@ -30,7 +31,7 @@ int main()
 
 	assert(utils.getJoints());
 	for (int i = 0; i < TOTAL_JOINTS; i++) {
-		printf("%g %d\n", utils.joints[i], utils.ticks_from[i]);  
+		printf("%10s %g %d\n", RobotState::jointNames[i].c_str(), utils.joints[i], utils.ticks_from[i]);  
 	}
 
 	for (int i = 0; i < TOTAL_JOINTS; i++)
@@ -44,10 +45,10 @@ int main()
     60, 60, 60, 60, 
     60, 60, 60
   };
-  assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
-  assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
+  assert(utils.setPGains(p_gains));
+  assert(utils.getPGains(p_gains));
   for (int i = 0; i < TOTAL_JOINTS; i++)
-    printf("gains %d %d\n", i, p_gains[i]);
+    printf("gains %10s %d\n", RobotState::jointNames[i].c_str(),  p_gains[i]);
 
 	double duration = 2;  
 	while(true) {
@@ -81,7 +82,7 @@ int main()
 
 		utils.getJoints();
 		for (int i = 0; i < TOTAL_JOINTS; i++) {
-			printf("%g %d\n", utils.joints[i], utils.ticks_from[i]);  
+			printf("%10s %g %d\n", RobotState::jointNames[i].c_str(), utils.joints[i], utils.ticks_from[i]);  
 		} 
 	}
 

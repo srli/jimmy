@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-//#define SIMULATION
+#define SIMULATION
 
 Plan plan;
 Logger logger;
@@ -16,6 +16,33 @@ IKcon IK;
 #ifndef SIMULATION
 ControlUtils utils;
 #endif
+
+
+char jointNames[23][100] = {
+	"L_HZ",
+	"L_HFE",
+	"L_HAA",
+	"L_KFE",
+	"L_AFE",
+	"L_AAA",
+	"R_HZ",
+	"R_HFE",
+	"R_HAA",
+	"R_KFE",
+	"R_AFE",
+	"R_AAA",
+	"L_SFE",
+	"L_SAA",
+	"L_SR",
+	"L_ELB",
+	"R_SFE",
+	"R_SAA",
+	"R_SR",
+	"R_ELB",
+	"N_YAW",
+	"N_TL1",
+	"N_TL2"
+};
 
 const int MAX_POSES = 100;
 const int MAX_GESTURES = 100;
@@ -175,6 +202,7 @@ void initWalk() {
 	quat2EA(IK_d.rootQ, startEA);
 	plan.bodyRoll.addKnot(0, startEA[0], 0);
 	plan.bodyPitch.addKnot(0, startEA[1], 0);
+	for(int s = 0; s < 2; s++)	plan.footPitch[s].addKnot(0, 0, 0);
 }
 
 void loadPoses() {
@@ -279,13 +307,16 @@ void init() {
   int8_t thermal_max[TOTAL_JOINTS] = {0};
   for (int i = 0; i < TOTAL_JOINTS; i++)
     thermal_max[i] = 60;
+#ifndef SIMULATION
   assert(utils.setGains(thermal_max, ControlUtils::THERMAL_MAX));
   assert(utils.getGains(thermal_max, ControlUtils::THERMAL_MAX));
+#endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("thermal %d %d\n", i, thermal_max[i]);
-
+#ifndef SIMULATION
   assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
   assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
+#endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("gains %d %d\n", i, p_gains[i]);
 
@@ -297,8 +328,8 @@ void init() {
 	
   char buf[100];
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-    sprintf(buf, "joint_%d", i);
-    logger.add_datapoint(buf,"rad",joints_actual+i);
+    sprintf(buf, "RS.joint[%s]", &(jointNames[i][0]));
+    logger.add_datapoint(buf,"rad",joints_actual+i); 
   }
   
   logger.add_datapoint("realT","s",&wallClockT);

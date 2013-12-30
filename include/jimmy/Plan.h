@@ -50,6 +50,7 @@ public:
 
 	TrajEW foot[2][3];
 	TrajEW footYaw[2];
+	TrajEW footPitch[2];
 	TrajEW bodyRoll;
 	TrajEW bodyPitch;
 

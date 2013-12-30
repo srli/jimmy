@@ -7,11 +7,15 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
+//#define SIMULATION
+
 Plan plan;
 Logger logger;
 IKcmd IK_d;
 IKcon IK;
+#ifndef SIMULATION
 ControlUtils utils;
+#endif
 
 const int MAX_POSES = 100;
 const int MAX_GESTURES = 100;
@@ -70,7 +74,7 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-  if(curTime > 40.0)	return -1;
+	if(curTime > 40.0)	return -1;
 	if(curTime > 7.0 && curTime < 70)		return 1;
 
 	return 0;
@@ -102,7 +106,9 @@ TrajEW spJoints[23];
 
 void initStandPrep() {
 	double initPos[23];
+#ifndef SIMULATION
 	utils.getJoints(initPos);
+#endif
 	for(int i = 0; i < 23; i++)		spJoints[i].freshMove(initPos[i], standPrepPose[i], 5.0);
 	modeDur = 5.0;
 }
@@ -377,7 +383,9 @@ void gestureCon() {
 void standPrepCon() {
 	double theta_d[23];
 	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
+#ifndef SIMULATION
 	utils.setJoints(theta_d);
+#endif
 }
 
 
@@ -431,9 +439,6 @@ void controlLoop() {
 		theta_d[N_J] = neckEAs[2];
 		theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
 		theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
-		//theta_d[N_J] = sin(2*M_PI*modeTime); //neckEAs[2];
-		//theta_d[N_J+1] = sin(2*M_PI*modeTime); //neckEAs[1]+neckEAs[0];
-		//theta_d[N_J+2] = sin(2*M_PI*modeTime); //neckEAs[1]-neckEAs[0];
 
 		//limit angles
 		for(int i = 0; i < 3; i++) {
@@ -441,8 +446,9 @@ void controlLoop() {
 			if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
 			if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
 		}
-
+#ifndef SIMULATION
 		utils.setJoints(theta_d);
+#endif
 	}
 }
 
@@ -485,8 +491,9 @@ int main( int argc, char **argv ) {
     else {
       timeQuota = plan.TIME_STEP;
       int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
-      
+#ifndef SIMULATION      
       usleep(sleep_t);
+#endif
     }
     ///////////////////////////////////////////////
 	}

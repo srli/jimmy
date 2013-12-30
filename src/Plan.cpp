@@ -172,7 +172,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 
 		//absurd hack: hip roll offset
-		double hrOffset = 0.05;
+		double hrOffset = 0.035;
 		if(s == RIGHT)		hrOffset = -hrOffset;
 		jointOffset[8-s*6].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -hrOffset, Linear);
 		jointOffset[8-s*6].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
@@ -335,7 +335,7 @@ void Plan::fillIK_d(IKcmd &IK_d, double t) {
 
 	IK_d.com[X] = (com[X])[nowInd];
 	IK_d.com[Y] = (com[Y])[nowInd];
-	IK_d.com[Z] = 0.44;
+	IK_d.com[Z] = 0.4;
 
 	IK_d.comd[X] = (comd[X])[nowInd];
 	IK_d.comd[Y] = (comd[Y])[nowInd];

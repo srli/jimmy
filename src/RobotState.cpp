@@ -123,7 +123,7 @@ void RobotState::computeSDFvars() {
 
 
 	const int footBody[2] = {6, 12};
-	double ankle2foot[3] = {0.012, 0.000, -0.094};
+	double ankle2foot[2][3] = {{0.012, -0.010, -0.094}, {0.012, 0.010, -0.094};
 
 
 
@@ -136,7 +136,7 @@ void RobotState::computeSDFvars() {
 		model->sdgetbtj(footBody[side], com_to_ankle);
 
 		//foot positions and jacobians
-		sdvadd(com_to_ankle, ankle2foot, temp);
+		sdvadd(com_to_ankle, &(ankle2foot[side][0]), temp);
 		body_position(model, NULL, footBody[side], temp, &(foot[side][0]), J[side].data());
 		model->sdvel(footBody[side], temp, &(footd[side][0]));
 

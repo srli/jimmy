@@ -179,6 +179,55 @@ bool ControlUtils::setGainStance(int side)
   return false;
 }
 
+bool ControlUtils::syncWriteByte(int cmd, const std::vector<int8_t> &id, const std::vector<int8_t> &val)
+{
+  if (id.size() != val.size())
+    return false;
+
+  // Make syncwrite packet
+  dxl_set_txpacket_id(BROADCAST_ID);
+  dxl_set_txpacket_instruction(INST_SYNC_WRITE);
+  dxl_set_txpacket_parameter(0, cmd);
+  dxl_set_txpacket_parameter(1, 1);
+  for (size_t i = 0; i < id.size(); i++) {
+    dxl_set_txpacket_parameter(2+2*i, _id[id[i]]);
+    
+    dxl_set_txpacket_parameter(2+2*i+1, val[i]);
+  }
+  dxl_set_txpacket_length((1+1)*id.size()+4);
+
+  dxl_txrx_packet();
+  if(dxl_get_result() == COMM_RXSUCCESS)
+    return true;
+  else
+    return false;
+}
+
+bool ControlUtils::syncWriteWord(int cmd, const std::vector<int8_t> &id, const std::vector<int16_t> &val)
+{
+  if (id.size() != val.size())
+    return false;
+
+  // Make syncwrite packet
+  dxl_set_txpacket_id(BROADCAST_ID);
+  dxl_set_txpacket_instruction(INST_SYNC_WRITE);
+  dxl_set_txpacket_parameter(0, cmd);
+  dxl_set_txpacket_parameter(1, 2);
+  for (size_t i = 0; i < id.size(); i++) {
+    dxl_set_txpacket_parameter(2+3*i, _id[id[i]]);
+    
+    dxl_set_txpacket_parameter(2+3*i+1, dxl_get_lowbyte(val[i]));
+    dxl_set_txpacket_parameter(2+3*i+2, dxl_get_highbyte(val[i]));
+  }
+  dxl_set_txpacket_length((2+1)*id.size()+4);
+
+  dxl_txrx_packet();
+  if(dxl_get_result() == COMM_RXSUCCESS)
+    return true;
+  else
+    return false; 
+}
+
 bool ControlUtils::setJoints(const double *a)
 {
 	int CommStatus;

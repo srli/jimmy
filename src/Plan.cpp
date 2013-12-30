@@ -19,6 +19,7 @@ void Plan::clearForRecord() {
 
 }
 
+
 void Plan::addToLog(Logger &logger) {
 	logger.add_datapoint("PN.nomPln[X]","m",&(nomPlanForRecord[0]));
 	logger.add_datapoint("PN.nomPln[Y]","m",&(nomPlanForRecord[1]));
@@ -169,6 +170,14 @@ void Plan::addStep(Step *step, double extraTraj) {
 		zmp_d[X].addKnot(step->td, allSteps.back()->x);
 		zmp_d[Y].addKnot(step->td, allSteps.back()->y);
 
+
+		//absurd hack: hip roll offset
+		double hrOffset = 0.1;
+		if(s == RIGHT)		hrOffset = -hrOffset;
+		jointOffset[8-s*6].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -hrOffset, Linear);
+		jointOffset[8-s*6].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+
+
 		double bRoll = ROLL_AMPLITUDE;
 		if(step->side == RIGHT)		bRoll = -bRoll;
 		bodyRoll.addKnot(step->td-SS_TIME, bRoll, 0);
@@ -227,7 +236,7 @@ void Plan::initFeet(double lx, double ly, double lYaw, double rx, double ry, dou
 	prevTDind = 0;
 	nextTD = LEFT;
 	endTime = std::numeric_limits<double>::infinity();
-	bodyPitch.addKnot(1.5, 0.03, 0);
+	bodyPitch.addKnot(1.5, 0.1, 0);
 }
 
 
@@ -254,6 +263,8 @@ void Plan::clearVectors() {
 	}
 	bodyRoll.clear();
 	bodyPitch.clear();
+
+	for(int i = 0; i < 23; i++)	jointOffset[i].clear();
 }
 
 void Plan::printSteps(char *fileName) {

@@ -56,6 +56,8 @@ public:
 
 	TrajEW zmp_d[2];
 
+	TrajEW jointOffset[23];
+
 	std::vector<double> zmpVec[2];
 	std::vector<double> com[2];
 	std::vector<double> comd[2];

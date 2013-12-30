@@ -261,6 +261,19 @@ void init() {
 	modeDur = 0.0;
 	for(int i = 0; i < 3; i++)		neckEAs[i] = 0.0;
 
+  // setting gains on robot
+  int8_t p_gains[TOTAL_JOINTS] = {
+    40, 60, 120, 60, 60, 120,
+    40, 60, 120, 60, 60, 120,
+    60, 60, 60, 60, 
+    60, 60, 60, 60, 
+    60, 60, 60
+  };
+  assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
+  assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    printf("gains %d %d\n", i, p_gains[i]);
+
 	std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
 	plan = Plan(name.c_str());
 	name = ros::package::getPath("jimmy") + "/conf/IK.cf";

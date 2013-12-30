@@ -50,6 +50,7 @@ class ControlUtils
     bool setJoints(const double *);
 
     bool setGains(const int8_t *, int which);
+    bool getGains(int8_t *, int which);
     bool getLoads(double *);
     ///////////////////////
     

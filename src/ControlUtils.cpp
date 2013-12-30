@@ -48,6 +48,34 @@ bool ControlUtils::setGains(const int8_t *a, int which)
   return true;
 }
 
+bool ControlUtils::getGains(int8_t *a, int which)
+{
+  int flag;
+  switch(which) {
+    case P_GAIN:
+      flag = P_P_GAIN;
+      break;
+    case I_GAIN:
+      flag = P_I_GAIN;
+      break;
+    case D_GAIN:
+      flag = P_D_GAIN;
+      break;
+    default:
+      return false;
+  }
+
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+		a[i] = dxl_read_byte(_id[i], flag);
+    int CommStatus = dxl_get_result();
+    if(CommStatus == COMM_RXSUCCESS) {}
+    else
+      return false;
+    usleep(5000);
+  }
+  return true;
+}
+
 bool ControlUtils::getLoads(double *a) 
 {
   for (int i = 0; i < TOTAL_JOINTS; i++) {

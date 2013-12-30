@@ -7,6 +7,8 @@
 #include "dynamixel.h"
 #include <vector>
 
+
+
 class ControlUtils 
 {
   private:
@@ -20,15 +22,18 @@ class ControlUtils
   
     int _legIdx;
 
-    bool syncWriteByte(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int8_t> &val);
-    bool syncWriteWord(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int16_t> &val);
+    bool syncWriteByte(int8_t addr, const std::vector<int> &joints, const std::vector<int8_t> &val);
+    bool syncWriteWord(int8_t addr, const std::vector<int> &joints, const std::vector<int16_t> &val);
+    bool setByte(int8_t gain, int8_t addr, int joint);
+    bool getByte(int8_t *gain, int8_t addr, int joint);
 
   public:
-    enum GAIN_TYPE {
+    enum CMD_TYPE {
       P_GAIN = 0,
       I_GAIN,
       D_GAIN,
-      THERMAL_MAX
+      THERMAL_MAX,
+      CUR_TEMPERATURE 
     };
 
     int16_t ticks_to[TOTAL_JOINTS];
@@ -61,8 +66,8 @@ class ControlUtils
     bool getGains(int8_t gain[TOTAL_JOINTS], int type);
     bool getLoads(double trq[TOTAL_JOINTS]);
 
-    bool setGain(int8_t gain, int type, int idx);
-    bool getGain(int8_t *gain, int type, int idx);
+    //bool setGain(int8_t gain, int type, int idx);
+    //bool getGain(int8_t *gain, int type, int idx);
 
     bool setStanceGain(int side);
 

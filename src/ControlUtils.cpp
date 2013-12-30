@@ -20,6 +20,7 @@
 #define ADDR_THERMAL                 11
 #define ADDR_PRESENT_LOAD_L          40
 #define ADDR_PRESENT_LOAD_H          41
+#define ADDR_PRESENT_TEMPERATURE     43
 
 bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
 {
@@ -42,6 +43,7 @@ bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
   return true;
 }
 
+/*
 bool ControlUtils::setGain(int8_t gain, int type, int idx)
 {
   int addr;
@@ -102,16 +104,11 @@ bool ControlUtils::getGain(int8_t *gain, int type, int idx)
     return false;
   }
 }
+*/
 
 bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int type)
 {
-  /*
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    if (!setGain(a[i], type, i))
-      return false;
-  }
-  */
-  std::vector<int8_t> joints;
+  std::vector<int> joints;
   std::vector<int8_t> vals;
   for (int i = 0; i < TOTAL_JOINTS; i++) {
     joints.push_back(i);
@@ -140,8 +137,28 @@ bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int type)
 
 bool ControlUtils::getGains(int8_t a[TOTAL_JOINTS], int type)
 {
+  int8_t addr;
+  switch(type) {
+    case P_GAIN:
+      addr = ADDR_P_GAIN;
+      break;
+    case I_GAIN:
+      addr = ADDR_I_GAIN;
+      break;
+    case D_GAIN:
+      addr = ADDR_D_GAIN;
+      break;
+    case THERMAL_MAX:
+      addr = ADDR_THERMAL;
+      break;
+    case CUR_TEMPERATURE:
+      addr = ADDR_PRESENT_TEMPERATURE;
+      break;
+    default:
+      return false;
+  }
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-		if (!getGain(a+i, type, i))
+		if (!getByte(a+i, addr, i))
       return false;
     //usleep(5000);
   }
@@ -200,20 +217,16 @@ bool ControlUtils::getJoints(double *a)
 
 bool ControlUtils::setStanceGain(int side)
 {
-  std::vector<int8_t> joints;
+  std::vector<int> joints;
   std::vector<int8_t> vals;
   // set left gain
   if (side == 0) {
-    //setGain(100, P_GAIN, L_AFE);
-    //setGain(60, P_GAIN, R_AFE);
     joints.push_back(L_AFE);
     joints.push_back(R_AFE);
     vals.push_back(100);
     vals.push_back(60);
   }
   else {
-    //setGain(100, P_GAIN, R_AFE);
-    //setGain(60, P_GAIN, L_AFE);
     joints.push_back(R_AFE);
     joints.push_back(L_AFE);
     vals.push_back(100);
@@ -222,7 +235,7 @@ bool ControlUtils::setStanceGain(int side)
   return syncWriteByte(ADDR_P_GAIN, joints, vals);
 }
 
-bool ControlUtils::syncWriteByte(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int8_t> &val)
+bool ControlUtils::syncWriteByte(int8_t addr, const std::vector<int> &joints, const std::vector<int8_t> &val)
 {
   if (joints.size() != val.size())
     return false;
@@ -249,7 +262,7 @@ bool ControlUtils::syncWriteByte(int8_t addr, const std::vector<int8_t> &joints,
     return false;
 }
 
-bool ControlUtils::syncWriteWord(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int16_t> &val)
+bool ControlUtils::syncWriteWord(int8_t addr, const std::vector<int> &joints, const std::vector<int16_t> &val)
 {
   if (joints.size() != val.size())
     return false;
@@ -277,11 +290,36 @@ bool ControlUtils::syncWriteWord(int8_t addr, const std::vector<int8_t> &joints,
     return false; 
 }
 
+bool ControlUtils::setByte(int8_t val, int8_t addr, int joint)
+{  
+  dxl_write_byte(_id[joint], addr, val);
+  if (dxl_get_result() == COMM_RXSUCCESS) {
+    return true;  
+  }
+  else {
+    printf("faled to write byte to %d at %d\n", addr, joint);
+    return false;
+  }
+}
+
+bool ControlUtils::getByte(int8_t *val, int8_t addr, int joint)
+{
+  int8_t tmp = dxl_read_byte(_id[joint], addr); 
+  if(dxl_get_result() == COMM_RXSUCCESS) {
+    *val = tmp;
+    return true;
+  }
+  else {
+    printf("faled to get byte from %d at %d\n", addr, joint);
+    return false;
+  } 
+}
+
 bool ControlUtils::setJoints(const double a[TOTAL_JOINTS])
 {
   int16_t tmp_tick[TOTAL_JOINTS];
   std::vector<int16_t> vals;
-  std::vector<int8_t> joints;
+  std::vector<int> joints;
   for (int i = 0; i < TOTAL_JOINTS; i++) {
     tmp_tick[i] = rad2tick(a[i], i);
     if (tmp_tick[i] != ticks_to[i]) {
@@ -292,37 +330,6 @@ bool ControlUtils::setJoints(const double a[TOTAL_JOINTS])
   }
 
   return syncWriteWord(ADDR_GOAL_POSITION_L, joints, vals);
-
-  /*
-	int CommStatus;
-  // Make syncwrite packet
-  dxl_set_txpacket_id(BROADCAST_ID);
-  dxl_set_txpacket_instruction(INST_SYNC_WRITE);
-  dxl_set_txpacket_parameter(0, ADDR_GOAL_POSITION_L);
-  dxl_set_txpacket_parameter(1, 2);
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    dxl_set_txpacket_parameter(2+3*i, _id[i]);
-    
-    ticks_to[i] = rad2tick(a[i], i);
-    
-    dxl_set_txpacket_parameter(2+3*i+1, dxl_get_lowbyte(ticks_to[i]));
-    dxl_set_txpacket_parameter(2+3*i+2, dxl_get_highbyte(ticks_to[i]));
-  }
-  dxl_set_txpacket_length((2+1)*TOTAL_JOINTS+4);
-
-  dxl_txrx_packet();
-  CommStatus = dxl_get_result();
-  if( CommStatus == COMM_RXSUCCESS )
-  {
-    //PrintErrorCode();
-    return true;
-  }
-  else
-  {
-    //PrintCommStatus(CommStatus);
-    return false;
-  }
-  */
 }
 
 
@@ -349,38 +356,6 @@ ControlUtils::~ControlUtils()
 {
 	dxl_terminate();
 }
-
-/*
-bool ControlUtils::sendCommand()
-{
-
-  return true;
-}
-
-bool ControlUtils::requestJoints()
-{
-
-  return true;
-}
-
-bool ControlUtils::waitForReady()
-{
-  
-  return true;
-}
-
-bool ControlUtils::sendJoints_d(const double *j)
-{
-  
-  return sendCommand();
-}
-
-bool ControlUtils::sendStandPrep(const double *j)
-{
-  
-  return sendCommand();
-}
-*/
 
 
 

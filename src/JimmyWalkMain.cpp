@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#define SIMULATION
+//#define SIMULATION
 
 Plan plan;
 Logger logger;
@@ -556,6 +556,13 @@ int main( int argc, char **argv ) {
 		logger.saveData();
 
 		if(getCommand() == -1) {
+#ifndef SIMULATION
+      int8_t temperature[TOTAL_JOINTS];
+      utils.getGains(temperature, CUR_TEMPERATURE);
+      for (int i = 0; i < TOTAL_JOINTS: i++)
+        printf("%d temp %d\n", i, temperature[i]);
+#endif
+
 			logger.writeToMRDPLOT();
 			exit(-1);
 		}
@@ -582,64 +589,4 @@ int main( int argc, char **argv ) {
 	return 0;
 }
 
-/*
-int main( int argc, char **argv ) 
-{
-	wallClockStart = get_time();
-	init();
-  //////////////////////////////////////////////
-	printf("Stand Preping\n");
-	   
-  double joints_d[TOTAL_JOINTS] = {0};
-  for (int i = 0; i < TOTAL_JOINTS; i++)
-    joints_d[i] = standPrepPose[i];
-
-  //utils.sendStandPrep(joints_d);
-  //utils.waitForReady();
-  //////////////////////////////////////////////
-
-	printf("Starting\n");
-
-  wallClockLast = get_time();
-  double timeQuota = plan.TIME_STEP;
-	while(true) {
-		double wallNow = get_time();
-		wallClockT = wallNow-wallClockStart;
-		wallClockDT = wallNow-wallClockLast;
-		wallClockLast = wallNow;
-		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
-
-		controlLoop();
-
-		logger.saveData();
-
-		if(getCommand() == -1) {
-			logger.writeToMRDPLOT();
-			exit(-1);
-		}
-    
-    //////////////////////////////////////////////
-    // wait
-    double wall1 = get_time();
-    double dt = wall1 - wallNow;
-    
-    // step up quota for the next time step
-    if (dt > timeQuota) {
-      timeQuota -= (dt - plan.TIME_STEP);
-      printf("takes too long %g\n", dt);
-      //utils.sendJoints_d(theta_d);
-    }
-    else {
-      timeQuota = plan.TIME_STEP;
-      int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
-      
-      //utils.sendJoints_d(theta_d);
-      usleep(sleep_t);
-    }
-    //////////////////////////////////////////////
-	}
-
-	return 374832748;
-}
-*/
 

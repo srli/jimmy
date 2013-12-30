@@ -20,6 +20,7 @@ public:
 	double TIME_STEP;
 	double STANCE_WIDTH;
 	double PRE_PLAN_TIME;
+	double ROLL_AMPLITUDE;
 
 	Plan();
 	Plan(const char *config);
@@ -49,6 +50,7 @@ public:
 
 	TrajEW foot[2][3];
 	TrajEW footYaw[2];
+	TrajEW bodyRoll;
 
 	TrajEW zmp_d[2];
 

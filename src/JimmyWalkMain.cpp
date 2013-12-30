@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#define SIMULATION
+//#define SIMULATION
 
 Plan plan;
 Logger logger;
@@ -321,7 +321,7 @@ void init() {
 	plan.addToLog(logger);
 
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-    sprintf(buf, "CMD.%s", &(jointNames[i][0]));
+    sprintf(buf, "CMD.%s", RobotState::jointNames[i].c_str());
     logger.add_datapoint(buf,"rad",theta_d+i); 
   }
 	IK_d.setToRS(IK.ikrs);

@@ -51,6 +51,8 @@ const int N_VALS_PER_POSE = 17;
 
 static int N_POSES;
 
+static int prevStance = 2;
+
 static double poses[MAX_POSES][N_VALS_PER_POSE];
 static int gestureSeq[MAX_GESTURES][MAX_POSES_PER_GESTURE];
 static double gestureTime[MAX_GESTURES][MAX_POSES_PER_GESTURE];
@@ -316,6 +318,7 @@ void init() {
 #ifndef SIMULATION
   assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
   assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
+ 	utils.setStanceGain(2);
 #endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("gains %d %d\n", i, p_gains[i]);
@@ -340,6 +343,7 @@ void init() {
 	logger.add_datapoint("CMD.vForward","m/s",&vForward);
 	logger.add_datapoint("CMD.vLeft","m/s",&vLeft);
 	logger.add_datapoint("CMD.dTheta","m/s",&dTheta);
+	logger.add_datapoint("stance","-",&prevStance);
 	IK_d.addToLog(logger);
 	IK.addToLog(logger);
 	plan.addToLog(logger);
@@ -466,7 +470,9 @@ void controlLoop() {
 	vForward = vLeft = dTheta = 0.0;
 	plan.clearForRecord();
 	
+#ifndef SIMULATION
   utils.getLegJointsCircular(joints_actual);
+#endif
 	
   //do actual control
 	switch(mode) {
@@ -502,6 +508,15 @@ void controlLoop() {
 	if(mode != STAND_PREP) {
 		double thetad_d[N_J+3];
 		IK.IK(IK_d, theta_d, thetad_d);
+
+		double stance = 2;
+		if(IK_d.foot[LEFT][Z] - IK_d.foot[RIGHT][Z] > 0.01)	stance = RIGHT;
+		if(IK_d.foot[RIGHT][Z] - IK_d.foot[LEFT][Z] > 0.01)	stance = LEFT;
+
+#ifndef SIMULATION
+		if(stance != prevStance)	utils.setStanceGain(stance);
+#endif
+		prevStance = stance;
 
 		//conversion from RPY to angles
 		theta_d[N_J] = neckEAs[2];

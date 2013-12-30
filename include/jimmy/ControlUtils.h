@@ -61,7 +61,7 @@ class ControlUtils
     bool setGain(int8_t gain, int type, int idx);
     bool getGain(int8_t *gain, int type, int idx);
 
-    bool setGainStance(int side);
+    bool setStanceGain(int side);
 
     ///////////////////////
     

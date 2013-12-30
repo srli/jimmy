@@ -171,6 +171,10 @@ void initWalk() {
 		plan.com[i].push_back(IK.ikrs.com[i]);
 		plan.comd[i].push_back(IK.ikrs.comd[i]);
 	}
+	double startEA[3];
+	quat2EA(IK_d.rootQ, startEA);
+	plan.bodyRoll.addKnot(0, startEA[0], 0);
+	plan.bodyPitch.addKnot(0, startEA[1], 0);
 }
 
 void loadPoses() {

@@ -7,21 +7,6 @@
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048
 
-#define ADDR_GOAL_POSITION_L	       30
-#define ADDR_GOAL_POSITION_H	       31
-#define ADDR_PRESENT_POSITION_L      36
-#define ADDR_PRESENT_POSITION_H	     37
-#define ADDR_GOAL_SPEED_L		         32
-#define ADDR_GOAL_SPEED_H		         33
-
-#define ADDR_P_GAIN                  28
-#define ADDR_I_GAIN                  27
-#define ADDR_D_GAIN                  26
-#define ADDR_THERMAL                 11
-#define ADDR_PRESENT_LOAD_L          40
-#define ADDR_PRESENT_LOAD_H          41
-#define ADDR_PRESENT_TEMPERATURE     43
-
 bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
 {
   int ctr = 0;
@@ -43,128 +28,29 @@ bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
   return true;
 }
 
-/*
-bool ControlUtils::setGain(int8_t gain, int type, int idx)
-{
-  int addr;
-  switch(type) {
-    case P_GAIN:
-      addr = ADDR_P_GAIN;
-      break;
-    case I_GAIN:
-      addr = ADDR_I_GAIN;
-      break;
-    case D_GAIN:
-      addr = ADDR_D_GAIN;
-      break;
-    case THERMAL_MAX:
-      addr = ADDR_THERMAL;
-      break;
-    default:
-      return false;
-  }
-  
-  dxl_write_byte(_id[idx], addr, gain);
-  if (dxl_get_result() == COMM_RXSUCCESS) {
-    return true;  
-  }
-  else {
-    printf("faled to set gain %d at %d\n", type, idx);
-    return false;
-  }
-}
-
-bool ControlUtils::getGain(int8_t *gain, int type, int idx)
-{
-  int addr;
-  switch(type) {
-    case P_GAIN:
-      addr = ADDR_P_GAIN;
-      break;
-    case I_GAIN:
-      addr = ADDR_I_GAIN;
-      break;
-    case D_GAIN:
-      addr = ADDR_D_GAIN;
-      break;
-    case THERMAL_MAX:
-      addr = ADDR_THERMAL;
-      break;
-    default:
-      return false;
-  }
- 
-  int8_t tmp = dxl_read_byte(_id[idx], addr); 
-  if(dxl_get_result() == COMM_RXSUCCESS) {
-    *gain = tmp;
-    return true;
-  }
-  else {
-    printf("faled to get gain %d at %d\n", type, idx);
-    return false;
-  }
-}
-*/
-
-bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int type)
+bool ControlUtils::setAllBytes(const int8_t val[TOTAL_JOINTS], int8_t addr)
 {
   std::vector<int> joints;
   std::vector<int8_t> vals;
   for (int i = 0; i < TOTAL_JOINTS; i++) {
     joints.push_back(i);
-    vals.push_back(a[i]);
-  }
-  int8_t addr;
-  switch(type) {
-    case P_GAIN:
-      addr = ADDR_P_GAIN;
-      break;
-    case I_GAIN:
-      addr = ADDR_I_GAIN;
-      break;
-    case D_GAIN:
-      addr = ADDR_D_GAIN;
-      break;
-    case THERMAL_MAX:
-      addr = ADDR_THERMAL;
-      break;
-    default:
-      return false;
+    vals.push_back(val[i]);
   }
   
-  return syncWriteByte(addr, joints, vals);
+  return syncWriteByte(addr, joints, vals); 
 }
 
-bool ControlUtils::getGains(int8_t a[TOTAL_JOINTS], int type)
+bool ControlUtils::getAllBytes(int8_t val[TOTAL_JOINTS], int8_t addr)
 {
-  int8_t addr;
-  switch(type) {
-    case P_GAIN:
-      addr = ADDR_P_GAIN;
-      break;
-    case I_GAIN:
-      addr = ADDR_I_GAIN;
-      break;
-    case D_GAIN:
-      addr = ADDR_D_GAIN;
-      break;
-    case THERMAL_MAX:
-      addr = ADDR_THERMAL;
-      break;
-    case CUR_TEMPERATURE:
-      addr = ADDR_PRESENT_TEMPERATURE;
-      break;
-    default:
-      return false;
-  }
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-		if (!getByte(a+i, addr, i))
+		if (!getByte(val+i, addr, i))
       return false;
     //usleep(5000);
   }
   return true;
 }
 
+/*
 bool ControlUtils::getLoads(double *a) 
 {
   for (int i = 0; i < TOTAL_JOINTS; i++) {
@@ -172,14 +58,12 @@ bool ControlUtils::getLoads(double *a)
     int16_t ret = dxl_read_word(_id[i], ADDR_PRESENT_LOAD_L);
     int CommStatus = dxl_get_result();
     int sign = 1;
-    /*
-     It means currently applied load.
-     The range of the value is 0~2047, and the unit is about 0.1%.
-     If the value is 0~1023, it means the load works to the CCW direction.
-     If the value is 1024~2047, it means the load works to the CW direction.
-     That is, the 10th bit becomes the direction bit to control the direction, and 1024 is equal to 0.
-     For example, the value is 512, it means the load is detected in the direction of CCW about 50% of the maximum torque.
-     */
+    // It means currently applied load.
+    // The range of the value is 0~2047, and the unit is about 0.1%.
+    // If the value is 0~1023, it means the load works to the CCW direction.
+    // If the value is 1024~2047, it means the load works to the CW direction.
+    // That is, the 10th bit becomes the direction bit to control the direction, and 1024 is equal to 0.
+    // For example, the value is 512, it means the load is detected in the direction of CCW about 50% of the maximum torque.
     if(CommStatus == COMM_RXSUCCESS) {
       if (ret >= 1024) {
         ret -= 1024;
@@ -196,6 +80,7 @@ bool ControlUtils::getLoads(double *a)
     usleep(5000);
   }
 }
+*/
 
 bool ControlUtils::getJoints(double *a)
 {
@@ -209,7 +94,7 @@ bool ControlUtils::getJoints(double *a)
     else
       return false;
 
-    usleep(5000);
+    //usleep(5000);
   }
 
   return true;
@@ -226,16 +111,26 @@ bool ControlUtils::setStanceGain(int side)
     joints.push_back(R_AFE);
     vals.push_back(100);
     vals.push_back(60);
+    printf("set SSL gains\n");
   }
-  else {
+  else if (side == 1) {
     joints.push_back(R_AFE);
     joints.push_back(L_AFE);
     vals.push_back(100);
     vals.push_back(60);
+    printf("set SSR gains\n");
+  }
+  else {
+    joints.push_back(L_AFE);
+    joints.push_back(R_AFE);
+    vals.push_back(100);
+    vals.push_back(100); 
+    printf("set DS gains\n");
   }
   
   bool ret = syncWriteByte(ADDR_P_GAIN, joints, vals); 
   
+  /*
   // hip roll i gain
   // ankle pitch i gain
   joints.clear();
@@ -250,7 +145,7 @@ bool ControlUtils::setStanceGain(int side)
     vals.push_back(0);
     vals.push_back(0);
   }
-  else {
+  else if (side == 1) {
     joints.push_back(R_HAA);
     joints.push_back(R_AFE);
     joints.push_back(L_HAA);
@@ -260,9 +155,20 @@ bool ControlUtils::setStanceGain(int side)
     vals.push_back(0);
     vals.push_back(0);
   }
+  else {
+    joints.push_back(R_HAA);
+    joints.push_back(R_AFE);
+    joints.push_back(L_HAA);
+    joints.push_back(L_AFE);
+    vals.push_back(5);
+    vals.push_back(5);
+    vals.push_back(5);
+    vals.push_back(5);
+  }
   
   ret &= syncWriteByte(ADDR_I_GAIN, joints, vals); 
-  
+  */
+
   return ret;
 }
 

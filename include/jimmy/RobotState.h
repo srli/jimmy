@@ -13,9 +13,10 @@ class RobotState {
   public:
 
     static const double jointLimits[2][N_JOINTS];
+    static const std::string jointNames[TOTAL_JOINTS];
 
     Eigen::Quaterniond rootQ;
-	double rootW[3];
+    double rootW[3];
     double root[3];  
     double rootd[3];  
     double joints[N_JOINTS];
@@ -24,14 +25,14 @@ class RobotState {
 
     double com[3];
     double comd[3];
-	double foot[LR][3];
-	double footd[LR][3];
-	double footW[LR][3];
-	Eigen::Quaterniond footQ[LR];
+    double foot[LR][3];
+    double footd[LR][3];
+    double footW[LR][3];
+    Eigen::Quaterniond footQ[LR];
 
     SDModel *model;
 
-	double m;
+    double m;
 
     // EIGEN uses col major by default, need to explicitly say rowmajor!!!
     Eigen::Matrix<double,N_U,6,Eigen::RowMajor> J[LR];    // foot J transpose
@@ -42,9 +43,9 @@ class RobotState {
 
 
     RobotState();
-	void fillZeros();
+    void fillZeros();
     void computeSDFvars();
-	double *getSDFstate(double *sdState);
+    double *getSDFstate(double *sdState);
     void addToLog(Logger &logger);
 };
 

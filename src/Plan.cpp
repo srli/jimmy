@@ -159,7 +159,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 		foot[s][Y].addMove(steps[s].back()->lo, step->td, step->y);
 		foot[s][Z].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME, SWING_HEIGHT, Linear);		//lift foot up
 		foot[s][Z].addMove(step->td-TD_TIME, step->td, 0.0, Linear);							//put foot down
-		footPitch[s].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME, -0.2, Linear);
+		footPitch[s].addMove(steps[s].back()->lo+LO_TIME/2.0, steps[s].back()->lo+LO_TIME, -0.2, Linear);
 		footPitch[s].addMove(step->td-TD_TIME, step->td, 0.0, Linear);
 		footYaw[s].addMove(steps[s].back()->lo, step->td, step->yaw);
 		//beginning of SS

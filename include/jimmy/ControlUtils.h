@@ -5,6 +5,7 @@
 #include "JimmyCommon.h"
 #include <stdint.h>
 #include "dynamixel.h"
+#include <vector>
 
 class ControlUtils 
 {
@@ -18,6 +19,9 @@ class ControlUtils
     static const int _id[TOTAL_JOINTS]; 
   
     int _legIdx;
+
+    bool syncWriteByte(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int8_t> &val);
+    bool syncWriteWord(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int16_t> &val);
 
   public:
     enum GAIN_TYPE {
@@ -45,7 +49,6 @@ class ControlUtils
     ControlUtils();
     ~ControlUtils();
 
-    ///////////////////////
     // ERIC
     bool getJoints() { return getJoints(joints); }
     bool setJoints() { return setJoints(joints_d); }
@@ -62,18 +65,6 @@ class ControlUtils
     bool getGain(int8_t *gain, int type, int idx);
 
     bool setStanceGain(int side);
-
-    ///////////////////////
-    
-    /*
-    bool waitForReady();
-    bool requestJoints();
-
-    inline bool sendJoints_d() { return sendJoints_d(joints_d); }
-    inline bool sendStandPrep() { return sendStandPrep(joints_d); }
-    bool sendJoints_d(const double *j_d);
-    bool sendStandPrep(const double *j_d);
-    */
 
     static int16_t rad2tick(double r, int j);
     static double tick2rad(int16_t t, int j);

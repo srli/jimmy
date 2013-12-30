@@ -17,6 +17,7 @@
 #define P_P_GAIN                  28
 #define P_I_GAIN                  27
 #define P_D_GAIN                  26
+#define THERMAL                   11
 #define P_PRESENT_LOAD_L          40
 #define P_PRESENT_LOAD_H          41
 
@@ -54,6 +55,9 @@ bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int which)
     case D_GAIN:
       flag = P_D_GAIN;
       break;
+    case THERMAL_MAX:
+      flag = THERMAL;
+      break;
     default:
       return false;
   }
@@ -81,6 +85,9 @@ bool ControlUtils::getGains(int8_t a[TOTAL_JOINTS], int which)
       break;
     case D_GAIN:
       flag = P_D_GAIN;
+      break;
+    case THERMAL_MAX:
+      flag = THERMAL;
       break;
     default:
       return false;

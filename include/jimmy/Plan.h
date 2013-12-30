@@ -51,6 +51,7 @@ public:
 	TrajEW foot[2][3];
 	TrajEW footYaw[2];
 	TrajEW bodyRoll;
+	TrajEW bodyPitch;
 
 	TrajEW zmp_d[2];
 

@@ -6,8 +6,6 @@
 
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <boost/thread.hpp>
-#include <jimmy/jimmy_command.h>
 
 //#define SIMULATION
 
@@ -71,80 +69,48 @@ static double modeDur;		//intended duration of current mode
 
 static double vForward, vLeft, dTheta;
 
-///////////////////////////////////////////////////
-// ros stuff
-boost::mutex r_Lock;
-static double r_vFwd, r_vLeft, r_dTheta;
-static int r_mode;
-static double r_neckEAd[3];
-
-ros::Publisher pub_feedback;
-///////////////////////////////////////////////////
-
 bool isReady() {
 	//TODO: wait until arbotix has moved robot to stand-prep
 	return true;
 }
 
 int getCommand() {
-  if(curTime > 40.0)	return -1;
+	//TODO: have some way for these commands to arrive from outside
+	if(curTime > 40.0)	return -1;
 	if(curTime > 7.0 && curTime < 70)		return 1;
 
 	return 0;
-  
-  /*
-  boost::mutex::scoped_lock lock(r_Lock);
-  return r_mode;
-  */
 }
 
-void getDriveCommand(double *vF, double *vL, double *dT) {
-	*vF = 0.00;
-	*vL = 0.00;
-	*dT = 0.0;
+void getDriveCommand(double *vForward, double *vLeft, double *dTheta) {
+	*vForward = 0.00;
+	*vLeft = 0.00;
+	*dTheta = 0.0;
 	//TODO: implement retrieving these command from the user
-  
-  /*
-  boost::mutex::scoped_lock lock(r_Lock);
-  *vF = r_vFwd;
-  *vL = r_vLeft;
-  *dT = r_dTheta;
-  */
 }
 
-void constrainDriveCommand(double *vF, double *vL, double *dT) {
+void constrainDriveCommand(double *vForward, double *vLeft, double *dTheta) {
 	//TODO: limit acceleration
 	//TODO: limit velocities (including in combination)
 }
 
 void getNeckCommand(double *EAs) {
+	double EAsd[3] = {0,0,0};		//desired velocities
 	//TODO: fetch desired velocities from user
-  double EAsd[3] = {0,0,0};		//desired velocities
-  for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;	//integrate
+	for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;	//integrate
 	for(int i = 0; i < 3; i++) {						//limit
 		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
 		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
 	}
-	
-	/*
-  boost::mutex::scoped_lock lock(r_Lock);
-  for(int i = 0; i < 3; i++)	
-    EAs[i] += r_neckEAd[i]*plan.TIME_STEP;	//integrate
-	for(int i = 0; i < 3; i++) {						//limit
-		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
-		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
-	}
-  */
 }
 
-TrajEW spJoints[TOTAL_JOINTS];
+TrajEW spJoints[23];
 
 void initStandPrep() {
-	//double initPos[TOTAL_JOINTS];
 #ifndef SIMULATION
 	utils.getJoints(joints_actual);
 #endif
-	for(int i = 0; i < TOTAL_JOINTS; i++)		
+	for(int i = 0; i < 23; i++)		
     spJoints[i].freshMove(joints_actual[i], standPrepPose[i], 5.0);
 	modeDur = 5.0;
 }
@@ -299,12 +265,21 @@ void init() {
 
   // setting gains on robot
   int8_t p_gains[TOTAL_JOINTS] = {
-    40, 60, 120, 60, 120, 120,
-    40, 60, 120, 60, 120, 120,
+    40, 60, 120, 60, 60, 120,
+    40, 60, 120, 60, 60, 120,
     60, 60, 60, 60, 
     60, 60, 60, 60, 
     60, 60, 60
   };
+
+  int8_t thermal_max[TOTAL_JOINTS] = {0};
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    thermal_max[i] = 60;
+  assert(utils.setGains(thermal_max, ControlUtils::THERMAL_MAX));
+  assert(utils.getGains(thermal_max, ControlUtils::THERMAL_MAX));
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    printf("thermal %d %d\n", i, thermal_max[i]);
+
   assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
   assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
   for (int i = 0; i < TOTAL_JOINTS; i++)
@@ -315,13 +290,14 @@ void init() {
 	name = ros::package::getPath("jimmy") + "/conf/IK.cf";
 	IK.readParams(name.c_str());
 	logger.init(plan.TIME_STEP);
+	
   char buf[100];
   for (int i = 0; i < TOTAL_JOINTS; i++) {
     sprintf(buf, "joint_%d", i);
     logger.add_datapoint(buf,"rad",joints_actual+i);
   }
-
-	logger.add_datapoint("realT","s",&wallClockT);
+  
+  logger.add_datapoint("realT","s",&wallClockT);
 	logger.add_datapoint("realDT","s",&wallClockDT);
 	logger.add_datapoint("curTime","s",&curTime);
 	logger.add_datapoint("modeTime","s",&modeTime);
@@ -436,8 +412,8 @@ void gestureCon() {
 }
 
 void standPrepCon() {
-	double theta_d[TOTAL_JOINTS];
-	for(int i = 0; i < TOTAL_JOINTS; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
+	double theta_d[23];
+	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
 #ifndef SIMULATION
 	utils.setJoints(theta_d);
 #endif
@@ -454,10 +430,10 @@ void controlLoop() {
 	//whipe out record values
 	vForward = vLeft = dTheta = 0.0;
 	plan.clearForRecord();
-
+	
   utils.getLegJointsCircular(joints_actual);
 	
-	//do actual control
+  //do actual control
 	switch(mode) {
 	case IDLE:
 		getNeckCommand(neckEAs);
@@ -509,60 +485,7 @@ void controlLoop() {
 	}
 }
 
-
-void getRosCommand(const jimmy::jimmy_command &msg)
-{
-  boost::mutex::scoped_lock lock(r_Lock);
-  
-  if (msg.cmd.size() != 1)
-    return;
-
-  int newMode = msg.cmd[0];
-  
-  // walk commands
-  if (newMode == jimmy::jimmy_command::CMD_WALK) {
-    if (msg.param.size() != 3)
-      return;
-    r_vFwd = msg.param[0];
-    r_vLeft = msg.param[1];
-    r_dTheta = msg.param[2];
-    r_mode = newMode;
-  }
-  else if (newMode == jimmy::jimmy_command::CMD_NECK) {
-    if (msg.param.size() != 3)
-      return;
-    for (int i = 0; i < 3; i++)
-      r_neckEAd[i] = msg.param[i];
-    r_mode = newMode;
-  }
-  else if (newMode >= -1)
-    r_mode = newMode;
-}
-
-int main( int argc, char **argv ) 
-{
-  /*
-  ////////////////////////////////////////////////////
-  // ros stuff
-  ros::init(argc, argv, "force_plate", ros::init_options::NoSigintHandler);
-  ros::NodeHandle* rosnode = new ros::NodeHandle();
-
-  ros::Time last_ros_time_;
-  bool wait = true;
-  while (wait) {
-    last_ros_time_ = ros::Time::now();
-    if (last_ros_time_.toSec() > 0) {
-      wait = false;
-    }
-  }
-  ////////////////////////////////////////////////////
-  */
-
-
-
-
-
-
+int main( int argc, char **argv ) {
 	wallClockStart = get_time();
 	init();
 	printf("Waiting for Arbotix\n");
@@ -611,4 +534,64 @@ int main( int argc, char **argv )
 	return 0;
 }
 
+/*
+int main( int argc, char **argv ) 
+{
+	wallClockStart = get_time();
+	init();
+  //////////////////////////////////////////////
+	printf("Stand Preping\n");
+	   
+  double joints_d[TOTAL_JOINTS] = {0};
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    joints_d[i] = standPrepPose[i];
+
+  //utils.sendStandPrep(joints_d);
+  //utils.waitForReady();
+  //////////////////////////////////////////////
+
+	printf("Starting\n");
+
+  wallClockLast = get_time();
+  double timeQuota = plan.TIME_STEP;
+	while(true) {
+		double wallNow = get_time();
+		wallClockT = wallNow-wallClockStart;
+		wallClockDT = wallNow-wallClockLast;
+		wallClockLast = wallNow;
+		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
+
+		controlLoop();
+
+		logger.saveData();
+
+		if(getCommand() == -1) {
+			logger.writeToMRDPLOT();
+			exit(-1);
+		}
+    
+    //////////////////////////////////////////////
+    // wait
+    double wall1 = get_time();
+    double dt = wall1 - wallNow;
+    
+    // step up quota for the next time step
+    if (dt > timeQuota) {
+      timeQuota -= (dt - plan.TIME_STEP);
+      printf("takes too long %g\n", dt);
+      //utils.sendJoints_d(theta_d);
+    }
+    else {
+      timeQuota = plan.TIME_STEP;
+      int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
+      
+      //utils.sendJoints_d(theta_d);
+      usleep(sleep_t);
+    }
+    //////////////////////////////////////////////
+	}
+
+	return 374832748;
+}
+*/
 

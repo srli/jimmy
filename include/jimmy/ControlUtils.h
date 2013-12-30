@@ -23,7 +23,8 @@ class ControlUtils
     enum GAIN_TYPE {
       P_GAIN = 0,
       I_GAIN,
-      D_GAIN
+      D_GAIN,
+      THERMAL_MAX
     };
 
     int16_t ticks_to[TOTAL_JOINTS];

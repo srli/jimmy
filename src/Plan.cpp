@@ -43,6 +43,7 @@ void Plan::init() {
 	TIME_STEP = 0.01;
 	STANCE_WIDTH = 0.2;
 	PRE_PLAN_TIME = 5.0;
+	ROLL_AMPLITUDE = 0.3;
 	endTime = std::numeric_limits<double>::infinity();
 	startDDPind = 0;
 	isStopped = false;
@@ -68,6 +69,7 @@ Plan::Plan(const char *config) {
 	planLookup["TIME_STEP"] = &(TIME_STEP);
 	planLookup["STANCE_WIDTH"] = &(STANCE_WIDTH);
 	planLookup["PRE_PLAN_TIME"] = &(PRE_PLAN_TIME);
+	planLookup["ROLL_AMPLITUDE"] = &(ROLL_AMPLITUDE);
 	
 	std::ifstream in(config);
 
@@ -164,6 +166,11 @@ void Plan::addStep(Step *step, double extraTraj) {
 		zmp_d[X].addKnot(step->td, allSteps.back()->x);
 		zmp_d[Y].addKnot(step->td, allSteps.back()->y);
 
+		double bRoll = ROLL_AMPLITUDE;
+		if(step->side == RIGHT)		bRoll = -bRoll;
+		bodyRoll.addKnot(step->td-SS_TIME, bRoll, 0);
+		bodyRoll.addKnot(step->td, bRoll, 0);
+
 		//fill in zmpVec
 		int startInd = zmpVec[X].size();
 		for(int i = startInd; i < (extraTraj + step->td)/TIME_STEP; i++) {
@@ -214,6 +221,7 @@ void Plan::initFeet(double lx, double ly, double lYaw, double rx, double ry, dou
 	nomYaw.push_back((lYaw+rYaw)/2.0);
 	zmp_d[X].addKnot(0,(lx+rx)/2.0);
 	zmp_d[Y].addKnot(0,(ly+ry)/2.0);
+	bodyRoll.addKnot(0, 0.0);
 	prevTDind = 0;
 	nextTD = LEFT;
 	endTime = std::numeric_limits<double>::infinity();
@@ -240,6 +248,7 @@ void Plan::clearVectors() {
 		comd[i].clear();
 		footYaw[i].clear();
 	}
+	bodyRoll.clear();
 }
 
 void Plan::printSteps(char *fileName) {
@@ -286,6 +295,8 @@ void Plan::stopHere() {
 	}
 	zmp_d[X].addKnot(s->td+DS0_TIME, (s->x+prev->x)/2.0);
 	zmp_d[Y].addKnot(s->td+DS0_TIME, (s->y+prev->y)/2.0);
+	bodyRoll.addKnot(s->td+DS0_TIME, 0.0);
+
 	addStep(s, DS0_TIME+0.1);	//0.1 for buffer; DS0_TIME is time to return to symmetric DS
 
 	printf("Stopping at {%g, %g}\n", (s->x+prev->x)/2.0,(s->y+prev->y)/2.0);
@@ -317,7 +328,7 @@ void Plan::fillIK_d(IKcmd &IK_d, double t) {
 	if(nowInd >= nomYaw.size()) 	torsoYaw = nomYaw.back();
 	else				torsoYaw = nomYaw[nowInd];
 
-	double rootEA[3] = {0.0, 0.0, torsoYaw};
+	double rootEA[3] = {bodyRoll.readPos(t), 0.0, torsoYaw};
 	IK_d.rootQ = EA2quat(rootEA);
 
 	for(int i = 0; i < 3; i++) {

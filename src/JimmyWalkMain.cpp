@@ -34,6 +34,8 @@ static int gestureNpose[MAX_GESTURES];
 static double neckEAs[3];
 static double theta_d[N_J+3];
 
+static double joints_actual[TOTAL_JOINTS];
+
 const static double neckLims[2][3] = {
 	{-1.4, -0.5, -0.5},
 	{1.4, 0.5, 0.5}
@@ -138,11 +140,12 @@ void getNeckCommand(double *EAs) {
 TrajEW spJoints[TOTAL_JOINTS];
 
 void initStandPrep() {
-	double initPos[TOTAL_JOINTS];
+	//double initPos[TOTAL_JOINTS];
 #ifndef SIMULATION
-	utils.getJoints(initPos);
+	utils.getJoints(joints_actual);
 #endif
-	for(int i = 0; i < TOTAL_JOINTS; i++)		spJoints[i].freshMove(initPos[i], standPrepPose[i], 5.0);
+	for(int i = 0; i < TOTAL_JOINTS; i++)		
+    spJoints[i].freshMove(joints_actual[i], standPrepPose[i], 5.0);
 	modeDur = 5.0;
 }
 
@@ -296,8 +299,8 @@ void init() {
 
   // setting gains on robot
   int8_t p_gains[TOTAL_JOINTS] = {
-    40, 60, 120, 60, 60, 120,
-    40, 60, 120, 60, 60, 120,
+    40, 60, 120, 60, 120, 120,
+    40, 60, 120, 60, 120, 120,
     60, 60, 60, 60, 
     60, 60, 60, 60, 
     60, 60, 60
@@ -312,6 +315,12 @@ void init() {
 	name = ros::package::getPath("jimmy") + "/conf/IK.cf";
 	IK.readParams(name.c_str());
 	logger.init(plan.TIME_STEP);
+  char buf[100];
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    sprintf(buf, "joint_%d", i);
+    logger.add_datapoint(buf,"rad",joints_actual+i);
+  }
+
 	logger.add_datapoint("realT","s",&wallClockT);
 	logger.add_datapoint("realDT","s",&wallClockDT);
 	logger.add_datapoint("curTime","s",&curTime);
@@ -445,6 +454,8 @@ void controlLoop() {
 	//whipe out record values
 	vForward = vLeft = dTheta = 0.0;
 	plan.clearForRecord();
+
+  utils.getLegJointsCircular(joints_actual);
 	
 	//do actual control
 	switch(mode) {
@@ -599,4 +610,5 @@ int main( int argc, char **argv )
 
 	return 0;
 }
+
 

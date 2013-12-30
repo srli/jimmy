@@ -16,6 +16,8 @@ class ControlUtils
   
     bool sendCommand();
     static const int _id[TOTAL_JOINTS]; 
+  
+    int _legIdx;
 
   public:
     enum GAIN_TYPE {
@@ -46,12 +48,14 @@ class ControlUtils
     // ERIC
     bool getJoints() { return getJoints(joints); }
     bool setJoints() { return setJoints(joints_d); }
-    bool getJoints(double *);
-    bool setJoints(const double *);
+    
+    bool getLegJointsCircular(double j[TOTAL_JOINTS]);
+    bool getJoints(double j[TOTAL_JOINTS]);
+    bool setJoints(const double j[TOTAL_JOINTS]);
 
-    bool setGains(const int8_t *, int which);
-    bool getGains(int8_t *, int which);
-    bool getLoads(double *);
+    bool setGains(const int8_t gain[TOTAL_JOINTS], int which);
+    bool getGains(int8_t gain[TOTAL_JOINTS], int which);
+    bool getLoads(double trq[TOTAL_JOINTS]);
     ///////////////////////
     
     /*

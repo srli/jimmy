@@ -20,7 +20,28 @@
 #define P_PRESENT_LOAD_L          40
 #define P_PRESENT_LOAD_H          41
 
-bool ControlUtils::setGains(const int8_t *a, int which)
+bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
+{
+  int ctr = 0;
+  while(ctr < 4)
+  {
+    ticks_from[_legIdx] = dxl_read_word(_id[_legIdx], P_PRESENT_POSITION_L);
+    int CommStatus = dxl_get_result();
+
+    if(CommStatus == COMM_RXSUCCESS)
+      a[_legIdx] = tick2rad(ticks_from[_legIdx], _legIdx);
+    else
+      return false;
+    
+    _legIdx++;
+    if (_legIdx > R_AAA)
+      _legIdx = L_HZ;
+    ctr++;
+  }
+  return true;
+}
+
+bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int which)
 {
   int flag;
   switch(which) {
@@ -48,7 +69,7 @@ bool ControlUtils::setGains(const int8_t *a, int which)
   return true;
 }
 
-bool ControlUtils::getGains(int8_t *a, int which)
+bool ControlUtils::getGains(int8_t a[TOTAL_JOINTS], int which)
 {
   int flag;
   switch(which) {
@@ -174,6 +195,8 @@ ControlUtils::ControlUtils()
   }
 	else
 		printf( "Succeed to open USB2Dynamixel!\n" ); 
+
+  _legIdx = 0;
 }
 
 ControlUtils::~ControlUtils()

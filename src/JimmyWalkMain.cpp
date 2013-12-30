@@ -103,7 +103,7 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 40.0)	return -1;
+	if(curTime > 70.0)	return -1;
 	if(curTime > 7.0 && curTime < 70)		return 1;
 
 	return 0;
@@ -523,13 +523,11 @@ void controlLoop() {
 int main( int argc, char **argv ) {
 	wallClockStart = get_time();
 	init();
-	printf("Waiting for Arbotix\n");
-	while(!isReady()) {
-		//do nothing
-	}
 	
   printf("Starting\n");
   double timeQuota = plan.TIME_STEP;
+	
+  wallClockLast = get_time();
 	
   while(true) {
 		double wallNow = get_time();

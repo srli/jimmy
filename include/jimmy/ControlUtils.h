@@ -54,9 +54,15 @@ class ControlUtils
     bool getJoints(double j[TOTAL_JOINTS]);
     bool setJoints(const double j[TOTAL_JOINTS]);
 
-    bool setGains(const int8_t gain[TOTAL_JOINTS], int which);
-    bool getGains(int8_t gain[TOTAL_JOINTS], int which);
+    bool setGains(const int8_t gain[TOTAL_JOINTS], int type);
+    bool getGains(int8_t gain[TOTAL_JOINTS], int type);
     bool getLoads(double trq[TOTAL_JOINTS]);
+
+    bool setGain(int8_t gain, int type, int idx);
+    bool getGain(int8_t *gain, int type, int idx);
+
+    bool setGainStance(int side);
+
     ///////////////////////
     
     /*

@@ -559,7 +559,7 @@ int main( int argc, char **argv ) {
 #ifndef SIMULATION
       int8_t temperature[TOTAL_JOINTS];
       utils.getGains(temperature, ControlUtils::CUR_TEMPERATURE);
-      for (int i = 0; i < TOTAL_JOINTS: i++)
+      for (int i = 0; i < TOTAL_JOINTS; i++)
         printf("%d temp %d\n", i, temperature[i]);
 #endif
 

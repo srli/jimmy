@@ -78,7 +78,7 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 80.0)	return -1;
+	if(curTime > 60.0)	return -1;
 	if(curTime > 7.0 && curTime < 120)		return 1;
 
 	return 0;

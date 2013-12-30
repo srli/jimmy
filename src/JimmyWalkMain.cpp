@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-//#define SIMULATION
+#define SIMULATION
 
 Plan plan;
 Logger logger;
@@ -105,8 +105,8 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	if(curTime > 70.0)	return -1;
-	if(curTime > 7.0 && curTime < 70)		return 1;
+	if(curTime > 80.0)	return -1;
+	if(curTime > 7.0 && curTime < 120)		return 1;
 
 	return 0;
 }
@@ -205,6 +205,7 @@ void initWalk() {
 	plan.bodyRoll.addKnot(0, startEA[0], 0);
 	plan.bodyPitch.addKnot(0, startEA[1], 0);
 	for(int s = 0; s < 2; s++)	plan.footPitch[s].addKnot(0, 0, 0);
+	for(int i = 0; i < 23; i++)	plan.jointOffset[i].addKnot(0, 0, 0);
 }
 
 void loadPoses() {
@@ -347,6 +348,11 @@ void init() {
 	IK_d.addToLog(logger);
 	IK.addToLog(logger);
 	plan.addToLog(logger);
+
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    sprintf(buf, "CMD.%s", &(jointNames[i][0]));
+    logger.add_datapoint(buf,"rad",theta_d+i); 
+  }
 	IK_d.setToRS(IK.ikrs);
 	IK_d.setVel0();
 	mode = STAND_PREP;
@@ -451,7 +457,6 @@ void gestureCon() {
 }
 
 void standPrepCon() {
-	double theta_d[23];
 	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
 #ifndef SIMULATION
 	utils.setJoints(theta_d);
@@ -508,6 +513,8 @@ void controlLoop() {
 	if(mode != STAND_PREP) {
 		double thetad_d[N_J+3];
 		IK.IK(IK_d, theta_d, thetad_d);
+
+		for(int i = 0; i < 23; i++)	theta_d[i]+=plan.jointOffset[i].readPos(modeTime);		
 
 		double stance = 2;
 		if(IK_d.foot[LEFT][Z] - IK_d.foot[RIGHT][Z] > 0.01)	stance = RIGHT;

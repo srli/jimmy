@@ -172,7 +172,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 
 		//absurd hack: hip roll offset
-		double hrOffset = 0.1;
+		double hrOffset = 0.05;
 		if(s == RIGHT)		hrOffset = -hrOffset;
 		jointOffset[8-s*6].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -hrOffset, Linear);
 		jointOffset[8-s*6].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);

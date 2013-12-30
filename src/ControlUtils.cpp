@@ -217,6 +217,7 @@ bool ControlUtils::getJoints(double *a)
 
 bool ControlUtils::setStanceGain(int side)
 {
+  // ankle pitch p gain
   std::vector<int> joints;
   std::vector<int8_t> vals;
   // set left gain
@@ -232,7 +233,37 @@ bool ControlUtils::setStanceGain(int side)
     vals.push_back(100);
     vals.push_back(60);
   }
-  return syncWriteByte(ADDR_P_GAIN, joints, vals);
+  
+  bool ret = syncWriteByte(ADDR_P_GAIN, joints, vals); 
+  
+  // hip roll i gain
+  // ankle pitch i gain
+  joints.clear();
+  vals.clear();
+  if (side == 0) {
+    joints.push_back(L_HAA);
+    joints.push_back(L_AFE);
+    joints.push_back(R_HAA);
+    joints.push_back(R_AFE);
+    vals.push_back(5);
+    vals.push_back(5);
+    vals.push_back(0);
+    vals.push_back(0);
+  }
+  else {
+    joints.push_back(R_HAA);
+    joints.push_back(R_AFE);
+    joints.push_back(L_HAA);
+    joints.push_back(L_AFE);
+    vals.push_back(5);
+    vals.push_back(5);
+    vals.push_back(0);
+    vals.push_back(0);
+  }
+  
+  ret &= syncWriteByte(ADDR_I_GAIN, joints, vals); 
+  
+  return ret;
 }
 
 bool ControlUtils::syncWriteByte(int8_t addr, const std::vector<int> &joints, const std::vector<int8_t> &val)

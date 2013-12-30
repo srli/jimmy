@@ -28,9 +28,6 @@ int main()
 	ControlUtils utils;
 	double t0, t1;
 
-	std::string name = ros::package::getPath("jimmy") + "/scripts/wiggle";
-	std::ifstream in(name.c_str());
-
 	assert(utils.getJoints());
 	for (int i = 0; i < TOTAL_JOINTS; i++) {
 		printf("%g %d\n", utils.joints[i], utils.ticks_from[i]);  
@@ -44,10 +41,14 @@ int main()
 		printf("press enter to continue.\n");
 		getchar();
 
+    std::string name = ros::package::getPath("jimmy") + "/scripts/wiggle";
+    std::ifstream in(name.c_str());
+
 		if (!load_pose(in)) {
 			printf("out of poses\n");
 			break;
 		}
+    in.close();
 
 		t0 = get_time();
 		printf("pose start at %g\n", t0);

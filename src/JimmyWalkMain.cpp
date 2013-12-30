@@ -290,7 +290,7 @@ void init() {
 #ifndef SIMULATION
   assert(utils.setPGains(p_gains));
   assert(utils.getPGains(p_gains));
- 	utils.setStanceGain(2);
+ 	assert(utils.setStanceGain(2));
 #endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("gains %10s %d\n", RobotState::jointNames[i].c_str(), p_gains[i]);
@@ -492,7 +492,7 @@ void controlLoop() {
 		if(IK_d.foot[RIGHT][Z] - IK_d.foot[LEFT][Z] > 0.01)	stance = LEFT;
 
 #ifndef SIMULATION
-		if(stance != prevStance)	utils.setStanceGain(stance);
+		if(stance != prevStance)	assert(utils.setStanceGain(stance));
 #endif
 		prevStance = stance;
 

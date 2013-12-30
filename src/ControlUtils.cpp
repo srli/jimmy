@@ -173,7 +173,7 @@ bool ControlUtils::getJoints(double *a)
   return true;
 }
 
-bool ControlUtils::setGainStance(int side)
+bool ControlUtils::setStanceGain(int side)
 {
 
   return false;

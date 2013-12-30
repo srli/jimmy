@@ -159,6 +159,8 @@ void Plan::addStep(Step *step, double extraTraj) {
 		foot[s][Y].addMove(steps[s].back()->lo, step->td, step->y);
 		foot[s][Z].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME, SWING_HEIGHT, Linear);		//lift foot up
 		foot[s][Z].addMove(step->td-TD_TIME, step->td, 0.0, Linear);							//put foot down
+		footPitch[s].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME, -0.2, Linear);
+		footPitch[s].addMove(step->td-TD_TIME, step->td, 0.0, Linear);
 		footYaw[s].addMove(steps[s].back()->lo, step->td, step->yaw);
 		//beginning of SS
 		zmp_d[X].addKnot(step->td-SS_TIME, allSteps.back()->x);
@@ -248,6 +250,7 @@ void Plan::clearVectors() {
 		com[i].clear();
 		comd[i].clear();
 		footYaw[i].clear();
+		footPitch[i].clear();
 	}
 	bodyRoll.clear();
 	bodyPitch.clear();
@@ -346,7 +349,7 @@ void Plan::fillIK_d(IKcmd &IK_d, double t) {
 	}
 
 	for(int s = 0; s < 2; s++) {
-		double footEA[3] = {0.0, 0.0, footYaw[s].readPos(t)};
+		double footEA[3] = {0.0, footPitch[s].readPos(t), footYaw[s].readPos(t)};
 		IK_d.footQ[s] = EA2quat(footEA);
 	}
 }

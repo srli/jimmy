@@ -64,7 +64,7 @@ class ControlUtils
     bool setGain(int8_t gain, int type, int idx);
     bool getGain(int8_t *gain, int type, int idx);
 
-    bool setGainStance(int side);
+    bool setStanceGain(int side);
 
     static int16_t rad2tick(double r, int j);
     static double tick2rad(int16_t t, int j);

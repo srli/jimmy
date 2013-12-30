@@ -85,29 +85,29 @@ bool isReady() {
 }
 
 int getCommand() {
-  /*
   if(curTime > 40.0)	return -1;
 	if(curTime > 7.0 && curTime < 70)		return 1;
 
 	return 0;
-  */
   
+  /*
   boost::mutex::scoped_lock lock(r_Lock);
   return r_mode;
+  */
 }
 
 void getDriveCommand(double *vF, double *vL, double *dT) {
-  /*
 	*vF = 0.00;
 	*vL = 0.00;
 	*dT = 0.0;
 	//TODO: implement retrieving these command from the user
-  */
   
+  /*
   boost::mutex::scoped_lock lock(r_Lock);
   *vF = r_vFwd;
   *vL = r_vLeft;
   *dT = r_dTheta;
+  */
 }
 
 void constrainDriveCommand(double *vF, double *vL, double *dT) {
@@ -117,15 +117,14 @@ void constrainDriveCommand(double *vF, double *vL, double *dT) {
 
 void getNeckCommand(double *EAs) {
 	//TODO: fetch desired velocities from user
-	/*
   double EAsd[3] = {0,0,0};		//desired velocities
   for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;	//integrate
 	for(int i = 0; i < 3; i++) {						//limit
 		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
 		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
 	}
-  */
 	
+	/*
   boost::mutex::scoped_lock lock(r_Lock);
   for(int i = 0; i < 3; i++)	
     EAs[i] += r_neckEAd[i]*plan.TIME_STEP;	//integrate
@@ -133,6 +132,7 @@ void getNeckCommand(double *EAs) {
 		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
 		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
 	}
+  */
 }
 
 TrajEW spJoints[TOTAL_JOINTS];
@@ -530,6 +530,7 @@ void getRosCommand(const jimmy::jimmy_command &msg)
 
 int main( int argc, char **argv ) 
 {
+  /*
   ////////////////////////////////////////////////////
   // ros stuff
   ros::init(argc, argv, "force_plate", ros::init_options::NoSigintHandler);
@@ -543,10 +544,8 @@ int main( int argc, char **argv )
       wait = false;
     }
   }
-  
-  
   ////////////////////////////////////////////////////
-
+  */
 
 
 

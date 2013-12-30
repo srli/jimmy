@@ -24,7 +24,7 @@
 bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
 {
   int ctr = 0;
-  while(ctr < 4)
+  while(ctr < 2)
   {
     ticks_from[_legIdx] = dxl_read_word(_id[_legIdx], P_PRESENT_POSITION_L);
     int CommStatus = dxl_get_result();
@@ -66,8 +66,10 @@ bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int which)
 		dxl_write_byte(_id[i], flag, a[i]);
     int CommStatus = dxl_get_result();
     if(CommStatus == COMM_RXSUCCESS) {}
-    else
+    else {
+      printf("faled at %d\n", i);
       return false;
+    }
     usleep(5000);
   }
   return true;
@@ -97,8 +99,10 @@ bool ControlUtils::getGains(int8_t a[TOTAL_JOINTS], int which)
 		a[i] = dxl_read_byte(_id[i], flag);
     int CommStatus = dxl_get_result();
     if(CommStatus == COMM_RXSUCCESS) {}
-    else
+    else {
+      printf("faled at %d\n", i);
       return false;
+    }
     usleep(5000);
   }
   return true;

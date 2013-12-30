@@ -74,8 +74,8 @@ bool isReady() {
 
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
-	//if(curTime > 40.0)	return -1;
-	if(curTime > 7.0)		return 1;
+	if(curTime > 100.0)	return -1;
+	if(curTime > 7.0 && curTime < 50)		return 1;
 
 	return 0;
 }
@@ -164,11 +164,17 @@ void initGesture(int gesture) {
 }
 
 void initWalk() {
+	double startEA[3];
+	quat2EA(IK_d.rootQ, startEA);
+
+	printf("Initializing walk with %g %g %g\n", startEA[0], startEA[1], startEA[2]);
 	plan.initFeet(IK.ikrs.foot[LEFT][X], IK.ikrs.foot[LEFT][Y], getYaw(IK.ikrs.footQ[LEFT]), IK.ikrs.foot[RIGHT][X], IK.ikrs.foot[RIGHT][Y], getYaw(IK.ikrs.footQ[RIGHT]));
 	for(int i = 0; i < 2; i++) {
 		plan.com[i].push_back(IK.ikrs.com[i]);
 		plan.comd[i].push_back(IK.ikrs.comd[i]);
 	}
+	plan.bodyRoll.addKnot(0, startEA[0]);
+	plan.bodyPitch.addKnot(0, startEA[1]);
 }
 
 void loadPoses() {
@@ -269,8 +275,10 @@ void init() {
     60, 60, 60, 60, 
     60, 60, 60
   };
+#ifndef SIMULATION
   assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
   assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
+#endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("gains %d %d\n", i, p_gains[i]);
 

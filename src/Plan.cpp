@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include "IK.h"
+#include "TrajEW.h"
 
 
 
@@ -221,10 +222,10 @@ void Plan::initFeet(double lx, double ly, double lYaw, double rx, double ry, dou
 	nomYaw.push_back((lYaw+rYaw)/2.0);
 	zmp_d[X].addKnot(0,(lx+rx)/2.0);
 	zmp_d[Y].addKnot(0,(ly+ry)/2.0);
-	bodyRoll.addKnot(0, 0.0);
 	prevTDind = 0;
 	nextTD = LEFT;
 	endTime = std::numeric_limits<double>::infinity();
+	bodyPitch.addKnot(1.5, 0.1, 0);
 }
 
 
@@ -249,6 +250,7 @@ void Plan::clearVectors() {
 		footYaw[i].clear();
 	}
 	bodyRoll.clear();
+	bodyPitch.clear();
 }
 
 void Plan::printSteps(char *fileName) {
@@ -296,6 +298,7 @@ void Plan::stopHere() {
 	zmp_d[X].addKnot(s->td+DS0_TIME, (s->x+prev->x)/2.0);
 	zmp_d[Y].addKnot(s->td+DS0_TIME, (s->y+prev->y)/2.0);
 	bodyRoll.addKnot(s->td+DS0_TIME, 0.0);
+	bodyPitch.addMove(s->td+DS0_TIME-1.5, s->td+DS0_TIME, 0.0, Cubic);
 
 	addStep(s, DS0_TIME+0.1);	//0.1 for buffer; DS0_TIME is time to return to symmetric DS
 
@@ -328,7 +331,7 @@ void Plan::fillIK_d(IKcmd &IK_d, double t) {
 	if(nowInd >= nomYaw.size()) 	torsoYaw = nomYaw.back();
 	else				torsoYaw = nomYaw[nowInd];
 
-	double rootEA[3] = {bodyRoll.readPos(t), 0.0, torsoYaw};
+	double rootEA[3] = {bodyRoll.readPos(t), bodyPitch.readPos(t), torsoYaw};
 	IK_d.rootQ = EA2quat(rootEA);
 
 	for(int i = 0; i < 3; i++) {

@@ -42,68 +42,83 @@ bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
   return true;
 }
 
-bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int which)
+bool ControlUtils::setGain(int8_t gain, int type, int idx)
 {
-  int flag;
-  switch(which) {
+  int addr;
+  switch(type) {
     case P_GAIN:
-      flag = P_P_GAIN;
+      addr = P_P_GAIN;
       break;
     case I_GAIN:
-      flag = P_I_GAIN;
+      addr = P_I_GAIN;
       break;
     case D_GAIN:
-      flag = P_D_GAIN;
+      addr = P_D_GAIN;
       break;
     case THERMAL_MAX:
-      flag = THERMAL;
+      addr = THERMAL;
       break;
     default:
       return false;
   }
+  
+  dxl_write_byte(_id[idx], addr, gain);
+  if (dxl_get_result() == COMM_RXSUCCESS) {
+    return true;  
+  }
+  else {
+    printf("faled to set gain %d at %d\n", type, idx);
+    return false;
+  }
+}
 
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-		dxl_write_byte(_id[i], flag, a[i]);
-    int CommStatus = dxl_get_result();
-    if(CommStatus == COMM_RXSUCCESS) {}
-    else {
-      printf("faled at %d\n", i);
+bool ControlUtils::getGain(int8_t *gain, int type, int idx)
+{
+  int addr;
+  switch(type) {
+    case P_GAIN:
+      addr = P_P_GAIN;
+      break;
+    case I_GAIN:
+      addr = P_I_GAIN;
+      break;
+    case D_GAIN:
+      addr = P_D_GAIN;
+      break;
+    case THERMAL_MAX:
+      addr = THERMAL;
+      break;
+    default:
       return false;
-    }
-    usleep(5000);
+  }
+ 
+  int8_t tmp = dxl_read_byte(_id[idx], addr); 
+  if(dxl_get_result() == COMM_RXSUCCESS) {
+    *gain = tmp;
+    return true;
+  }
+  else {
+    printf("faled to get gain %d at %d\n", type, idx);
+    return false;
+  }
+}
+
+bool ControlUtils::setGains(const int8_t a[TOTAL_JOINTS], int type)
+{
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    if (!setGain(a[i], type, i))
+      return false;
+    //usleep(5000);
   }
   return true;
 }
 
-bool ControlUtils::getGains(int8_t a[TOTAL_JOINTS], int which)
+bool ControlUtils::getGains(int8_t a[TOTAL_JOINTS], int type)
 {
-  int flag;
-  switch(which) {
-    case P_GAIN:
-      flag = P_P_GAIN;
-      break;
-    case I_GAIN:
-      flag = P_I_GAIN;
-      break;
-    case D_GAIN:
-      flag = P_D_GAIN;
-      break;
-    case THERMAL_MAX:
-      flag = THERMAL;
-      break;
-    default:
-      return false;
-  }
-
   for (int i = 0; i < TOTAL_JOINTS; i++) {
-		a[i] = dxl_read_byte(_id[i], flag);
-    int CommStatus = dxl_get_result();
-    if(CommStatus == COMM_RXSUCCESS) {}
-    else {
-      printf("faled at %d\n", i);
+		if (!getGain(a+i, type, i))
       return false;
-    }
-    usleep(5000);
+    //usleep(5000);
   }
   return true;
 }
@@ -156,6 +171,12 @@ bool ControlUtils::getJoints(double *a)
   }
 
   return true;
+}
+
+bool ControlUtils::setGainStance(int side)
+{
+
+  return false;
 }
 
 bool ControlUtils::setJoints(const double *a)

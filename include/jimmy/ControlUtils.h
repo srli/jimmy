@@ -18,6 +18,12 @@ class ControlUtils
     static const int _id[TOTAL_JOINTS]; 
 
   public:
+    enum GAIN_TYPE {
+      P_GAIN = 0,
+      I_GAIN,
+      D_GAIN
+    };
+
     int16_t ticks_to[TOTAL_JOINTS];
     int16_t ticks_from[TOTAL_JOINTS];
 
@@ -42,6 +48,10 @@ class ControlUtils
     bool setJoints() { return setJoints(joints_d); }
     bool getJoints(double *);
     bool setJoints(const double *);
+
+    bool setGains(const int8_t *, int which);
+    bool getGains(int8_t *, int which);
+    bool getLoads(double *);
     ///////////////////////
     
     /*

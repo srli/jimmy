@@ -7,12 +7,106 @@
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048
 
-#define P_GOAL_POSITION_L	30
-#define P_GOAL_POSITION_H	31
-#define P_PRESENT_POSITION_L	36
-#define P_PRESENT_POSITION_H	37
-#define P_GOAL_SPEED_L		32
-#define P_GOAL_SPEED_H		33
+#define P_GOAL_POSITION_L	        30
+#define P_GOAL_POSITION_H	        31
+#define P_PRESENT_POSITION_L      36
+#define P_PRESENT_POSITION_H	    37
+#define P_GOAL_SPEED_L		        32
+#define P_GOAL_SPEED_H		        33
+
+#define P_P_GAIN                  28
+#define P_I_GAIN                  27
+#define P_D_GAIN                  26
+#define P_PRESENT_LOAD_L          40
+#define P_PRESENT_LOAD_H          41
+
+bool ControlUtils::setGains(const int8_t *a, int which)
+{
+  int flag;
+  switch(which) {
+    case P_GAIN:
+      flag = P_P_GAIN;
+      break;
+    case I_GAIN:
+      flag = P_I_GAIN;
+      break;
+    case D_GAIN:
+      flag = P_D_GAIN;
+      break;
+    default:
+      return false;
+  }
+
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+		dxl_write_byte(_id[i], flag, a[i]);
+    int CommStatus = dxl_get_result();
+    if(CommStatus == COMM_RXSUCCESS) {}
+    else
+      return false;
+    usleep(5000);
+  }
+  return true;
+}
+
+bool ControlUtils::getGains(int8_t *a, int which)
+{
+  int flag;
+  switch(which) {
+    case P_GAIN:
+      flag = P_P_GAIN;
+      break;
+    case I_GAIN:
+      flag = P_I_GAIN;
+      break;
+    case D_GAIN:
+      flag = P_D_GAIN;
+      break;
+    default:
+      return false;
+  }
+
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+		a[i] = dxl_read_byte(_id[i], flag);
+    int CommStatus = dxl_get_result();
+    if(CommStatus == COMM_RXSUCCESS) {}
+    else
+      return false;
+    usleep(5000);
+  }
+  return true;
+}
+
+bool ControlUtils::getLoads(double *a) 
+{
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    // Read present position
+    int16_t ret = dxl_read_word(_id[i], P_PRESENT_LOAD_L);
+    int CommStatus = dxl_get_result();
+    int sign = 1;
+    /*
+     It means currently applied load.
+     The range of the value is 0~2047, and the unit is about 0.1%.
+     If the value is 0~1023, it means the load works to the CCW direction.
+     If the value is 1024~2047, it means the load works to the CW direction.
+     That is, the 10th bit becomes the direction bit to control the direction, and 1024 is equal to 0.
+     For example, the value is 512, it means the load is detected in the direction of CCW about 50% of the maximum torque.
+     */
+    if(CommStatus == COMM_RXSUCCESS) {
+      if (ret >= 1024) {
+        ret -= 1024;
+        sign = -1;
+      }
+      else {
+        sign = 1;
+      }
+      a[i] = ((double)ret / 1024.) * sign * tick_sign[i];
+    }
+    else
+      return false;
+
+    usleep(5000);
+  }
+}
 
 bool ControlUtils::getJoints(double *a)
 {

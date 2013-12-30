@@ -36,7 +36,20 @@ int main()
 	for (int i = 0; i < TOTAL_JOINTS; i++)
 		joints0[i] = utils.joints[i];
 
-	double duration = 5;  
+  // setting gains on robot
+  int8_t p_gains[TOTAL_JOINTS] = {
+    40, 60, 120, 60, 60, 120,
+    40, 60, 120, 60, 60, 120,
+    60, 60, 60, 60, 
+    60, 60, 60, 60, 
+    60, 60, 60
+  };
+  assert(utils.setGains(p_gains, ControlUtils::P_GAIN));
+  assert(utils.getGains(p_gains, ControlUtils::P_GAIN));
+  for (int i = 0; i < TOTAL_JOINTS; i++)
+    printf("gains %d %d\n", i, p_gains[i]);
+
+	double duration = 2;  
 	while(true) {
 		printf("press enter to continue.\n");
 		getchar();

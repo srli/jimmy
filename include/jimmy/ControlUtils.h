@@ -20,8 +20,8 @@ class ControlUtils
   
     int _legIdx;
 
-    bool syncWriteByte(int cmd, const std::vector<int8_t> &id, const std::vector<int8_t> &val);
-    bool syncWriteWord(int cmd, const std::vector<int8_t> &id, const std::vector<int16_t> &val);
+    bool syncWriteByte(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int8_t> &val);
+    bool syncWriteWord(int8_t addr, const std::vector<int8_t> &joints, const std::vector<int16_t> &val);
 
   public:
     enum GAIN_TYPE {

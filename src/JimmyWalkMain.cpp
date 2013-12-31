@@ -85,13 +85,13 @@ static double theta_d[N_J+3];
 static double joints_actual[TOTAL_JOINTS];
 
 const static double neckLims[2][3] = {
-	{-1.4, -0.5, -0.5},
-	{1.4, 0.5, 0.5}
+	{-1.4, -0.7, -0.7},
+	{1.4, 0.7, 0.7}
 };
 
 const static double neckEAlims[2][3] = {
-	{-1.4, -0.5, -0.5},
-	{1.4, 0.5, 0.5}
+	{-1.4, -0.6, -0.6},
+	{1.4, 0.6, 0.6}
 };
 
 const static double poseBodyLims[2][6] = {
@@ -593,7 +593,7 @@ void controlLoop() {
 		else {
 			//conversion from RPY to angles
 			theta_d[N_J] = neckEAs[2];
-			theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
+			theta_d[N_J+1] = -neckEAs[1]-neckEAs[0];
 			theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
 		}
 

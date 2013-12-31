@@ -11,8 +11,8 @@ static const double armsDown[8] = {-0.33, -1.14, 1.03, -1.42, -0.33, 1.14, 1.03,
 static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
 
 static const double neckLean[2][3] = {
-	{0, 0.25, 0.7},
-	{0, -0.7, -0.25}
+	{0, 0.5, 0.5},
+	{0, -0.5, -0.5}
 };
 
 void Plan::clearForRecord() {

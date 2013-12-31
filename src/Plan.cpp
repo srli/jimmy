@@ -221,7 +221,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 		if(s == RIGHT) {
 			jointOffset[L_KFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/4.0, -0.0, Linear);
 			jointOffset[L_KFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
-			jointOffset[L_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, 0.02, Linear);
+			jointOffset[L_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, 0.03, Linear);
 			jointOffset[L_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
 		}
 		

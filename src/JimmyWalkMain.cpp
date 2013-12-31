@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#define SIMULATION
+//#define SIMULATION
 
 Plan plan;
 Logger logger;

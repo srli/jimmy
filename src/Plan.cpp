@@ -246,6 +246,8 @@ void Plan::initFeet(double lx, double ly, double lYaw, double rx, double ry, dou
 	nextTD = LEFT;
 	endTime = std::numeric_limits<double>::infinity();
 	bodyPitch.addKnot(1.5, 0.1, 0);
+	zmp_d[X].overRideType = Cubic;
+	zmp_d[Y].overRideType = Cubic;
 }
 
 

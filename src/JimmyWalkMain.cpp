@@ -25,6 +25,7 @@ const int N_VALS_PER_POSE = 17;
 static int N_POSES;
 
 static int prevStance = 2;
+static bool prevLimp[2] = {false, false};
 
 static double poses[MAX_POSES][N_VALS_PER_POSE];
 static int gestureSeq[MAX_GESTURES][MAX_POSES_PER_GESTURE];
@@ -316,6 +317,8 @@ void init() {
 	logger.add_datapoint("CMD.vLeft","m/s",&vLeft);
 	logger.add_datapoint("CMD.dTheta","m/s",&dTheta);
 	logger.add_datapoint("stance","-",&prevStance);
+	logger.add_datapoint("limpA[L]","-",&(prevLimp[LEFT]));
+	logger.add_datapoint("limpA[R]","-",&(prevLimp[RIGHT]));
 	IK_d.addToLog(logger);
 	IK.addToLog(logger);
 	plan.addToLog(logger);
@@ -495,6 +498,17 @@ void controlLoop() {
 		if(stance != prevStance)	assert(utils.setStanceGain(stance));
 #endif
 		prevStance = stance;
+
+		//limp ankles
+		for(int s = 0; s < 2; s++) {
+			bool limp = false;
+			if(IK_d.footd[s][Z] < 0)	limp = true;
+			if(limp != prevLimp[s]) {
+				if(limp)	utils.setPGain(0, 5+6*s);
+				else		utils.setPGain(120, 5+6*2);
+			}
+			prevLimp[s] = limp;
+		}
 
 		//conversion from RPY to angles
 		theta_d[N_J] = neckEAs[2];

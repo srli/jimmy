@@ -248,6 +248,8 @@ void Plan::initFeet(double lx, double ly, double lYaw, double rx, double ry, dou
 	bodyPitch.addKnot(1.5, 0.1, 0);
 	zmp_d[X].overRideType = Cubic;
 	zmp_d[Y].overRideType = Cubic;
+	foot[LEFT][Z].overRideType = Cubic;
+	foot[RIGHT][Z].overRideType = Cubic;
 }
 
 

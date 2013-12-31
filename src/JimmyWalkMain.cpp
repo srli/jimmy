@@ -505,7 +505,7 @@ void controlLoop() {
 			if(IK_d.footd[s][Z] < 0)	limp = true;
 			if(limp != prevLimp[s]) {
 				if(limp)	utils.setPGain(0, 5+6*s);
-				else		utils.setPGain(120, 5+6*2);
+				else		utils.setPGain(120, 5+6*s);
 			}
 			prevLimp[s] = limp;
 		}

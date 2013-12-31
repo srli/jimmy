@@ -123,7 +123,7 @@ void RobotState::computeSDFvars() {
 
 
 	const int footBody[2] = {6, 12};
-	double ankle2foot[2][3] = {{0.012, -0.015, -0.094}, {0.012, 0.01, -0.094}};
+	double ankle2foot[2][3] = {{0.012, -0.0, -0.094}, {0.012, -0.01, -0.094}};
 
 
 

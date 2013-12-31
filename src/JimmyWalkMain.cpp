@@ -9,7 +9,7 @@
 #include <boost/thread.hpp>
 #include <jimmy/jimmy_command.h>
  
-#define SIMULATION
+//#define SIMULATION
 
 ///////////////////////////////////////////////////
 // ros stuff
@@ -675,9 +675,9 @@ int main( int argc, char **argv )
     else {
       timeQuota = plan.TIME_STEP;
       int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
-//#ifndef SIMULATION      
+#ifndef SIMULATION      
       usleep(sleep_t);
-//#endif
+#endif
     }
     ///////////////////////////////////////////////
 	}

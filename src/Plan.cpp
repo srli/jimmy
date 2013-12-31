@@ -154,6 +154,14 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 	int s = step->side;
 	if(steps[s].size() > 0) {	//if not initializing
+		Step *prev = allSteps.back();
+		double prevInside[2] = {-sin(prev->yaw), cos(prev->yaw)};
+		if(prev->side == LEFT) {
+			prevInside[0] = -prevInside[0];
+			prevInside[1] = -prevInside[1];
+		}
+
+
 		step->adjustClearOf(allSteps.back());
 		steps[s].back()->lo = step->td-SS_TIME;		//previous step now ends
 		foot[s][X].addMove(steps[s].back()->lo, step->td, step->x);
@@ -165,12 +173,19 @@ void Plan::addStep(Step *step, double extraTraj) {
 		footPitch[s].addMove(steps[s].back()->lo+LO_TIME/2.0, steps[s].back()->lo+LO_TIME, -0.2, Linear);
 		footPitch[s].addMove(step->td-TD_TIME, step->td, 0.0, Linear);
 		footYaw[s].addMove(steps[s].back()->lo, step->td, step->yaw);
+		//pause a bit
+		zmp_d[X].addKnot(step->td-SS_TIME-DS_TIME/4.0, allSteps.back()->x+prevInside[X]*0.01);
+		zmp_d[Y].addKnot(step->td-SS_TIME-DS_TIME/4.0, allSteps.back()->y+prevInside[Y]*0.01);
 		//beginning of SS
-		zmp_d[X].addKnot(step->td-SS_TIME-DS_TIME/4.0, allSteps.back()->x);
-		zmp_d[Y].addKnot(step->td-SS_TIME-DS_TIME/4.0, allSteps.back()->y);
+		zmp_d[X].addKnot(step->td-SS_TIME, allSteps.back()->x+prevInside[X]*0.01);
+		zmp_d[Y].addKnot(step->td-SS_TIME, allSteps.back()->y+prevInside[Y]*0.01);
+
+		//shift out a bit
+		zmp_d[X].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->x-prevInside[X]*0.01);
+		zmp_d[Y].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->y-prevInside[Y]*0.01);
 		//end of SS
-		zmp_d[X].addKnot(step->td, allSteps.back()->x);
-		zmp_d[Y].addKnot(step->td, allSteps.back()->y);
+		zmp_d[X].addKnot(step->td, allSteps.back()->x-prevInside[X]*0.01);
+		zmp_d[Y].addKnot(step->td, allSteps.back()->y-prevInside[Y]*0.01);
 
 
 		//absurd hack: hip roll offset

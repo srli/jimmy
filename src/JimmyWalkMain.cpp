@@ -6,9 +6,56 @@
 
 #include <ros/ros.h>
 #include <ros/package.h>
+#include <boost/thread.hpp>
+#include <jimmy/jimmy_command.h>
+ 
+#define SIMULATION
 
-//#define SIMULATION
+///////////////////////////////////////////////////
+// ros stuff
+boost::mutex r_Lock;
+static double r_vFwd = 0;
+static double r_vLeft = 0;
+static double r_dTheta = 0;
+static int r_mode = 0;
+static double r_neckEAd[3] = {0};
 
+ros::Publisher pub_feedback;
+
+void jimmyCMDCallback(const jimmy::jimmy_command &msg)
+{
+  boost::mutex::scoped_lock lock(r_Lock);
+  
+  int newMode = msg.cmd;
+  
+  // walk commands
+  if (newMode == jimmy::jimmy_command::CMD_WALK) {
+    if (msg.param.size() != 3) {
+      printf("wrong number of walk params %lu\n", msg.param.size());
+      return;
+    }
+    r_vFwd = msg.param[0];
+    r_vLeft = msg.param[1];
+    r_dTheta = msg.param[2];
+    r_mode = newMode;
+  }
+  // neck commands
+  else if (newMode == jimmy::jimmy_command::CMD_NECK) {
+    if (msg.param.size() != 3) {
+      printf("wrong number of neck params %lu\n", msg.param.size());
+      return;
+    }
+    for (int i = 0; i < 3; i++)
+      r_neckEAd[i] = msg.param[i];
+    r_mode = newMode;
+  }
+  else if (newMode == jimmy::jimmy_command::CMD_SAVE_AND_QUIT || 
+           newMode == jimmy::jimmy_command::CMD_IDLE ||
+           newMode >= jimmy::jimmy_command::CMD_GESTURE_START)
+    r_mode = newMode;
+}
+///////////////////////////////////////////////////
+ 
 Plan plan;
 Logger logger;
 IKcmd IK_d;
@@ -72,27 +119,40 @@ static double modeDur;		//intended duration of current mode
 
 static double vForward, vLeft, dTheta;
 
-bool isReady() {
-	//TODO: wait until arbotix has moved robot to stand-prep
-	return true;
-}
-
 int getCommand() {
-	//TODO: have some way for these commands to arrive from outside
-
+  /*
 	if(curTime > 25.0)	return -1;
 	//if(curTime > 7.0 && curTime < 120)		return 1;
 	if(curTime > 7 && curTime < 7.1)		return 2;
+  */
 
+  boost::mutex::scoped_lock lock(r_Lock);
+  if (r_mode == jimmy::jimmy_command::CMD_NECK)
+    return 0;
+  if (r_mode == jimmy::jimmy_command::CMD_SAVE_AND_QUIT)
+    return -1;
+  if (r_mode == jimmy::jimmy_command::CMD_IDLE)
+    return 0;
+  if (r_mode == jimmy::jimmy_command::CMD_WALK)
+    return 1;
+  if (r_mode >= jimmy::jimmy_command::CMD_GESTURE_START)
+    return jimmy::jimmy_command::CMD_GESTURE_START;
 
-	return 0;
+  // should never happen
+  return 0;
 }
 
-void getDriveCommand(double *vForward, double *vLeft, double *dTheta) {
-	*vForward = 0.005;
-	*vLeft = 0.00;
-	*dTheta = 0.0;
-	//TODO: implement retrieving these command from the user
+void getDriveCommand(double *vFwd, double *vLef, double *dYaw) {
+  /*
+	*vFwd = 0.005;
+	*vLef = 0.00;
+	*dYaw = 0.0;
+  */
+ 
+  boost::mutex::scoped_lock lock(r_Lock);
+  *vFwd = r_vFwd;
+  *vLef = r_vLeft;
+  *dYaw = r_dTheta;
 }
 
 void constrainDriveCommand(double *vForward, double *vLeft, double *dTheta) {
@@ -101,9 +161,18 @@ void constrainDriveCommand(double *vForward, double *vLeft, double *dTheta) {
 }
 
 void getNeckCommand(double *EAs) {
+  /*
 	double EAsd[3] = {0,0,0};		//desired velocities
-	//TODO: fetch desired velocities from user
 	for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;	//integrate
+	for(int i = 0; i < 3; i++) {						//limit
+		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
+		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
+	}
+  */
+
+  boost::mutex::scoped_lock lock(r_Lock);
+  for(int i = 0; i < 3; i++)	
+    EAs[i] += r_neckEAd[i]*plan.TIME_STEP;	//integrate
 	for(int i = 0; i < 3; i++) {						//limit
 		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
 		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
@@ -540,7 +609,25 @@ void controlLoop() {
 	}
 }
 
-int main( int argc, char **argv ) {
+int main( int argc, char **argv ) 
+{
+  ////////////////////////////////////////////////////
+  // ros stuff
+  ros::init(argc, argv, "jimmy_walk", ros::init_options::NoSigintHandler);
+  ros::NodeHandle rosnode = ros::NodeHandle();
+
+  ros::Time last_ros_time_;
+  bool wait = true;
+  while (wait) {
+    last_ros_time_ = ros::Time::now();
+    if (last_ros_time_.toSec() > 0) {
+      wait = false;
+    }
+  }
+
+  ros::Subscriber subcommand = rosnode.subscribe("/jimmy/jimmy_command", 10, jimmyCMDCallback);
+  //////////////////////////////////////////////////// 
+
 	wallClockStart = get_time();
 	init();
 	
@@ -573,6 +660,10 @@ int main( int argc, char **argv ) {
 		}
 
     ///////////////////////////////////////////////
+    // proc ros msg
+    ros::spinOnce();
+
+    ///////////////////////////////////////////////
     // wait
     double wall1 = get_time();
     double dt = wall1 - wallNow;
@@ -584,9 +675,9 @@ int main( int argc, char **argv ) {
     else {
       timeQuota = plan.TIME_STEP;
       int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
-#ifndef SIMULATION      
+//#ifndef SIMULATION      
       usleep(sleep_t);
-#endif
+//#endif
     }
     ///////////////////////////////////////////////
 	}

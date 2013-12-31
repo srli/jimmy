@@ -207,15 +207,21 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 
 		//absurd hack: hip roll offset
-		double hrOffset = 0.045;
+		double hrOffset = 0.2;
 		double hrwOffset = -0.12;
 		if(s == RIGHT) {
-			hrOffset = -hrOffset;
+			hrOffset = -0.045;
 			hrwOffset = -hrwOffset;
 		}
 		//stance
 		jointOffset[8-s*6].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -hrOffset, Linear);
 		jointOffset[8-s*6].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+    if (s == LEFT) {
+		  jointOffset[R_HFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.15, Linear);
+		  jointOffset[R_HFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+		  jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.02, Linear);
+		  jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+    }
 		//swing
 		jointOffset[2+s*6].addMove(steps[s].back()->lo+LO_TIME/2., steps[s].back()->lo+LO_TIME, -hrwOffset, Linear);
 		jointOffset[2+s*6].addMove(step->td, step->td+DS_TIME/3.0, 0, Linear);

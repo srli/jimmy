@@ -86,7 +86,7 @@ int getCommand() {
 }
 
 void getDriveCommand(double *vForward, double *vLeft, double *dTheta) {
-	*vForward = 0.00;
+	*vForward = 0.0;
 	*vLeft = 0.00;
 	*dTheta = 0.0;
 	//TODO: implement retrieving these command from the user

@@ -40,6 +40,9 @@ rosbuild_add_executable(test_jimmy src/JimmyWalkMain.cpp)
 rosbuild_add_executable(test_serial src/test_as_client.cpp)
   target_link_libraries(test_serial jimmylib rt dxl)
 
+rosbuild_add_executable(test_puppet src/test_puppet.cpp)
+  target_link_libraries(test_puppet jimmylib rt dxl)
+
 #rosbuild_add_executable(test_lipm src/lipm_test.cpp)
 #  target_link_libraries(test_lipm jimmylib rt dxl)
 

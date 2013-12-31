@@ -171,7 +171,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 		foot[s][Z].addKnot(steps[s].back()->lo+LO_TIME, SWING_HEIGHT, 0.0);				//remainder of liftoff
 		foot[s][Z].addMove(step->td-TD_TIME, step->td, 0.04, Linear);						//put foot down (mostly)
 		foot[s][Z].addKnot(step->td+DS_TIME/2.0, 0.0);								//finish putting it down
-		footPitch[s].addMove(steps[s].back()->lo+LO_TIME/2.0, steps[s].back()->lo+LO_TIME, -0.2, Linear);
+		footPitch[s].addMove(steps[s].back()->lo+LO_TIME/2.0, steps[s].back()->lo+LO_TIME, -0.1, Linear);
 		footPitch[s].addMove(step->td-TD_TIME, step->td, 0.0, Linear);
 		footYaw[s].addMove(steps[s].back()->lo, step->td, step->yaw);
 		//pause a bit
@@ -211,13 +211,21 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 		//absurd asymmetric hack: right hip and knee offset
 		if(s == LEFT) {
-			jointOffset[R_KFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/4.0, -0.04, Linear);
+			jointOffset[R_KFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/4.0, -0.0, Linear);
 			jointOffset[R_KFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
 			jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.0, Linear);
 			jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
 		}
-
-		double bRoll = ROLL_AMPLITUDE;
+    
+    //absurd asymmetric hack: right hip and knee offset
+		if(s == RIGHT) {
+			jointOffset[L_KFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/4.0, -0.0, Linear);
+			jointOffset[L_KFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+			jointOffset[L_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, 0.02, Linear);
+			jointOffset[L_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+		}
+		
+    double bRoll = ROLL_AMPLITUDE;
 		if(step->side == RIGHT)		bRoll = -bRoll;
 		bodyRoll.addKnot(step->td-SS_TIME, bRoll, 0);
 		bodyRoll.addKnot(step->td, bRoll, 0);

@@ -300,7 +300,7 @@ void Plan::initFeet(double lx, double ly, double lYaw, double rx, double ry, dou
 	prevTDind = 0;
 	nextTD = LEFT;
 	endTime = std::numeric_limits<double>::infinity();
-	bodyPitch.addKnot(1.5, 0.1, 0);
+	bodyPitch.addKnot(1.5, 0.15, 0);
 	zmp_d[X].overRideType = Cubic;
 	zmp_d[Y].overRideType = Cubic;
 	foot[LEFT][Z].overRideType = Cubic;

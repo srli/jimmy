@@ -121,8 +121,8 @@ static double vForward, vLeft, dTheta;
 
 int getCommand() {
   /*
-	if(curTime > 25.0)	return -1;
-	//if(curTime > 7.0 && curTime < 120)		return 1;
+	if(curTime > 10)	return -1;
+	if(curTime > 7.0 && curTime < 120)		return 1;
 	if(curTime > 7 && curTime < 7.1)		return 2;
   */
 
@@ -609,6 +609,27 @@ void controlLoop() {
 	}
 }
 
+int sleep_t = 1e4;
+double t_pre_sleep = 0;
+double t_aft_sleep = 0;
+double t_real_sleep = 0;
+
+
+void spin_wait(double dt)
+{
+  double t0 = get_time();
+  int spin = 1;
+  int ctr = 0;
+  while(spin) {
+    if (get_time() - t0 < dt) {
+      ctr++;
+    }
+    else
+      spin = 0;
+  }
+  return;
+}
+
 int main( int argc, char **argv ) 
 {
   ////////////////////////////////////////////////////
@@ -627,6 +648,8 @@ int main( int argc, char **argv )
 
   ros::Subscriber subcommand = rosnode.subscribe("/jimmy/jimmy_command", 10, jimmyCMDCallback);
   //////////////////////////////////////////////////// 
+  /*
+  */
 
 	wallClockStart = get_time();
 	init();
@@ -635,7 +658,10 @@ int main( int argc, char **argv )
   double timeQuota = plan.TIME_STEP;
 	
   wallClockLast = get_time();
-	
+	logger.add_datapoint("sleep_time", "us", &sleep_t);
+	logger.add_datapoint("sleep_time_real", "s", &t_real_sleep);
+
+
   while(true) {
 		double wallNow = get_time();
 		wallClockT = wallNow-wallClockStart;
@@ -674,9 +700,12 @@ int main( int argc, char **argv )
     }
     else {
       timeQuota = plan.TIME_STEP;
-      int sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
+      sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
 #ifndef SIMULATION      
+      //t_pre_sleep = get_time();
       usleep(sleep_t);
+      //t_real_sleep = get_time() - t_pre_sleep;
+      //spin_wait(sleep_t / 1e6);
 #endif
     }
     ///////////////////////////////////////////////

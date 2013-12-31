@@ -7,7 +7,8 @@
 #include "IK.h"
 #include "TrajEW.h"
 
-
+static const double armsDown[8] = {-0.33, -1.14, 1.03, -1.42, -0.33, 1.14, 1.03, 1.42};
+static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
 
 void Plan::clearForRecord() {
 	for(int i = 0; i < 3; i++) {
@@ -187,6 +188,13 @@ void Plan::addStep(Step *step, double extraTraj) {
 		zmp_d[X].addKnot(step->td, allSteps.back()->x-prevInside[X]*0.01);
 		zmp_d[Y].addKnot(step->td, allSteps.back()->y-prevInside[Y]*0.01);
 
+		for(int i = 0; i < 4; i++) {
+			armTraj[i+4*s].addKnot(step->td-SS_TIME, armsDown[i+4*s], 0.0);
+			armTraj[i+4*s].addKnot(step->td, armsDown[i+4*s], 0.0);
+			armTraj[i+4-4*s].addKnot(step->td-SS_TIME, armsOut[i+4-4*s], 0.0);
+			armTraj[i+4-4*s].addKnot(step->td, armsOut[i+4-4*s], 0.0);
+		}
+
 
 		//absurd hack: hip roll offset
 		double hrOffset = 0.045;
@@ -300,6 +308,7 @@ void Plan::clearVectors() {
 	bodyPitch.clear();
 
 	for(int i = 0; i < 23; i++)	jointOffset[i].clear();
+	for(int i = 0; i < 8; i++)	armTraj[i].clear();
 }
 
 void Plan::printSteps(char *fileName) {
@@ -398,5 +407,7 @@ void Plan::fillIK_d(IKcmd &IK_d, double t) {
 		double footEA[3] = {0.0, footPitch[s].readPos(t), footYaw[s].readPos(t)};
 		IK_d.footQ[s] = EA2quat(footEA);
 	}
+
+	for(int i = 0; i < 8; i++)	IK_d.armJoints[i] = armTraj[i].readPos(t);
 }
 

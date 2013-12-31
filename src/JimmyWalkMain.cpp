@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-//#define SIMULATION
+#define SIMULATION
 
 Plan plan;
 Logger logger;
@@ -166,6 +166,8 @@ void initGesture(int gesture) {
 	modeDur = totTime;
 }
 
+static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
+
 void initWalk() {
 	plan.initFeet(IK.ikrs.foot[LEFT][X], IK.ikrs.foot[LEFT][Y], getYaw(IK.ikrs.footQ[LEFT]), IK.ikrs.foot[RIGHT][X], IK.ikrs.foot[RIGHT][Y], getYaw(IK.ikrs.footQ[RIGHT]));
 	for(int i = 0; i < 2; i++) {
@@ -178,6 +180,8 @@ void initWalk() {
 	plan.bodyPitch.addKnot(0, startEA[1], 0);
 	for(int s = 0; s < 2; s++)	plan.footPitch[s].addKnot(0, 0, 0);
 	for(int i = 0; i < 23; i++)	plan.jointOffset[i].addKnot(0, 0, 0);
+	for(int i = 0; i < 8; i++)	plan.armTraj[i].addKnot(0, IK_d.armJoints[i], 0);
+	for(int i = 0; i < 8; i++)	plan.armTraj[i].addKnot(plan.DS_TIME/2.0, armsOut[i], 0);
 }
 
 void loadPoses() {

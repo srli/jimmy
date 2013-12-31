@@ -162,6 +162,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 	if(steps[s].size() > 0) {	//if not initializing
 		Step *prev = allSteps.back();
 		double prevInside[2] = {-sin(prev->yaw), cos(prev->yaw)};
+		double prevForward[2] = {cos(prev->yaw), sin(prev->yaw)};
 		if(prev->side == LEFT) {
 			prevInside[0] = -prevInside[0];
 			prevInside[1] = -prevInside[1];
@@ -186,12 +187,16 @@ void Plan::addStep(Step *step, double extraTraj) {
 		zmp_d[X].addKnot(step->td-SS_TIME, allSteps.back()->x+prevInside[X]*0.01);
 		zmp_d[Y].addKnot(step->td-SS_TIME, allSteps.back()->y+prevInside[Y]*0.01);
 
+		//halfway through LO
+		zmp_d[X].addKnot(step->td-SS_TIME+LO_TIME/2.0, allSteps.back()->x+prevInside[X]*0.01);
+		zmp_d[Y].addKnot(step->td-SS_TIME+LO_TIME/2.0, allSteps.back()->y+prevInside[Y]*0.01);
+
 		//shift out a bit
-		zmp_d[X].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->x-prevInside[X]*0.01);
-		zmp_d[Y].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->y-prevInside[Y]*0.01);
+		zmp_d[X].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->x-prevInside[X]*0.01-prevForward[X]*0.01);
+		zmp_d[Y].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->y-prevInside[Y]*0.01-prevForward[X]*0.01);
 		//end of SS
-		zmp_d[X].addKnot(step->td, allSteps.back()->x-prevInside[X]*0.01);
-		zmp_d[Y].addKnot(step->td, allSteps.back()->y-prevInside[Y]*0.01);
+		zmp_d[X].addKnot(step->td, allSteps.back()->x-prevInside[X]*0.01-prevForward[X]*0.01);
+		zmp_d[Y].addKnot(step->td, allSteps.back()->y-prevInside[Y]*0.01-prevForward[X]*0.01);
 
 		for(int i = 0; i < 4; i++) {
 			armTraj[i+4*s].addKnot(step->td-SS_TIME, armsDown[i+4*s], 0.0);
@@ -383,6 +388,9 @@ void Plan::stopHere() {
 	zmp_d[Y].addKnot(s->td+DS0_TIME, (s->y+prev->y)/2.0);
 	bodyRoll.addKnot(s->td+DS0_TIME, 0.0);
 	bodyPitch.addMove(s->td+DS0_TIME-1.5, s->td+DS0_TIME, 0.0, Cubic);
+
+	for(int i = 0; i < 3; i++)	neckTraj[i].addKnot(s->td+DS0_TIME, 0.0, 0.0);
+	for(int i = 0; i < 8; i++)	armTraj[i].addKnot(s->td+DS0_TIME, armsOut[i], 0.0);
 
 	addStep(s, DS0_TIME+0.1);	//0.1 for buffer; DS0_TIME is time to return to symmetric DS
 

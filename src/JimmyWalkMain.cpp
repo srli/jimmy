@@ -566,7 +566,7 @@ void controlLoop() {
 		double thetad_d[N_J+3];
 		IK.IK(IK_d, theta_d, thetad_d);
 
-		for(int i = 0; i < 23; i++)	theta_d[i]+=plan.jointOffset[i].readPos(modeTime);		
+		if(mode == WALK)	for(int i = 0; i < 23; i++)	theta_d[i]+=plan.jointOffset[i].readPos(modeTime);		
 
 		double stance = 2;
 		if(IK_d.foot[LEFT][Z] - IK_d.foot[RIGHT][Z] > 0.01)	stance = RIGHT;

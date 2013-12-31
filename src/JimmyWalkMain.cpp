@@ -504,8 +504,8 @@ void controlLoop() {
 			bool limp = false;
 			if(IK_d.footd[s][Z] < 0)	limp = true;
 			if(limp != prevLimp[s]) {
-				if(limp)	utils.setPGain(0, 5+6*s);
-				else		utils.setPGain(120, 5+6*s);
+				if(limp)	utils.setTorqueLimit(0, 5+6*s); //utils.setPGain(0, 5+6*s);
+				else		utils.setTorqueLimit(1023, 5+6*s); //utils.setPGain(120, 5+6*s);
 			}
 			prevLimp[s] = limp;
 		}

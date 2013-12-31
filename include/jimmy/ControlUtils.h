@@ -12,6 +12,8 @@
 #define ADDR_PRESENT_POSITION_H	     37
 #define ADDR_GOAL_SPEED_L		         32
 #define ADDR_GOAL_SPEED_H		         33
+#define ADDR_TRQ_LIM_L               34
+#define ADDR_TRQ_LIM_H               35
 
 #define ADDR_P_GAIN                  28
 #define ADDR_I_GAIN                  27
@@ -86,6 +88,8 @@ class ControlUtils
     inline bool getDGains(int8_t gains[TOTAL_JOINTS]) { return getAllBytes(gains, ADDR_D_GAIN); }
     inline bool getThermalMax(int8_t m[TOTAL_JOINTS]) { return getAllBytes(m, ADDR_THERMAL_MAX); }
     inline bool getCurTemperature(int8_t t[TOTAL_JOINTS]) { return getAllBytes(t, ADDR_PRESENT_TEMPERATURE); }
+
+    bool setTorqueLimit(int16_t lim, int joint);
 
     bool setStanceGain(int side);
 

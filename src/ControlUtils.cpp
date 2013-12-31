@@ -368,7 +368,7 @@ const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
 
 const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
 	-1,  1, -1, -1,  1, -1,
-	-1, -1,  1, -1,  1, -1,
+	-1, -1, -1, -1,  1, -1,
 	 1,  1, -1, -1,
 	-1,  1,  1, -1,
    1,  1,  1

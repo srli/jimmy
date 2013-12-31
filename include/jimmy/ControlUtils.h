@@ -38,9 +38,9 @@ class ControlUtils
 
   public:
     enum CMD_TYPE {
-      P_GAIN = 0,
+      D_GAIN = 0,
       I_GAIN,
-      D_GAIN,
+      P_GAIN,
     };
 
     int16_t ticks_to[TOTAL_JOINTS];
@@ -68,6 +68,13 @@ class ControlUtils
     bool getLegJointsCircular(double j[TOTAL_JOINTS]);
     bool getJoints(double j[TOTAL_JOINTS]);
     bool setJoints(const double j[TOTAL_JOINTS]);
+
+    inline bool setPGain(int8_t gain, int joint) { return setByte(gain, ADDR_P_GAIN, joint); }
+    inline bool getPGain(int8_t *gain, int joint) { return getByte(gain, ADDR_P_GAIN, joint); }
+    inline bool setIGain(int8_t gain, int joint) { return setByte(gain, ADDR_I_GAIN, joint); }
+    inline bool getIGain(int8_t *gain, int joint) { return getByte(gain, ADDR_I_GAIN, joint); }
+    inline bool setDGain(int8_t gain, int joint) { return setByte(gain, ADDR_D_GAIN, joint); }
+    inline bool getDGain(int8_t *gain, int joint) { return getByte(gain, ADDR_D_GAIN, joint); }
 
     inline bool setPGains(const int8_t gains[TOTAL_JOINTS]) { return setAllBytes(gains, ADDR_P_GAIN); }
     inline bool setIGains(const int8_t gains[TOTAL_JOINTS]) { return setAllBytes(gains, ADDR_I_GAIN); }

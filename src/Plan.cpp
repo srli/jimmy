@@ -10,6 +10,11 @@
 static const double armsDown[8] = {-0.33, -1.14, 1.03, -1.42, -0.33, 1.14, 1.03, 1.42};
 static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
 
+static const double neckLean[2][3] = {
+	{0, 0.25, 0.7},
+	{0, -0.7, -0.25}
+};
+
 void Plan::clearForRecord() {
 	for(int i = 0; i < 3; i++) {
 		nomPlanForRecord[i] = 0.0;
@@ -195,6 +200,11 @@ void Plan::addStep(Step *step, double extraTraj) {
 			armTraj[i+4-4*s].addKnot(step->td, armsOut[i+4-4*s], 0.0);
 		}
 
+		for(int i = 0; i < 3; i++) {
+			neckTraj[i].addKnot(step->td-SS_TIME, neckLean[1-s][i], 0.0);
+			neckTraj[i].addKnot(step->td, neckLean[1-s][i], 0.0);
+		}
+
 
 		//absurd hack: hip roll offset
 		double hrOffset = 0.045;
@@ -317,6 +327,7 @@ void Plan::clearVectors() {
 
 	for(int i = 0; i < 23; i++)	jointOffset[i].clear();
 	for(int i = 0; i < 8; i++)	armTraj[i].clear();
+	for(int i = 0; i < 3; i++)	neckTraj[i].clear();
 }
 
 void Plan::printSteps(char *fileName) {

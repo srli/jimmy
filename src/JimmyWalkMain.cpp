@@ -181,7 +181,9 @@ void initWalk() {
 	for(int s = 0; s < 2; s++)	plan.footPitch[s].addKnot(0, 0, 0);
 	for(int i = 0; i < 23; i++)	plan.jointOffset[i].addKnot(0, 0, 0);
 	for(int i = 0; i < 8; i++)	plan.armTraj[i].addKnot(0, IK_d.armJoints[i], 0);
-	for(int i = 0; i < 8; i++)	plan.armTraj[i].addKnot(plan.DS_TIME/2.0, armsOut[i], 0);
+	for(int i = 0; i < 8; i++)	plan.armTraj[i].addKnot(plan.DS_TIME/2.0, armsOut[i], 0);	//get clear
+	for(int i = 0; i < 3; i++)	plan.neckTraj[i].addKnot(0, theta_d[i+20], 0);
+	for(int i = 0; i < 3; i++)	plan.neckTraj[i].addKnot(plan.DS_TIME/2.0, 0.0, 0);		//center
 }
 
 void loadPoses() {
@@ -513,11 +515,15 @@ void controlLoop() {
 			}
 			prevLimp[s] = limp;
 		}
-
-		//conversion from RPY to angles
-		theta_d[N_J] = neckEAs[2];
-		theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
-		theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
+		if(mode == WALK) {
+			for(int i = 0; i < 3; i++)	theta_d[20+i] = plan.neckTraj[i].readPos(modeTime);
+		}
+		else {
+			//conversion from RPY to angles
+			theta_d[N_J] = neckEAs[2];
+			theta_d[N_J+1] = neckEAs[1]+neckEAs[0];
+			theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
+		}
 
 		//limit angles
 		for(int i = 0; i < 3; i++) {

@@ -59,6 +59,7 @@ public:
 	TrajEW jointOffset[23];
 
 	TrajEW armTraj[8];
+	TrajEW neckTraj[3];
 
 	std::vector<double> zmpVec[2];
 	std::vector<double> com[2];

@@ -7,6 +7,12 @@
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048
 
+bool ControlUtils::setTorqueLimit(int16_t lim, int joint)
+{
+  dxl_write_word(_id[joint], ADDR_TRQ_LIM_L, lim);
+  return (dxl_get_result() == COMM_RXSUCCESS);
+}
+
 bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
 {
   int ctr = 0;

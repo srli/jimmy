@@ -80,16 +80,16 @@ bool isReady() {
 int getCommand() {
 	//TODO: have some way for these commands to arrive from outside
 
-	if(curTime > 25.0)	return -1;
-	//if(curTime > 7.0 && curTime < 120)		return 1;
-	if(curTime > 7 && curTime < 7.1)		return 2;
+	if(curTime > 62.5)	return -1;
+	if(curTime > 7.0 && curTime < 120)		return 1;
+	//if(curTime > 7 && curTime < 7.1)		return 2;
 
 
 	return 0;
 }
 
 void getDriveCommand(double *vForward, double *vLeft, double *dTheta) {
-	*vForward = 0.005;
+	*vForward = 0.01;
 	*vLeft = 0.00;
 	*dTheta = 0.0;
 	//TODO: implement retrieving these command from the user

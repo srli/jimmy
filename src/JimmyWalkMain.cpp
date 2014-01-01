@@ -612,9 +612,14 @@ void controlLoop() {
 		}
 		if(mode == WALK) {
 			for(int i = 0; i < 3; i++)	theta_d[20+i] = plan.neckTraj[i].readPos(modeTime);
+			neckEAs[0] = (-neckAngs[2] - neckAngs[1])/2.0;
+			neckEAs[1] = ( neckAngs[2] - neckAngs[1])/2.0;
+			neckEAs[2] = neckAngs[0];
 		}
 		else if(mode == GESTURE) {
 			for(int i = 0; i < 3; i++)	theta_d[N_J+i] = neckAngs[i];
+			neckEAs[0] = (-neckAngs[2] - neckAngs[1])/2.0;
+			neckEAs[1] = ( neckAngs[2] - neckAngs[1])/2.0;
 			neckEAs[2] = neckAngs[0];
 		}
 		else {

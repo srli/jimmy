@@ -94,6 +94,7 @@ static double gestureTime[MAX_GESTURES][MAX_POSES_PER_GESTURE];
 static int gestureNpose[MAX_GESTURES];
 
 static double neckEAs[3];
+static double neckAngs[3];
 static double theta_d[N_J+3];
 
 static double joints_actual[TOTAL_JOINTS];
@@ -519,7 +520,7 @@ void walkCon() {
 
 void gestureCon() {
 	for(int i = 0; i < 8; i++) 	IK_d.armJoints[i] = gestureArms[i].readPos(modeTime);
-	for(int i = 0; i < 3; i++)	neckEAs[i] = gestureNeck[i].readPos(modeTime);
+	for(int i = 0; i < 3; i++)	neckAngs[i] = gestureNeck[i].readPos(modeTime);
 	for(int i = 0; i < 3; i++) {
 		gestureCoM[i].read(modeTime, &(IK_d.com[i]), &(IK_d.comd[i]), NULL);
 		IK_d.com[i] += (IK_d.foot[LEFT][i] + IK_d.foot[RIGHT][i])/2.0;
@@ -610,6 +611,10 @@ void controlLoop() {
 		}
 		if(mode == WALK) {
 			for(int i = 0; i < 3; i++)	theta_d[20+i] = plan.neckTraj[i].readPos(modeTime);
+		}
+		else if(mode == GESTURE) {
+			for(int i = 0; i < 3; i++)	theta_d[N_J+i] = neckAngs[i];
+			neckEAs[2] = neckAngs[0];
 		}
 		else {
 			//conversion from RPY to angles

@@ -192,11 +192,11 @@ void Plan::addStep(Step *step, double extraTraj) {
 		zmp_d[Y].addKnot(step->td-SS_TIME+LO_TIME/2.0, allSteps.back()->y+prevInside[Y]*0.01);
 
 		//shift out a bit
-		zmp_d[X].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->x-prevInside[X]*0.01-prevForward[X]*0.01);
-		zmp_d[Y].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->y-prevInside[Y]*0.01-prevForward[X]*0.01);
+		zmp_d[X].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->x-prevInside[X]*0.01-prevForward[X]*0.0);
+		zmp_d[Y].addKnot(step->td-SS_TIME+LO_TIME, allSteps.back()->y-prevInside[Y]*0.01-prevForward[X]*0.0);
 		//end of SS
-		zmp_d[X].addKnot(step->td, allSteps.back()->x-prevInside[X]*0.01-prevForward[X]*0.01);
-		zmp_d[Y].addKnot(step->td, allSteps.back()->y-prevInside[Y]*0.01-prevForward[X]*0.01);
+		zmp_d[X].addKnot(step->td, allSteps.back()->x-prevInside[X]*0.01-prevForward[X]*0.0);
+		zmp_d[Y].addKnot(step->td, allSteps.back()->y-prevInside[Y]*0.01-prevForward[X]*0.0);
 
 		for(int i = 0; i < 4; i++) {
 			armTraj[i+4*s].addKnot(step->td-SS_TIME, armsDown[i+4*s], 0.0);
@@ -221,22 +221,19 @@ void Plan::addStep(Step *step, double extraTraj) {
 		//stance
 		jointOffset[8-s*6].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -hrOffset, Linear);
 		jointOffset[8-s*6].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
-    if (s == LEFT) {
-		  jointOffset[R_HFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.15, Linear);
-		  jointOffset[R_HFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
-		  jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.02, Linear);
-		  jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
-    }
 		//swing
 		jointOffset[2+s*6].addMove(steps[s].back()->lo+LO_TIME/2., steps[s].back()->lo+LO_TIME, -hrwOffset, Linear);
 		jointOffset[2+s*6].addMove(step->td, step->td+DS_TIME/3.0, 0, Linear);
 
 		//absurd asymmetric hack: right hip and knee offset
 		if(s == LEFT) {
-			jointOffset[R_KFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/4.0, -0.0, Linear);
+      jointOffset[R_HFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.15, Linear);
+		  jointOffset[R_HFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+		  jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.02, Linear);
+		  jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear); 
+			
+      jointOffset[R_KFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/4.0, -0.0, Linear);
 			jointOffset[R_KFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
-			jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.0, Linear);
-			jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
 		}
     
     //absurd asymmetric hack: right hip and knee offset

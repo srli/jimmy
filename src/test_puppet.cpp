@@ -19,7 +19,7 @@ int main()
   std::vector<int16_t> ticks;
   for (int i = L_HZ; i <= R_AAA; i++) {
     joints.push_back(i);
-    ticks.push_back(rad2tick(standPrepPose[i], i));
+    ticks.push_back(utils.rad2tick(standPrepPose[i], i));
   }
   assert(utils.syncWriteWord(ADDR_GOAL_POSITION_L, joints, ticks));
 

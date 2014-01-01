@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     }
   }
 
-  ros::Publisher pub = rosnode.advertise<jimmy::jimmy_command>("/jimmy/jimmy_command", 10);
+  ros::Publisher pub = rosnode.advertise<jimmy::jimmy_command>("Jimmy_cmd", 10);
   jimmy::jimmy_command cmd;
 
   int type = atoi(argv[1]);

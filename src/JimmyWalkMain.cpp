@@ -13,8 +13,8 @@
 
 static const int8_t default_gain[TOTAL_JOINTS] = 
 {
-  32, 32, 32, 32, 32, 32,  
-  32, 32, 32, 32, 32, 32,  
+  32, 32, 60, 32, 60, 32,  
+  32, 32, 60, 32, 60, 32,  
   32, 32, 32, 32,
   32, 32, 32, 32,
   32, 32, 32
@@ -390,15 +390,9 @@ void init() {
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("max thermal %10s %d\n", RobotState::jointNames[i].c_str(), thermal_max[i]);
   
-  /*
 #ifndef SIMULATION
-  assert(utils.setPGains(p_gains));
-  assert(utils.getPGains(p_gains));
- 	assert(utils.setStanceGain(2));
+  assert(utils.setPGains(default_gain));
 #endif
-  for (int i = 0; i < TOTAL_JOINTS; i++)
-    printf("gains %10s %d\n", RobotState::jointNames[i].c_str(), p_gains[i]);
-  */
 
 	std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
 	plan = Plan(name.c_str());
@@ -689,7 +683,7 @@ int main( int argc, char **argv )
     }
   }
 
-  ros::Subscriber subcommand = rosnode.subscribe("/jimmy/jimmy_command", 10, jimmyCMDCallback);
+  ros::Subscriber subcommand = rosnode.subscribe("Jimmy_cmd", 10, jimmyCMDCallback);
   //////////////////////////////////////////////////// 
   /*
   */

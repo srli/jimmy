@@ -11,6 +11,23 @@
  
 //#define SIMULATION
 
+static const int8_t default_gain[TOTAL_JOINTS] = 
+{
+  32, 32, 32, 32, 32, 32,  
+  32, 32, 32, 32, 32, 32,  
+  32, 32, 32, 32,
+  32, 32, 32, 32,
+  32, 32, 32
+};
+
+static const int8_t walk_gain[TOTAL_JOINTS] = {
+  40, 60, 120, 60, 60, 120,
+  40, 60, 120, 60, 60, 120,
+  32, 32, 32, 32,
+  32, 32, 32, 32,
+  32, 32, 32
+};
+
 ///////////////////////////////////////////////////
 // ros stuff
 boost::mutex r_Lock;
@@ -363,22 +380,6 @@ void init() {
 	modeDur = 0.0;
 	for(int i = 0; i < 3; i++)		neckEAs[i] = 0.0;
 
-  // setting gains on robot
-  int8_t p_gains[TOTAL_JOINTS] = {
-    /*
-    42, 42, 42, 42, 42, 42,
-    42, 42, 42, 42, 42, 42,
-    42, 42, 42, 42,
-    42, 42, 42, 42,
-    42, 42, 42
-    */
-    40, 60, 120, 60, 60, 120,
-    40, 60, 120, 60, 60, 120,
-    60, 60, 60, 60, 
-    60, 60, 60, 60, 
-    60, 60, 60
-  };
-
   int8_t thermal_max[TOTAL_JOINTS] = {0};
   for (int i = 0; i < TOTAL_JOINTS; i++)
     thermal_max[i] = 60;
@@ -388,6 +389,8 @@ void init() {
 #endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("max thermal %10s %d\n", RobotState::jointNames[i].c_str(), thermal_max[i]);
+  
+  /*
 #ifndef SIMULATION
   assert(utils.setPGains(p_gains));
   assert(utils.getPGains(p_gains));
@@ -395,6 +398,7 @@ void init() {
 #endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("gains %10s %d\n", RobotState::jointNames[i].c_str(), p_gains[i]);
+  */
 
 	std::string name = ros::package::getPath("jimmy") + "/conf/plan.cf";
 	plan = Plan(name.c_str());
@@ -451,6 +455,7 @@ void stateMachine() {
 			modeT0 = curTime;
 			mode = GESTURE;
 			initGesture(command);
+      cleanCommand();
 			printf("IDLE to GESTURE\n");
 		}
 		break;
@@ -459,6 +464,11 @@ void stateMachine() {
 			modeT0 = curTime;
 			mode = WALK;
 			printf("PRE_WALK to WALK\n");
+#ifndef SIMULATION
+      assert(utils.setPGains(walk_gain));
+      assert(utils.setStanceGain(2));
+      printf("setting walking gain\n");
+#endif
 		}
 		break;
 	case WALK:
@@ -469,6 +479,8 @@ void stateMachine() {
 			modeT0 = curTime;
 			mode = IDLE;
 			printf("WALK to IDLE\n");
+      assert(utils.setPGains(default_gain));
+      printf("setting default gain\n");
 		}
 		break;
 	case GESTURE:

@@ -13,7 +13,16 @@ int main()
   std::string name = ros::package::getPath("jimmy") + "/scripts/puppte";
   std::ofstream out;
   out.open(name.c_str(), std::ofstream::out | std::ofstream::app);
-	
+
+  // set leg joints to stance, leave arms limp
+  std::vector<int> joints; 
+  std::vector<int16_t> ticks;
+  for (int i = L_HZ; i <= R_AAA; i++) {
+    joints.push_back(i);
+    ticks.push_back(utils.rad2tick(standPrepPose[i], i));
+  }
+  assert(utils.syncWriteWord(ADDR_GOAL_POSITION_L, joints, ticks));
+
   while(true) {
     getchar();
     

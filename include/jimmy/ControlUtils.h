@@ -31,13 +31,7 @@ class ControlUtils
   
     int _legIdx;
 
-    bool syncWriteByte(int8_t addr, const std::vector<int> &joints, const std::vector<int8_t> &val);
-    bool syncWriteWord(int8_t addr, const std::vector<int> &joints, const std::vector<int16_t> &val);
-    bool setByte(int8_t gain, int8_t addr, int joint);
-    bool getByte(int8_t *gain, int8_t addr, int joint);
-    bool setAllBytes(const int8_t val[TOTAL_JOINTS], int8_t addr);
-    bool getAllBytes(int8_t val[TOTAL_JOINTS], int8_t addr);
-
+    
   public:
     enum CMD_TYPE {
       D_GAIN = 0,
@@ -92,6 +86,13 @@ class ControlUtils
     bool setTorqueLimit(int16_t lim, int joint);
 
     bool setStanceGain(int side);
+
+    bool syncWriteByte(int8_t addr, const std::vector<int> &joints, const std::vector<int8_t> &val);
+    bool syncWriteWord(int8_t addr, const std::vector<int> &joints, const std::vector<int16_t> &val);
+    bool setByte(int8_t gain, int8_t addr, int joint);
+    bool getByte(int8_t *gain, int8_t addr, int joint);
+    bool setAllBytes(const int8_t val[TOTAL_JOINTS], int8_t addr);
+    bool getAllBytes(int8_t val[TOTAL_JOINTS], int8_t addr);
 
     static int16_t rad2tick(double r, int j);
     static double tick2rad(int16_t t, int j);

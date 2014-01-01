@@ -450,6 +450,7 @@ void stateMachine() {
 			modeT0 = curTime;
 			mode = GESTURE;
 			initGesture(command);
+      cleanCommand();
 			printf("IDLE to GESTURE\n");
 		}
 		break;

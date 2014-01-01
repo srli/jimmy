@@ -22,6 +22,18 @@ static double r_neckEAd[3] = {0};
 
 ros::Publisher pub_feedback;
 
+void cleanCommand()
+{
+  boost::mutex::scoped_lock lock(r_Lock);
+  r_vFwd = 0;
+  r_vLeft = 0;
+  r_dTheta = 0;
+  r_mode = 0;
+  r_neckEAd[0] = 0; 
+  r_neckEAd[1] = 0; 
+  r_neckEAd[2] = 0; 
+}
+
 void jimmyCMDCallback(const jimmy::jimmy_command &msg)
 {
   boost::mutex::scoped_lock lock(r_Lock);
@@ -51,8 +63,10 @@ void jimmyCMDCallback(const jimmy::jimmy_command &msg)
   }
   else if (newMode == jimmy::jimmy_command::CMD_SAVE_AND_QUIT || 
            newMode == jimmy::jimmy_command::CMD_IDLE ||
-           newMode >= jimmy::jimmy_command::CMD_GESTURE_START)
+           newMode >= jimmy::jimmy_command::CMD_GESTURE_START) {
+    printf("\t\t%d\n", newMode);
     r_mode = newMode;
+  }
 }
 ///////////////////////////////////////////////////
  
@@ -136,7 +150,7 @@ int getCommand() {
   if (r_mode == jimmy::jimmy_command::CMD_WALK)
     return 1;
   if (r_mode >= jimmy::jimmy_command::CMD_GESTURE_START)
-    return jimmy::jimmy_command::CMD_GESTURE_START;
+    return r_mode;
 
   // should never happen
   return 0;
@@ -350,6 +364,13 @@ void init() {
 
   // setting gains on robot
   int8_t p_gains[TOTAL_JOINTS] = {
+    /*
+    42, 42, 42, 42, 42, 42,
+    42, 42, 42, 42, 42, 42,
+    42, 42, 42, 42,
+    42, 42, 42, 42,
+    42, 42, 42
+    */
     40, 60, 120, 60, 60, 120,
     40, 60, 120, 60, 60, 120,
     60, 60, 60, 60, 

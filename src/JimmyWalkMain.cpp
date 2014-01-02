@@ -475,6 +475,7 @@ void stateMachine() {
 			printf("WALK to IDLE\n");
       assert(utils.setPGains(default_gain));
       printf("setting default gain\n");
+      cleanCommand();
 		}
 		break;
 	case GESTURE:

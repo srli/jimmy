@@ -178,7 +178,10 @@ void Plan::addStep(Step *step, double extraTraj) {
 		foot[s][Z].addMove(step->td-TD_TIME, step->td, 0.04, Linear);						//put foot down (mostly)
 		foot[s][Z].addKnot(step->td+DS_TIME/2.0, 0.0);								//finish putting it down
 		footPitch[s].addMove(steps[s].back()->lo+LO_TIME/2.0, steps[s].back()->lo+LO_TIME, -0.1, Linear);
-		footPitch[s].addMove(step->td-TD_TIME, step->td, 0.0, Linear);
+		if (s == LEFT)
+      footPitch[s].addMove(step->td, step->td+DS_TIME/2., 0.0, Linear);
+    else
+  		footPitch[s].addMove(step->td-TD_TIME, step->td, 0.0, Linear);
 		footYaw[s].addMove(steps[s].back()->lo, step->td, step->yaw);
 		//pause a bit
 		zmp_d[X].addKnot(step->td-SS_TIME-DS_TIME/4.0, allSteps.back()->x+prevInside[X]*0.01);
@@ -227,10 +230,10 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 		//absurd asymmetric hack: right hip and knee offset
 		if(s == LEFT) {
-      //jointOffset[R_HFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.07, Linear);
-		  //jointOffset[R_HFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
-		  jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.02, Linear);
-		  jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear); 
+      jointOffset[R_HFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, 0.12, Linear);
+		  jointOffset[R_HFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+		  //jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.02, Linear);
+		  //jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear); 
 			
       jointOffset[R_KFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/4.0, -0.0, Linear);
 			jointOffset[R_KFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
@@ -383,8 +386,8 @@ void Plan::stopHere() {
 	}
 	double forwardVec[2] = {cos(s->yaw), sin(s->yaw)};
 
-	zmp_d[X].addKnot(s->td+DS0_TIME, (s->x+prev->x)/2.0+forwardVec[X]*0.01);
-	zmp_d[Y].addKnot(s->td+DS0_TIME, (s->y+prev->y)/2.0+forwardVec[Y]*0.01);
+	zmp_d[X].addKnot(s->td+DS0_TIME, (s->x+prev->x)/2.0+forwardVec[X]*0.0);
+	zmp_d[Y].addKnot(s->td+DS0_TIME, (s->y+prev->y)/2.0+forwardVec[Y]*0.0);
 	bodyRoll.addKnot(s->td+DS0_TIME, 0.0);
 	bodyPitch.addMove(s->td+DS0_TIME-1.5, s->td+DS0_TIME, 0.0, Cubic);
 

@@ -212,7 +212,7 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 
 		//absurd hack: hip roll offset
-		double hrOffset = 0.2;
+		double hrOffset = 0.045;
 		double hrwOffset = -0.12;
 		if(s == RIGHT) {
 			hrOffset = -0.045;
@@ -227,8 +227,8 @@ void Plan::addStep(Step *step, double extraTraj) {
 
 		//absurd asymmetric hack: right hip and knee offset
 		if(s == LEFT) {
-      jointOffset[R_HFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.15, Linear);
-		  jointOffset[R_HFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
+      //jointOffset[R_HFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.07, Linear);
+		  //jointOffset[R_HFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear);
 		  jointOffset[R_AFE].addMove(steps[s].back()->lo, steps[s].back()->lo+LO_TIME/2.0, -0.02, Linear);
 		  jointOffset[R_AFE].addMove(step->td-TD_TIME/2.0, step->td, 0, Linear); 
 			

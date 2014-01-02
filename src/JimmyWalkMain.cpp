@@ -740,9 +740,9 @@ int main( int argc, char **argv )
       sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
 #ifndef SIMULATION      
       //t_pre_sleep = get_time();
-      usleep(sleep_t);
+      //usleep(sleep_t);
       //t_real_sleep = get_time() - t_pre_sleep;
-      //spin_wait(sleep_t / 1e6);
+      spin_wait(sleep_t / 1e6);
 #endif
     }
     ///////////////////////////////////////////////

@@ -381,8 +381,10 @@ void Plan::stopHere() {
 	else {
 		s = new Step(prev->x-sin(yaw)*STANCE_WIDTH, prev->y+cos(yaw)*STANCE_WIDTH, yaw, prev->td+DS_TIME+SS_TIME, LEFT);
 	}
-	zmp_d[X].addKnot(s->td+DS0_TIME, (s->x+prev->x)/2.0);
-	zmp_d[Y].addKnot(s->td+DS0_TIME, (s->y+prev->y)/2.0);
+	double forwardVec[2] = {cos(s->yaw), sin(s->yaw)};
+
+	zmp_d[X].addKnot(s->td+DS0_TIME, (s->x+prev->x)/2.0+forwardVec[X]*0.01);
+	zmp_d[Y].addKnot(s->td+DS0_TIME, (s->y+prev->y)/2.0+forwardVec[Y]*0.01);
 	bodyRoll.addKnot(s->td+DS0_TIME, 0.0);
 	bodyPitch.addMove(s->td+DS0_TIME-1.5, s->td+DS0_TIME, 0.0, Cubic);
 

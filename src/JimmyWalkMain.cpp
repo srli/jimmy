@@ -469,7 +469,7 @@ void stateMachine() {
 		if(getCommand() == 0) {
 			plan.stopHere();
 		}
-		if(plan.isDone(modeTime)) {
+		if(plan.isDone(modeTime) || modeTime > 36) {
 			modeT0 = curTime;
 			mode = IDLE;
 			printf("WALK to IDLE\n");

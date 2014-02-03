@@ -1,6 +1,8 @@
 logger 
-  needs mrdplot, can ignore if you dont want it.
+  data saved in mrdplot format, use the matlab scripts in src/mrdplot for 
+  plotting
 
+scripts/
 
 
 include/jimmy/

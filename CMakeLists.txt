@@ -34,15 +34,19 @@ include_directories("${PROJECT_SOURCE_DIR}/include/jimmy")
 add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "src/SDModel_common.cpp" "src/Jimmy.cpp" "src/Logger.cpp" "src/RobotState.cpp" "src/TrajEW.cpp" "src/mrdplot.c" "src/sdlib.c" "src/ControlUtils.cpp")
   set_target_properties(jimmylib PROPERTIES COMPILE_FLAGS "-O4")
 
+# walk program
 rosbuild_add_executable(test_jimmy src/JimmyWalkMain.cpp)
   target_link_libraries(test_jimmy jimmylib rt dxl)
 
+# test servo communication 
 rosbuild_add_executable(test_serial src/test_serial.cpp)
   target_link_libraries(test_serial jimmylib rt dxl)
 
+# used to pose the robot and grad joint position
 rosbuild_add_executable(test_puppet src/test_puppet.cpp)
   target_link_libraries(test_puppet jimmylib rt dxl)
 
+# send a command thourgh ros
 rosbuild_add_executable(test_send_ros_cmd src/test_send_ros_cmd.cpp)
   target_link_libraries(test_send_ros_cmd jimmylib rt dxl)
 

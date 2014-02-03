@@ -23,6 +23,15 @@ bool load_pose(std::ifstream &in)
   return true;
 }
 
+
+/*
+ * loads joint angles from home_of_jimmy/scripts/wiggle
+ * and play it on the robot. 
+ * Each joint is controlled by linearly interpolating from the start joint poition
+ * to the desired. 
+ *
+ * Press Enter to execute the next pose.
+ */
 int main()
 {
   ControlUtils utils;

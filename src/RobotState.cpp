@@ -84,6 +84,10 @@ RobotState::RobotState() {
 	computeSDFvars();
 }
 
+// generate a sdfast state with 
+//  root position, orientation, 
+//  linear and angular velocity,
+//  and all joint position and velocity
 double *RobotState::getSDFstate(double *sdState) {
 	// copy joint pos and vel
 	memcpy(sdState+6, joints, sizeof(double)*N_JOINTS);
@@ -102,6 +106,7 @@ double *RobotState::getSDFstate(double *sdState) {
 	return sdState;
 }
 
+// computes forward kinematics and Jacobian for vairous body parts
 void RobotState::computeSDFvars() {
 	double sdfast_state[N_U+N_Q];
 
@@ -144,7 +149,6 @@ void RobotState::computeSDFvars() {
 		model->sdorient(footBody[side], dircos);
 		sddc2quat(dircos, qq, qq+1, qq+2, qq+3);
 		footQ[side] = Eigen::Quaterniond(qq[3], qq[0], qq[1], qq[2]).normalized();
-
 
 		//foot angular velocities
 		model->sdangvel(footBody[side], footW[side]);

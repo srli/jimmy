@@ -31,87 +31,27 @@ void IKcon::setRoot(const double *root, Eigen::Quaterniond rootQ, const double *
 }
 
 
-void IKcon::addToLog(Logger &logger) {
-	logger.add_datapoint("IK.QPval","-",&QPval);
-	logger.add_datapoint("IK.com[X]","m",&(ikrs.com[X]));
-	logger.add_datapoint("IK.com[Y]","m",&(ikrs.com[Y]));
-	logger.add_datapoint("IK.com[Z]","m",&(ikrs.com[Z]));
-
-	logger.add_datapoint("IK.comd[X]","v",&(ikrs.comd[X]));
-	logger.add_datapoint("IK.comd[Y]","v",&(ikrs.comd[Y]));
-	logger.add_datapoint("IK.comd[Z]","v",&(ikrs.comd[Z]));
-
-	logger.add_quat("IK.rootQ",&(ikrs.rootQ));
-
-	logger.add_datapoint("IK.foot[L][X]","m",&(ikrs.foot[LEFT][X]));
-	logger.add_datapoint("IK.foot[L][Y]","m",&(ikrs.foot[LEFT][Y]));
-	logger.add_datapoint("IK.foot[L][Z]","m",&(ikrs.foot[LEFT][Z]));
-	logger.add_datapoint("IK.foot[R][X]","m",&(ikrs.foot[RIGHT][X]));
-	logger.add_datapoint("IK.foot[R][Y]","m",&(ikrs.foot[RIGHT][Y]));
-	logger.add_datapoint("IK.foot[R][Z]","m",&(ikrs.foot[RIGHT][Z]));
-
-	logger.add_quat("IK.footQ[L]",&(ikrs.footQ[LEFT]));
-	logger.add_quat("IK.footQ[R]",&(ikrs.footQ[RIGHT]));
-
-
-	logger.add_datapoint("IK.rootW[X]","r/s",&(ikrs.rootW[X]));
-	logger.add_datapoint("IK.rootW[Y]","r/s",&(ikrs.rootW[Y]));
-	logger.add_datapoint("IK.rootW[Z]","r/s",&(ikrs.rootW[Z]));
-
-	logger.add_datapoint("IK.root[X]","m",&(ikrs.root[X]));
-	logger.add_datapoint("IK.root[Y]","m",&(ikrs.root[Y]));
-	logger.add_datapoint("IK.root[Z]","m",&(ikrs.root[Z]));
-	logger.add_datapoint("IK.rootd[X]","v",&(ikrs.rootd[X]));
-	logger.add_datapoint("IK.rootd[Y]","v",&(ikrs.rootd[Y]));
-	logger.add_datapoint("IK.rootd[Z]","v",&(ikrs.rootd[Z]));
-
-	logger.add_datapoint("IK.jt[L_HZ]","-",&(ikrs.joints[0]));
-	logger.add_datapoint("IK.jt[L_HFE]","-",&(ikrs.joints[1]));
-	logger.add_datapoint("IK.jt[L_HAA]","-",&(ikrs.joints[2]));
-	logger.add_datapoint("IK.jt[L_KFE]","-",&(ikrs.joints[3]));
-	logger.add_datapoint("IK.jt[L_AFE]","-",&(ikrs.joints[4]));
-	logger.add_datapoint("IK.jt[L_AAA]","-",&(ikrs.joints[5]));
-	logger.add_datapoint("IK.jt[R_HZ]","-",&(ikrs.joints[6]));
-	logger.add_datapoint("IK.jt[R_HFE]","-",&(ikrs.joints[7]));
-	logger.add_datapoint("IK.jt[R_HAA]","-",&(ikrs.joints[8]));
-	logger.add_datapoint("IK.jt[R_KFE]","-",&(ikrs.joints[9]));
-	logger.add_datapoint("IK.jt[R_AFE]","-",&(ikrs.joints[10]));
-	logger.add_datapoint("IK.jt[R_AAA]","-",&(ikrs.joints[11]));
-	logger.add_datapoint("IK.jt[L_SFE]","-",&(ikrs.joints[12]));
-	logger.add_datapoint("IK.jt[L_SAA]","-",&(ikrs.joints[13]));
-	logger.add_datapoint("IK.jt[L_SR]","-",&(ikrs.joints[14]));
-	logger.add_datapoint("IK.jt[L_ELB]","-",&(ikrs.joints[15]));
-	logger.add_datapoint("IK.jt[R_SFE]","-",&(ikrs.joints[16]));
-	logger.add_datapoint("IK.jt[R_SAA]","-",&(ikrs.joints[17]));
-	logger.add_datapoint("IK.jt[R_SR]","-",&(ikrs.joints[18]));
-	logger.add_datapoint("IK.jt[R_ELB]","-",&(ikrs.joints[19]));
-
-	logger.add_datapoint("IK.jtd[L_HZ]","-",&(ikrs.jointsd[0]));
-	logger.add_datapoint("IK.jtd[L_HFE]","-",&(ikrs.jointsd[1]));
-	logger.add_datapoint("IK.jtd[L_HAA]","-",&(ikrs.jointsd[2]));
-	logger.add_datapoint("IK.jtd[L_KFE]","-",&(ikrs.jointsd[3]));
-	logger.add_datapoint("IK.jtd[L_AFE]","-",&(ikrs.jointsd[4]));
-	logger.add_datapoint("IK.jtd[L_AAA]","-",&(ikrs.jointsd[5]));
-	logger.add_datapoint("IK.jtd[R_HZ]","-",&(ikrs.jointsd[6]));
-	logger.add_datapoint("IK.jtd[R_HFE]","-",&(ikrs.jointsd[7]));
-	logger.add_datapoint("IK.jtd[R_HAA]","-",&(ikrs.jointsd[8]));
-	logger.add_datapoint("IK.jtd[R_KFE]","-",&(ikrs.jointsd[9]));
-	logger.add_datapoint("IK.jtd[R_AFE]","-",&(ikrs.jointsd[10]));
-	logger.add_datapoint("IK.jtd[R_AAA]","-",&(ikrs.jointsd[11]));
-	logger.add_datapoint("IK.jtd[L_SFE]","-",&(ikrs.jointsd[12]));
-	logger.add_datapoint("IK.jtd[L_SAA]","-",&(ikrs.jointsd[13]));
-	logger.add_datapoint("IK.jtd[L_SR]","-",&(ikrs.jointsd[14]));
-	logger.add_datapoint("IK.jtd[L_ELB]","-",&(ikrs.jointsd[15]));
-	logger.add_datapoint("IK.jtd[R_SFE]","-",&(ikrs.jointsd[16]));
-	logger.add_datapoint("IK.jtd[R_SAA]","-",&(ikrs.jointsd[17]));
-	logger.add_datapoint("IK.jtd[R_SR]","-",&(ikrs.jointsd[18]));
-	logger.add_datapoint("IK.jtd[R_ELB]","-",&(ikrs.jointsd[19]));
-
-}
-
-
-
-
+/*
+ * The basic idea is to solve for qd with a Quadratic Program. 
+ * IK keeps its own internal state q. For each call to IK, it generates a new 
+ * qd and with which integrates its q. 
+ *
+ * We want to track position x (e.g. foot, com, etc). We can compute a desired
+ * velocity using feedback with
+ * xd_d' = K*(x_d - x) + xd_d
+ * where K is some gain, x_d, xd_d is the desired position and velocity, and x 
+ * is IK's position. x_d and xd_d are specified in IKcmd. 
+ * We then solve a QP with unknown qd that minimize 
+ * |J * qd - xd_d'|^2,
+ * where J is the Jacobian for point x. 
+ *
+ * To track multiple locations on the robot, we simply stack all the Jacobians 
+ * and xd_d', and minimize the same cost function.  
+ *
+ * Joint limits are handled in the constraints part in QP.
+ *
+ * For more details, contact sfeng@cs.cmu.edu
+ */
 bool IKcon::IK(const IKcmd &cmd, double *theta_d, double *thetad_d) {
 	Eigen::AngleAxisd rotVec;
 	Eigen::Vector3d Rotvec;
@@ -310,3 +250,86 @@ void IKcon::getCommand(double *theta_d, double *thetad_d) {
 	if(theta_d)		dvec_copy(theta_d, ikrs.joints, N_J);
 	if(thetad_d)	dvec_copy(thetad_d, ikrs.jointsd, N_J);
 }
+
+
+
+void IKcon::addToLog(Logger &logger) {
+	logger.add_datapoint("IK.QPval","-",&QPval);
+	logger.add_datapoint("IK.com[X]","m",&(ikrs.com[X]));
+	logger.add_datapoint("IK.com[Y]","m",&(ikrs.com[Y]));
+	logger.add_datapoint("IK.com[Z]","m",&(ikrs.com[Z]));
+
+	logger.add_datapoint("IK.comd[X]","v",&(ikrs.comd[X]));
+	logger.add_datapoint("IK.comd[Y]","v",&(ikrs.comd[Y]));
+	logger.add_datapoint("IK.comd[Z]","v",&(ikrs.comd[Z]));
+
+	logger.add_quat("IK.rootQ",&(ikrs.rootQ));
+
+	logger.add_datapoint("IK.foot[L][X]","m",&(ikrs.foot[LEFT][X]));
+	logger.add_datapoint("IK.foot[L][Y]","m",&(ikrs.foot[LEFT][Y]));
+	logger.add_datapoint("IK.foot[L][Z]","m",&(ikrs.foot[LEFT][Z]));
+	logger.add_datapoint("IK.foot[R][X]","m",&(ikrs.foot[RIGHT][X]));
+	logger.add_datapoint("IK.foot[R][Y]","m",&(ikrs.foot[RIGHT][Y]));
+	logger.add_datapoint("IK.foot[R][Z]","m",&(ikrs.foot[RIGHT][Z]));
+
+	logger.add_quat("IK.footQ[L]",&(ikrs.footQ[LEFT]));
+	logger.add_quat("IK.footQ[R]",&(ikrs.footQ[RIGHT]));
+
+
+	logger.add_datapoint("IK.rootW[X]","r/s",&(ikrs.rootW[X]));
+	logger.add_datapoint("IK.rootW[Y]","r/s",&(ikrs.rootW[Y]));
+	logger.add_datapoint("IK.rootW[Z]","r/s",&(ikrs.rootW[Z]));
+
+	logger.add_datapoint("IK.root[X]","m",&(ikrs.root[X]));
+	logger.add_datapoint("IK.root[Y]","m",&(ikrs.root[Y]));
+	logger.add_datapoint("IK.root[Z]","m",&(ikrs.root[Z]));
+	logger.add_datapoint("IK.rootd[X]","v",&(ikrs.rootd[X]));
+	logger.add_datapoint("IK.rootd[Y]","v",&(ikrs.rootd[Y]));
+	logger.add_datapoint("IK.rootd[Z]","v",&(ikrs.rootd[Z]));
+
+	logger.add_datapoint("IK.jt[L_HZ]","-",&(ikrs.joints[0]));
+	logger.add_datapoint("IK.jt[L_HFE]","-",&(ikrs.joints[1]));
+	logger.add_datapoint("IK.jt[L_HAA]","-",&(ikrs.joints[2]));
+	logger.add_datapoint("IK.jt[L_KFE]","-",&(ikrs.joints[3]));
+	logger.add_datapoint("IK.jt[L_AFE]","-",&(ikrs.joints[4]));
+	logger.add_datapoint("IK.jt[L_AAA]","-",&(ikrs.joints[5]));
+	logger.add_datapoint("IK.jt[R_HZ]","-",&(ikrs.joints[6]));
+	logger.add_datapoint("IK.jt[R_HFE]","-",&(ikrs.joints[7]));
+	logger.add_datapoint("IK.jt[R_HAA]","-",&(ikrs.joints[8]));
+	logger.add_datapoint("IK.jt[R_KFE]","-",&(ikrs.joints[9]));
+	logger.add_datapoint("IK.jt[R_AFE]","-",&(ikrs.joints[10]));
+	logger.add_datapoint("IK.jt[R_AAA]","-",&(ikrs.joints[11]));
+	logger.add_datapoint("IK.jt[L_SFE]","-",&(ikrs.joints[12]));
+	logger.add_datapoint("IK.jt[L_SAA]","-",&(ikrs.joints[13]));
+	logger.add_datapoint("IK.jt[L_SR]","-",&(ikrs.joints[14]));
+	logger.add_datapoint("IK.jt[L_ELB]","-",&(ikrs.joints[15]));
+	logger.add_datapoint("IK.jt[R_SFE]","-",&(ikrs.joints[16]));
+	logger.add_datapoint("IK.jt[R_SAA]","-",&(ikrs.joints[17]));
+	logger.add_datapoint("IK.jt[R_SR]","-",&(ikrs.joints[18]));
+	logger.add_datapoint("IK.jt[R_ELB]","-",&(ikrs.joints[19]));
+
+	logger.add_datapoint("IK.jtd[L_HZ]","-",&(ikrs.jointsd[0]));
+	logger.add_datapoint("IK.jtd[L_HFE]","-",&(ikrs.jointsd[1]));
+	logger.add_datapoint("IK.jtd[L_HAA]","-",&(ikrs.jointsd[2]));
+	logger.add_datapoint("IK.jtd[L_KFE]","-",&(ikrs.jointsd[3]));
+	logger.add_datapoint("IK.jtd[L_AFE]","-",&(ikrs.jointsd[4]));
+	logger.add_datapoint("IK.jtd[L_AAA]","-",&(ikrs.jointsd[5]));
+	logger.add_datapoint("IK.jtd[R_HZ]","-",&(ikrs.jointsd[6]));
+	logger.add_datapoint("IK.jtd[R_HFE]","-",&(ikrs.jointsd[7]));
+	logger.add_datapoint("IK.jtd[R_HAA]","-",&(ikrs.jointsd[8]));
+	logger.add_datapoint("IK.jtd[R_KFE]","-",&(ikrs.jointsd[9]));
+	logger.add_datapoint("IK.jtd[R_AFE]","-",&(ikrs.jointsd[10]));
+	logger.add_datapoint("IK.jtd[R_AAA]","-",&(ikrs.jointsd[11]));
+	logger.add_datapoint("IK.jtd[L_SFE]","-",&(ikrs.jointsd[12]));
+	logger.add_datapoint("IK.jtd[L_SAA]","-",&(ikrs.jointsd[13]));
+	logger.add_datapoint("IK.jtd[L_SR]","-",&(ikrs.jointsd[14]));
+	logger.add_datapoint("IK.jtd[L_ELB]","-",&(ikrs.jointsd[15]));
+	logger.add_datapoint("IK.jtd[R_SFE]","-",&(ikrs.jointsd[16]));
+	logger.add_datapoint("IK.jtd[R_SAA]","-",&(ikrs.jointsd[17]));
+	logger.add_datapoint("IK.jtd[R_SR]","-",&(ikrs.jointsd[18]));
+	logger.add_datapoint("IK.jtd[R_ELB]","-",&(ikrs.jointsd[19]));
+
+}
+
+
+   

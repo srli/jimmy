@@ -5,12 +5,18 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include "RobotState.h"
- 
+
+/*
+ * Stiffen the legs, but leave arm and neck joints loose. You can also make 
+ * all joints loose by commenting out a section. 
+ * When Enter is pressed, the program grabs the current joint position and 
+ * appends them to the end of home_of_jimmy/scripts/puppet
+ */
 int main()
 {
  	ControlUtils utils;
     
-  std::string name = ros::package::getPath("jimmy") + "/scripts/puppte";
+  std::string name = ros::package::getPath("jimmy") + "/scripts/puppet";
   std::ofstream out;
   out.open(name.c_str(), std::ofstream::out | std::ofstream::app);
 

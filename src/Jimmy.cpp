@@ -4,6 +4,11 @@
 #include "sdlib.h"
 #include "Jimmy.h"
 
+/*
+ * sdfast generated file, has all kinematics and dynamics for Jimmy. 
+ * not intented for human reading.
+ */
+
 #define ground (sdgtopo.ground_)
 #define nbod (sdgtopo.nbod_)
 #define ndof (sdgtopo.ndof_)

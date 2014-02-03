@@ -1,7 +1,14 @@
+/*
+ * Handles communication with the servos. 
+ * Tick / radiant conversion is also handled here. 
+ * Use sync write for multiple joints for faster speed.
+ */
+
 #include "ControlUtils.h"
 #include "Utils.h"
 #include <math.h>
 
+// servo pot ranges from 0 to 4096, -pi to pi
 #define TICK_MIN          0
 #define TICK_MAX          4096
 #define TICK_ZEROS        2048

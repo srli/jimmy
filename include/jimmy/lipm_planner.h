@@ -1,6 +1,13 @@
 #ifndef LIPM_PLANNER_H
 #define LIPM_PLANNER_H
 
+/*
+ * Plans a center of mass (com) trajectory given a sequence of foot steps and
+ * the current com position and velocity. 
+ *
+ * For more info, http://www.cs.cmu.edu/~sfeng/sf_humanoids13.pdf
+ */
+
 #include <vector>
 
 #include <eigen3/Eigen/Core>

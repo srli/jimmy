@@ -1,5 +1,15 @@
 #ifndef PLAN_DEFINED
 #define PLAN_DEFINED
+
+/*
+ * Simple planner for walking.
+ * It does the following things, 
+ *   1. Plans the next couple steps based on the given linear and angular 
+ *    velocity
+ *   2. Uses the foots to generate center of mass trajectory with lipm_planner
+ *   3. Generates swing foot trajectory with 5th spline. 
+ */
+
 #include <vector>
 #include "Step.h"
 #include "JimmyCommon.h"

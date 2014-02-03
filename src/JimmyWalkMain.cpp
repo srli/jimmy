@@ -1,3 +1,22 @@
+/*
+ * Main controller for Jimmy. 
+ * 
+ * The main loop runs at 100hz, it can be changed by plan.cf/TIME_STEP. 
+ * The controller is open loop, as it plans a motion, generates joint 
+ * angles and sends them to the servos. It does not react to perturbations.
+ *
+ * The main loop does the following on every tick:
+ *  1. Processes external command, such as switching modes
+ *  2. Generates IK_d based on walking or gesturing behavior, 
+ *  3. Uses IK to generate the desired joint angles, q_d. 
+ *  4. Sends q_d to servos with sync write.
+ *
+ * On every tick, we have to send q_d to all the joints. q_d are send to all
+ * the servos with sync write. Since there isn't a sync read, and polling 
+ * every joint sequentially is too slow, we read 2 joints each tick. Reading
+ * current joint angle is only for logging and debugging behavior. 
+ */
+
 #include "Plan.h"
 #include "Logger.h"
 #include "IK.h"
@@ -39,6 +58,7 @@ static double r_neckEAd[3] = {0};
 
 ros::Publisher pub_feedback;
 
+// wipes all stored commands
 void cleanCommand()
 {
   boost::mutex::scoped_lock lock(r_Lock);
@@ -51,6 +71,7 @@ void cleanCommand()
   r_neckEAd[2] = 0; 
 }
 
+// gets called by ros, copies ros land commands to cache
 void jimmyCMDCallback(const jimmy::jimmy_command &msg)
 {
   boost::mutex::scoped_lock lock(r_Lock);
@@ -86,13 +107,13 @@ void jimmyCMDCallback(const jimmy::jimmy_command &msg)
   }
 }
 ///////////////////////////////////////////////////
- 
-Plan plan;
-Logger logger;
-IKcmd IK_d;
-IKcon IK;
+
+Plan plan;                  // walking pattern generator
+Logger logger;              // data logging
+IKcmd IK_d;                 // desired quantities for IK
+IKcon IK;                   // full body IK solver
 #ifndef SIMULATION
-ControlUtils utils;
+ControlUtils utils;         // talks to all the servos
 #endif
 
 const int MAX_POSES = 100;
@@ -133,7 +154,7 @@ const static double poseBodyLims[2][6] = {
 
 enum ConMode {
 	IDLE=0,
-	PRE_WALK,	//wait until we have enough steps queued up
+	PRE_WALK,	            //wait until we have enough steps queued up
 	WALK,
 	GESTURE,
 	STAND_PREP
@@ -144,10 +165,10 @@ static double wallClockStart, wallClockLast, wallClockDT, wallClockT;
 static bool isIdle;
 static ConMode mode;
 
-static double curTime;		//time since start of controller
-static double modeTime;	//time since start of current mode
-static double modeT0;		//time this mode started;
-static double modeDur;		//intended duration of current mode
+static double curTime;		    //time since start of controller
+static double modeTime;	      //time since start of current mode
+static double modeT0;		      //time this mode started;
+static double modeDur;		    //intended duration of current mode
 
 static double vForward, vLeft, dTheta;
 
@@ -211,7 +232,7 @@ void getNeckCommand(double *EAs) {
 	}
 }
 
-TrajEW spJoints[23];
+TrajEW spJoints[23];            // knot points for spline 
 
 void initStandPrep() {
 #ifndef SIMULATION
@@ -686,8 +707,6 @@ int main( int argc, char **argv )
 
   ros::Subscriber subcommand = rosnode.subscribe("Jimmy_cmd", 10, jimmyCMDCallback);
   //////////////////////////////////////////////////// 
-  /*
-  */
 
 	wallClockStart = get_time();
 	init();
@@ -743,6 +762,9 @@ int main( int argc, char **argv )
       //t_pre_sleep = get_time();
       //usleep(sleep_t);
       //t_real_sleep = get_time() - t_pre_sleep;
+      
+      // if stealth runs on battery, usleep does not work correctly,
+      // spin wait does.
       spin_wait(sleep_t / 1e6);
 #endif
     }

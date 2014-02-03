@@ -6,6 +6,15 @@
 #include "dynamixel.h"
 #include <vector>
 
+// Basically, we send commands or read sensor values by writing or reading
+// some register address on the servo. 
+// refer to http://support.robotis.com/en/product/dynamixel/mx_series/mx-64.htm
+// for register address. 
+// Some registers are 2 bytes long, thus with _L for lower bits, and _H 
+// for higher.
+
+// Synchronized write is available, I don't thing there is sync read. 
+// Sync commands are much faster than polling each servo in a loop. 
 #define ADDR_GOAL_POSITION_L	       30
 #define ADDR_GOAL_POSITION_H	       31
 #define ADDR_PRESENT_POSITION_L      36
@@ -57,7 +66,6 @@ class ControlUtils
     ControlUtils();
     ~ControlUtils();
 
-    // ERIC
     bool getJoints() { return getJoints(joints); }
     bool setJoints() { return setJoints(joints_d); }
     

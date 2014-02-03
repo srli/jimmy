@@ -1,0 +1,23 @@
+logger 
+  needs mrdplot, can ignore if you dont want it.
+
+
+
+include/jimmy/
+
+conf/
+  IK.cf: weights for IK
+  plan.cf: parameters for walking, i.e. swing length, step size etc
+  poses.cf: pose file. Each line specifies a desired pose. 
+            First 8 numbers are arm joint angles. 
+            Next 3 are torso RPY.
+            Next 3 are pelvis position (XYZ) relative to the middle of 
+              the feet.
+            Next 3 head angles. 
+  gestures.cf: Each line represents a gesture, which is a list of two 
+            numbers. This first number is the index to the line number in 
+            poses.cf (0 index), and the second number is the length in 
+            seconds. 
+
+
+            

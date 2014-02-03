@@ -1,6 +1,10 @@
-
 #ifndef __LOGGER_H
 #define __LOGGER_H
+
+/*
+ * Useful for logging data traces. The log is saved in mrdplot format. There is
+ * a front end for data visulization in matlab. 
+ */
 
 #include <stdio.h>
 #include <string.h>

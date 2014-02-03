@@ -1,6 +1,10 @@
 #ifndef LQR_CONTROLLER_H
 #define LQR_CONTROLLER_H
 
+/*
+ * Simple lqr controller
+ */
+
 #include <cassert>
 #include <cstring>
 

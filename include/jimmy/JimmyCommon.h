@@ -1,12 +1,23 @@
 #ifndef JCOMMON_DEFINED
 #define JCOMMON_DEFINED
 
+/* some common defines for Jimmy. 
+ * The kinematic model we used, which is genereated by sdfast, does not include
+ * the 3 head joints. That's why there are 2 separate defines for number of 
+ * joints. 
+ */
+
 #define GRAVITY 9.8
 
-const int N_JOINTS = 20;        // sdfast
+//////////////////////////////////////////////////////////
+// sdfast related
+const int N_JOINTS = 20;
 const int N_J = N_JOINTS;
-const int N_U = N_J+6;
+// number of joints +3 linear and +3 angular velocity for the root 
+const int N_U = N_J+6;          
+// number of joints +3 position and +4 for orientation (quaternion)
 const int N_Q = N_U+1;
+//////////////////////////////////////////////////////////
 
 const int TOTAL_JOINTS = 23;    // real
 

@@ -1,24 +1,11 @@
-/*
- * =====================================================================================
- *
- *       Filename:  Eigen_utils.hpp
- *
- *    Description:  
- *
- *        Version:  1.0
- *        Created:  05/06/2013 12:31:09 AM
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  YOUR NAME (), 
- *        Company:  
- *
- * =====================================================================================
- */
-
 #ifndef __EIGEN_UTILS_HPP
 #define __EIGEN_UTILS_HPP
 
+/*
+ * Some Eigen related math utility functions, mostly for coordinate 
+ * transformation and quaternion manipulation. 
+ */
+ 
 #include <eigen3/Eigen/Geometry>
 #include <stdio.h>
 #include <string>
@@ -45,8 +32,6 @@ y = rot(2,1);
 ccode(x)
 ccode(y)
 */ 
-
-
 
 inline Eigen::Quaterniond normalAndYaw2Quat(Eigen::Vector3d normal, double yaw)
 {

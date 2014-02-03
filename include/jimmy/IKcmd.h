@@ -1,6 +1,10 @@
 #ifndef IKCMD_INCLUDED
 #define IKCMD_INCLUDED
 
+/*
+ * Input to IK. User specifies desired, and IK will try to track these subject
+ * to kinematic constraints (joint angle limits, etc). 
+ */
 
 #include <eigen3/Eigen/Geometry>
 #include "Logger.h"
@@ -10,16 +14,21 @@
 
 class IKcmd {
 public:
+  // center of mass position and velocity
 	double com[3], comd[3];
 
+  // pelvis orientation and angular velocity
 	Eigen::Quaterniond rootQ;
 	double rootW[3];
 
+  // foot position and orientation
 	double foot[2][3];
 	Eigen::Quaterniond footQ[2];
+  // foot linear and angular velocity
 	double footd[2][3];
 	double footW[2][3];
 
+  // arm angles 
 	double armJoints[8];
 
 
@@ -28,8 +37,7 @@ public:
 
 	}
 
-
-
+  // set IKcmd to match the given RobotState
 	void setToRS(const RobotState &rs) {
 		for(int i = 0; i < 3; i++) {
 			com[i] = rs.com[i];
@@ -66,6 +74,7 @@ public:
 		}
 	}
 
+  // add data traces to the logger
 	void addToLog(Logger &logger) {
 		logger.add_datapoint("IK_d.com[X]","m",&(com[X]));
 		logger.add_datapoint("IK_d.com[Y]","m",&(com[Y]));

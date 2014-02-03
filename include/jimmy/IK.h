@@ -1,23 +1,22 @@
-/*
-* =====================================================================================
-*
-*       Filename:  ik_controller.hpp
-*
-*    Description:  
-*
-*        Version:  1.0
-*        Created:  10/02/2013 04:19:56 PM
-*       Revision:  none
-*       Compiler:  gcc
-*
-*         Author:  YOUR NAME (), 
-*        Company:  
-*
-* =====================================================================================
-*/
-
 #ifndef __IK_CONTROLLER_H
 #define __IK_CONTROLLER_H
+
+/*
+ * This is a full body IK controller, it considers all the joints + 6 DOF
+ * floating base at the pelvis. 
+ *
+ * We solve velocity (qd) instead of going directly for positions (q). 
+ * We start from some initial configuration. For each call of IK,
+ * a qd is generated that best matches the input IKcmd, and we numerically 
+ * integrate qd to get q, we then return q and qd to the caller.
+ *
+ * Since this is gradient based method, solutions are guaranteed to be smooth.
+ * Constraints, mostly joint limits, are also handled correctly. So we can 
+ * specify unrealistic IKcmd, and the controller will do its best to achieve 
+ * it. This IK is formulated as a Quadratic Programming problem. 
+ *
+ * You can contact Siyuan at sfeng@cs.cmu.edu for more details.
+ */
 
 #include "RobotState.h"
 #include "IKcmd.h"
@@ -42,14 +41,13 @@ public:
 	Eigen::Matrix<double,MAX_ROWS,1> _b;
 
 	static double timeStep;
-
 	Eigen::Matrix<double,N_U,1> _qdOld;
-
 
 	std::map <const std::string, double *> lookup;
 
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW		//weird Siyuan magic
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW		// google this for more explanation
 
+  // weights for different criteria in the cost function
 	double IK_FOOT_WEIGHT;
 	double IK_COMxyz_WEIGHT[3];
 	double IK_TORSO_WEIGHT;
@@ -57,15 +55,15 @@ public:
 	double IK_DQDOT_WEIGHT;
 	double IK_ARM_WEIGHT;
 
+  // gains for computing desired xd_d: 
+  // xd_d = K * (x_d - x), 
+  // where xd_d is the input to the QP, K is the gain, x_d is the desired 
+  // position, and x is the current position. 
 	double IK_ARM_RATE;
 	double IK_POS_RATE;
 
-	double QPval;
-
-	
-
-
-
+  // total cost
+  double QPval;
 
 	bool IK(const IKcmd &cmd, double *theta_d=NULL, double *thetad_d=NULL);
 	void setPose(const double *theta, const double *thetad);
@@ -98,7 +96,6 @@ public:
 
 		_qdOld.setZero();
 	}
-
 
 	bool readParams(const char *fileName)
 	{

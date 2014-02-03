@@ -31,20 +31,20 @@ rosbuild_genmsg()
 
 include_directories("${PROJECT_SOURCE_DIR}/include/jimmy")
 
-add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "src/SDModel_common.cpp" "src/Jimmy.cpp" "src/Logger.cpp" "src/RobotState.cpp" "src/TrajEW.cpp" "src/mrdplot.c" "src/sdlib.c" "src/ControlUtils.cpp" "src/soautils.c" "src/serial.cpp")
+add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "src/SDModel_common.cpp" "src/Jimmy.cpp" "src/Logger.cpp" "src/RobotState.cpp" "src/TrajEW.cpp" "src/mrdplot.c" "src/sdlib.c" "src/ControlUtils.cpp")
   set_target_properties(jimmylib PROPERTIES COMPILE_FLAGS "-O4")
 
 rosbuild_add_executable(test_jimmy src/JimmyWalkMain.cpp)
   target_link_libraries(test_jimmy jimmylib rt dxl)
 
-rosbuild_add_executable(test_serial src/test_as_client.cpp)
+rosbuild_add_executable(test_serial src/test_serial.cpp)
   target_link_libraries(test_serial jimmylib rt dxl)
 
 rosbuild_add_executable(test_puppet src/test_puppet.cpp)
   target_link_libraries(test_puppet jimmylib rt dxl)
 
-rosbuild_add_executable(test_ros src/test_ros.cpp)
-  target_link_libraries(test_ros jimmylib rt dxl)
+rosbuild_add_executable(test_send_ros_cmd src/test_send_ros_cmd.cpp)
+  target_link_libraries(test_send_ros_cmd jimmylib rt dxl)
 
 #rosbuild_add_executable(test_lipm src/lipm_test.cpp)
 #  target_link_libraries(test_lipm jimmylib rt dxl)

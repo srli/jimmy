@@ -1,6 +1,5 @@
 #include "ControlUtils.h"
 #include "Utils.h"
-#include "arbotix_comm.h"
 #include <math.h>
 
 #define TICK_MIN          0

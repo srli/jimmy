@@ -77,4 +77,17 @@ conf/
   puppet: temp file that stores the logged joint positions when in puppetry 
           mode. 
 
-            
+3 ROS messages
+The message definition is in msg/jimmy_command.msg
+The message has 1 int for its type, and variable number of doubles parameters 
+that are used for neck motion or steering walking. 
+
+
+4. Examples
+4.1 bin/test_puppet 
+For puppetry. Press Enter to save a pose.
+
+4.2 bin/test_jimmy 
+Main code. Starts the robot in standing mode. The user can send ROS messages
+to change mode or give commands. 
+

@@ -4,6 +4,16 @@
 #include <fstream>
 #include <ros/ros.h>
 #include <ros/package.h>
+ 
+
+/*
+ * loads joint angles from home_of_jimmy/conf/wiggle
+ * and play it on the robot. 
+ * Each joint is controlled by linearly interpolating from the start joint poition
+ * to the desired. 
+ *
+ * Press Enter to execute the next pose.
+ */
 
 static double joints0[TOTAL_JOINTS] = {0};
 static double joints1[TOTAL_JOINTS] = {0};
@@ -23,21 +33,12 @@ bool load_pose(std::ifstream &in)
   return true;
 }
 
-
-/*
- * loads joint angles from home_of_jimmy/scripts/wiggle
- * and play it on the robot. 
- * Each joint is controlled by linearly interpolating from the start joint poition
- * to the desired. 
- *
- * Press Enter to execute the next pose.
- */
 int main()
 {
   ControlUtils utils;
   double t0, t1;
   
-	std::string name = ros::package::getPath("jimmy") + "/scripts/wiggle";
+	std::string name = ros::package::getPath("jimmy") + "/conf/wiggle";
   std::ifstream in(name.c_str());
 
   utils.requestJoints();

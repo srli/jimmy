@@ -55,7 +55,7 @@ int main()
 		printf("press enter to continue.\n");
 		getchar();
 
-    std::string name = ros::package::getPath("jimmy") + "/scripts/wiggle";
+    std::string name = ros::package::getPath("jimmy") + "/conf/wiggle";
     std::ifstream in(name.c_str());
 
 		if (!load_pose(in)) {

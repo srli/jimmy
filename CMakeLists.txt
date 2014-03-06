@@ -46,6 +46,10 @@ rosbuild_add_executable(test_serial src/test_serial.cpp)
 rosbuild_add_executable(test_puppet src/test_puppet.cpp)
   target_link_libraries(test_puppet jimmylib rt dxl)
 
+# send a servo command thourgh ros
+rosbuild_add_executable(test_send_servo_cmd src/test_send_servo_cmd.cpp)
+  target_link_libraries(test_send_servo_cmd jimmylib rt dxl)
+
 # send a command thourgh ros
 rosbuild_add_executable(test_send_ros_cmd src/test_send_ros_cmd.cpp)
   target_link_libraries(test_send_ros_cmd jimmylib rt dxl)

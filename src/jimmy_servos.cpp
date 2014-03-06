@@ -1,3 +1,21 @@
+/*
+ * Main controller for Jimmy. 
+ * 
+ * The main loop runs at 100hz, it can be changed by plan.cf/TIME_STEP. 
+ * The controller is open loop, as it plans a motion, generates joint 
+ * angles and sends them to the servos. It does not react to perturbations.
+ *
+ * The main loop does the following on every tick:
+ *  1. Processes external command, such as switching modes
+ *  2. Generates IK_d based on walking or gesturing behavior, 
+ *  3. Uses IK to generate the desired joint angles, q_d. 
+ *  4. Sends q_d to servos with sync write.
+ *
+ * On every tick, we have to send q_d to all the joints. q_d are send to all
+ * the servos with sync write. Since there isn't a sync read, and polling 
+ * every joint sequentially is too slow, we read 2 joints each tick. Reading
+ * current joint angle is only for logging and debugging behavior. 
+ */
 
 #include "Plan.h"
 #include "Logger.h"
@@ -8,11 +26,10 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <boost/thread.hpp>
+#include <jimmy/jimmy_servo.h>
 #include <jimmy/jimmy_command.h>
-#include <stdlib.h>
-#include <time.h>
  
-//#define SIMULATION
+#define SIMULATION
 
 static const int8_t default_gain[TOTAL_JOINTS] = 
 {
@@ -42,6 +59,7 @@ static double r_neckEAd[3] = {0};
 
 ros::Publisher pub_feedback;
 
+// wipes all stored commands
 void cleanCommand()
 {
   boost::mutex::scoped_lock lock(r_Lock);
@@ -54,10 +72,16 @@ void cleanCommand()
   r_neckEAd[2] = 0; 
 }
 
-void jimmyCMDCallback(const jimmy::jimmy_command &msg)
+// gets called by ros, copies ros land commands to cache
+void jimmyServoCallback(const jimmy::jimmy_servo &msg)
 {
   boost::mutex::scoped_lock lock(r_Lock);
-  
+
+  for (int i = 0; i < msg.positions.size(); i++) {
+	std::cout << msg.positions[i] << " : " << msg.servo_names[i] << std::endl;
+  }
+
+ /* 
   int newMode = msg.cmd;
   
   // walk commands
@@ -87,15 +111,16 @@ void jimmyCMDCallback(const jimmy::jimmy_command &msg)
     printf("\t\t%d\n", newMode);
     r_mode = newMode;
   }
+*/
 }
 ///////////////////////////////////////////////////
- 
-Plan plan;
-Logger logger;
-IKcmd IK_d;
-IKcon IK;
+
+Plan plan;                  // walking pattern generator
+Logger logger;              // data logging
+IKcmd IK_d;                 // desired quantities for IK
+IKcon IK;                   // full body IK solver
 #ifndef SIMULATION
-ControlUtils utils;
+ControlUtils utils;         // talks to all the servos
 #endif
 
 const int MAX_POSES = 100;
@@ -136,7 +161,7 @@ const static double poseBodyLims[2][6] = {
 
 enum ConMode {
 	IDLE=0,
-	PRE_WALK,	//wait until we have enough steps queued up
+	PRE_WALK,	            //wait until we have enough steps queued up
 	WALK,
 	GESTURE,
 	STAND_PREP
@@ -147,10 +172,10 @@ static double wallClockStart, wallClockLast, wallClockDT, wallClockT;
 static bool isIdle;
 static ConMode mode;
 
-static double curTime;		//time since start of controller
-static double modeTime;	//time since start of current mode
-static double modeT0;		//time this mode started;
-static double modeDur;		//intended duration of current mode
+static double curTime;		    //time since start of controller
+static double modeTime;	      //time since start of current mode
+static double modeT0;		      //time this mode started;
+static double modeDur;		    //intended duration of current mode
 
 static double vForward, vLeft, dTheta;
 
@@ -214,7 +239,7 @@ void getNeckCommand(double *EAs) {
 	}
 }
 
-TrajEW spJoints[23];
+TrajEW spJoints[23];            // knot points for spline 
 
 void initStandPrep() {
 #ifndef SIMULATION
@@ -301,17 +326,14 @@ void loadPoses() {
 	int i = 0;
 	while (true) {
 		in >> poses[pose][i];
-		std::cout << i << " " << poses[pose][i] << std::endl;
 		i++;
 		if(i >= N_VALS_PER_POSE) {
 			i = 0;
 			pose++;
 		}
-
-
 		if (in.eof()) {
-			if(i != 0) {
-				printf("Ran out of data mid pose, in pose %d\n", pose);
+			if(i != 1) {
+				printf("Ran out of data mid pose\n");
 				exit(-1);
 			}	
 			printf("Loaded %d poses\n",pose);
@@ -333,7 +355,6 @@ void loadPoses() {
 			if(poses[p][i] < poseLimits[0][i]) {
 				printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[0][i]);
 				poses[p][i] = poseLimits[0][i];
-
 			}
 			if(poses[p][i] > poseLimits[1][i]) {
 				printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[1][i]);
@@ -368,7 +389,7 @@ void loadGestures() {
 			}
 		}
 		if (in.eof()) {
-			printf("Ran out of data mid gesture, in gesture: %d \n", gesture);
+			printf("Ran out of data mid gesture\n");
 			exit(-1);
 		}
 		gesture++;
@@ -392,7 +413,7 @@ void init() {
     thermal_max[i] = 60;
 #ifndef SIMULATION
   assert(utils.setThermalMax(thermal_max));
-  //assert(utils.getThermalMax(thermal_max));
+  assert(utils.getThermalMax(thermal_max));
 #endif
   for (int i = 0; i < TOTAL_JOINTS; i++)
     printf("max thermal %10s %d\n", RobotState::jointNames[i].c_str(), thermal_max[i]);
@@ -441,19 +462,10 @@ void init() {
 
 
 void stateMachine() {
-	int command, random_gesture;
+	int command;
 	switch(mode) {
 	case IDLE:
-		srand (time(NULL)); //seeds random number
-		random_gesture = rand() % 6 + 2;
 		command = getCommand();
-		modeT0 = curTime;
-		mode = GESTURE;
-		initGesture(random_gesture);
-		printf("IDLE to GESTURE\n");
-	
-		//printf("IDLE GESTURE\n");
-
 		//don't want to make this unreadable with a switch inside a switch
 		if(command == 1) {
 			modeT0 = curTime;
@@ -465,13 +477,10 @@ void stateMachine() {
 			modeT0 = curTime;
 			mode = GESTURE;
 			initGesture(command);
-      		cleanCommand();
+      cleanCommand();
 			printf("IDLE to GESTURE\n");
 		}
-		
 		break;
-	
-		
 	case PRE_WALK:
 		if(modeTime > plan.PRE_PLAN_TIME) {
 			modeT0 = curTime;
@@ -691,7 +700,7 @@ int main( int argc, char **argv )
 {
   ////////////////////////////////////////////////////
   // ros stuff
-  ros::init(argc, argv, "jimmy_walk", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "jimmy_servos", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode = ros::NodeHandle();
 
   ros::Time last_ros_time_;
@@ -703,10 +712,8 @@ int main( int argc, char **argv )
     }
   }
 
-  ros::Subscriber subcommand = rosnode.subscribe("Jimmy_cmd", 10, jimmyCMDCallback);
+  ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_servo", 10, jimmyServoCallback);
   //////////////////////////////////////////////////// 
-  /*
-  */
 
 	wallClockStart = get_time();
 	init();
@@ -762,6 +769,9 @@ int main( int argc, char **argv )
       //t_pre_sleep = get_time();
       //usleep(sleep_t);
       //t_real_sleep = get_time() - t_pre_sleep;
+      
+      // if stealth runs on battery, usleep does not work correctly,
+      // spin wait does.
       spin_wait(sleep_t / 1e6);
 #endif
     }

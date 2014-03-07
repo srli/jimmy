@@ -28,5 +28,5 @@ int32 ID_HEAD_TILT_2           =27
 
 
 
-int32 servos
+int32[] servo_numbers
 float64[] positions

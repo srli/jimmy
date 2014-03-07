@@ -22,19 +22,19 @@ struct jimmy_servo_ {
   typedef jimmy_servo_<ContainerAllocator> Type;
 
   jimmy_servo_()
-  : servo_names(0)
+  : servo_numbers()
   , positions()
   {
   }
 
   jimmy_servo_(const ContainerAllocator& _alloc)
-  : servo_names(0)
+  : servo_numbers(_alloc)
   , positions(_alloc)
   {
   }
 
-  typedef int32_t _servo_names_type;
-  int32_t servo_names;
+  typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _servo_numbers_type;
+  std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  servo_numbers;
 
   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _positions_type;
   std::vector<double, typename ContainerAllocator::template rebind<double>::other >  positions;
@@ -95,12 +95,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::jimmy::jimmy_servo_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "3eb09b780994d9d2bcbc43fd0335a65d";
+    return "2d78e2febebac866912581a526c5b6e3";
   }
 
   static const char* value(const  ::jimmy::jimmy_servo_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x3eb09b780994d9d2ULL;
-  static const uint64_t static_value2 = 0xbcbc43fd0335a65dULL;
+  static const uint64_t static_value1 = 0x2d78e2febebac866ULL;
+  static const uint64_t static_value2 = 0x912581a526c5b6e3ULL;
 };
 
 template<class ContainerAllocator>
@@ -147,7 +147,7 @@ int32 ID_HEAD_TILT_2           =27\n\
 \n\
 \n\
 \n\
-int32 servo_names\n\
+int32[] servo_numbers\n\
 float64[] positions\n\
 \n\
 ";
@@ -168,7 +168,7 @@ template<class ContainerAllocator> struct Serializer< ::jimmy::jimmy_servo_<Cont
 {
   template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
   {
-    stream.next(m.servo_names);
+    stream.next(m.servo_numbers);
     stream.next(m.positions);
   }
 
@@ -187,8 +187,12 @@ struct Printer< ::jimmy::jimmy_servo_<ContainerAllocator> >
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const  ::jimmy::jimmy_servo_<ContainerAllocator> & v) 
   {
-    s << indent << "servo_names: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.servo_names);
+    s << indent << "servo_numbers[]" << std::endl;
+    for (size_t i = 0; i < v.servo_numbers.size(); ++i)
+    {
+      s << indent << "  servo_numbers[" << i << "]: ";
+      Printer<int32_t>::stream(s, indent + "  ", v.servo_numbers[i]);
+    }
     s << indent << "positions[]" << std::endl;
     for (size_t i = 0; i < v.positions.size(); ++i)
     {

@@ -1,9 +1,12 @@
-#include <jimmy/jimmy_command.h>
 #include <jimmy/jimmy_servo.h>
 #include <ros/ros.h>
 
 int main(int argc, char **argv)
 {
+  if (argc < 3) {
+    printf("argc > 2\n");
+    exit(-1);
+  }
 
   ////////////////////////////////////////////////////
   // ros stuff
@@ -13,6 +16,7 @@ int main(int argc, char **argv)
   ros::Time last_ros_time_;
   bool wait = true;
   while (wait) {
+    printf("waiting!\n");
     last_ros_time_ = ros::Time::now();
     if (last_ros_time_.toSec() > 0) {
       wait = false;
@@ -22,24 +26,26 @@ int main(int argc, char **argv)
   ros::Publisher pub = rosnode.advertise<jimmy::jimmy_servo>("jimmy_move_servo", 10);
   jimmy::jimmy_servo servos;
 
-  int type = atoi(argv[1]);
-  if (type <= jimmy::jimmy_servo::ID_R_KNEE){
-    printf("Bending knees!\n");
-  }
-  else if (type > jimmy::jimmy_servo::ID_R_KNEE){
-    printf("Not bending knees\n");
-  }
+
+  //printf("%d is the servo?\n", servos);
+
+  int servo_number = atoi(argv[1]);
+  float servo_position = atof(argv[2]);
+
+  servos.servo_numbers.push_back(servo_number);
+  servos.positions.push_back(servo_position);
 
 /*  servos.positions.push_back(1.0);
   servos.positions.push_back(0.4);
   servos.servo_names.push_back("left_elbow");
-  servos.servo_names.push_back("right_elbow");
-
-  getchar();
-  pub.publish(servos);*/
-  getchar();
+  servos.servo_names.push_back("right_elbow");*/
+  //getchar();
+  //sleep(5);
+  sleep(2);  
+  printf("publishing");
   pub.publish(servos);
 
-  for (int i = 0; i < 10000; i++)
+  while (true) {
     ros::spinOnce();
+  }
 }

@@ -6,7 +6,7 @@ import struct
 
 
 class jimmy_servo(genpy.Message):
-  _md5sum = "3eb09b780994d9d2bcbc43fd0335a65d"
+  _md5sum = "2d78e2febebac866912581a526c5b6e3"
   _type = "jimmy/jimmy_servo"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """int32 ID_R_SHOULDER_PITCH      =1
@@ -39,7 +39,7 @@ int32 ID_HEAD_TILT_2           =27
 
 
 
-int32 servo_names
+int32[] servo_numbers
 float64[] positions
 
 """
@@ -72,8 +72,8 @@ float64[] positions
   ID_L_GRIPPER = 26
   ID_HEAD_TILT_2 = 27
 
-  __slots__ = ['servo_names','positions']
-  _slot_types = ['int32','float64[]']
+  __slots__ = ['servo_numbers','positions']
+  _slot_types = ['int32[]','float64[]']
 
   def __init__(self, *args, **kwds):
     """
@@ -83,7 +83,7 @@ float64[] positions
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       servo_names,positions
+       servo_numbers,positions
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -92,12 +92,12 @@ float64[] positions
     if args or kwds:
       super(jimmy_servo, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
-      if self.servo_names is None:
-        self.servo_names = 0
+      if self.servo_numbers is None:
+        self.servo_numbers = []
       if self.positions is None:
         self.positions = []
     else:
-      self.servo_names = 0
+      self.servo_numbers = []
       self.positions = []
 
   def _get_types(self):
@@ -112,7 +112,10 @@ float64[] positions
     :param buff: buffer, ``StringIO``
     """
     try:
-      buff.write(_struct_i.pack(self.servo_names))
+      length = len(self.servo_numbers)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(struct.pack(pattern, *self.servo_numbers))
       length = len(self.positions)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
@@ -129,7 +132,11 @@ float64[] positions
       end = 0
       start = end
       end += 4
-      (self.servo_names,) = _struct_i.unpack(str[start:end])
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.servo_numbers = struct.unpack(pattern, str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -149,7 +156,10 @@ float64[] positions
     :param numpy: numpy python module
     """
     try:
-      buff.write(_struct_i.pack(self.servo_names))
+      length = len(self.servo_numbers)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(self.servo_numbers.tostring())
       length = len(self.positions)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
@@ -167,7 +177,11 @@ float64[] positions
       end = 0
       start = end
       end += 4
-      (self.servo_names,) = _struct_i.unpack(str[start:end])
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.servo_numbers = numpy.frombuffer(str[start:end], dtype=numpy.int32, count=length)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -180,4 +194,3 @@ float64[] positions
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_i = struct.Struct("<i")

@@ -29,7 +29,7 @@
 #include <jimmy/jimmy_servo.h>
 #include <jimmy/jimmy_command.h>
  
-#define SIMULATION
+//#define SIMULATION
 
 static const int8_t default_gain[TOTAL_JOINTS] = 
 {
@@ -47,7 +47,9 @@ static const int8_t walk_gain[TOTAL_JOINTS] = {
   32, 32, 32, 32,
   32, 32, 32
 };
-
+#ifndef SIMULATION
+ControlUtils utils;         // talks to all the servos
+#endif
 ///////////////////////////////////////////////////
 // ros stuff
 boost::mutex r_Lock;
@@ -56,6 +58,7 @@ static double r_vLeft = 0;
 static double r_dTheta = 0;
 static int r_mode = 0;
 static double r_neckEAd[3] = {0};
+
 
 ros::Publisher pub_feedback;
 
@@ -75,11 +78,23 @@ void cleanCommand()
 // gets called by ros, copies ros land commands to cache
 void jimmyServoCallback(const jimmy::jimmy_servo &msg)
 {
-  boost::mutex::scoped_lock lock(r_Lock);
+  printf("In servo callback\n");
 
+  assert(utils.getJoints());
+  for (int i = 0; i < TOTAL_JOINTS; i++) {
+    printf("Current joints are:\n");
+    printf("%10s %g %d\n", RobotState::jointNames[i].c_str(), utils.joints[i], utils.ticks_from[i]);}  
+//  boost::mutex::scoped_lock lock(r_Lock);
+
+  double jointPositions[23];
+  utils.getJoints(jointPositions);
+ 
   for (int i = 0; i < msg.positions.size(); i++) {
-	std::cout << msg.positions[i] << " : " << msg.servo_names[i] << std::endl;
+  	jointPositions[msg.servo_numbers[i]] = msg.positions[i];
+	std::cout << msg.positions[i] << " : " << msg.servo_numbers[i] << std::endl;
   }
+
+  utils.setJoints(jointPositions);
 
  /* 
   int newMode = msg.cmd;
@@ -119,9 +134,7 @@ Plan plan;                  // walking pattern generator
 Logger logger;              // data logging
 IKcmd IK_d;                 // desired quantities for IK
 IKcon IK;                   // full body IK solver
-#ifndef SIMULATION
-ControlUtils utils;         // talks to all the servos
-#endif
+
 
 const int MAX_POSES = 100;
 const int MAX_GESTURES = 100;
@@ -716,6 +729,7 @@ int main( int argc, char **argv )
   //////////////////////////////////////////////////// 
 
 	wallClockStart = get_time();
+	printf("About to initialize!");
 	init();
 	
   printf("Starting\n");

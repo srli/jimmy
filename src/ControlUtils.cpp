@@ -306,12 +306,6 @@ ControlUtils::~ControlUtils()
 	dxl_terminate();
 }
 
-
-
-
-
-
-
 int16_t ControlUtils::rad2tick(double r, int j)
 {
   int16_t tmp = (int16_t)(r*ticks_per_rad)*tick_sign[j];

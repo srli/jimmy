@@ -6,15 +6,74 @@ import struct
 
 
 class jimmy_servo(genpy.Message):
-  _md5sum = "38811bf91898e543ed7e7f543da886c8"
+  _md5sum = "3eb09b780994d9d2bcbc43fd0335a65d"
   _type = "jimmy/jimmy_servo"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """string[] servo_names
+  _full_text = """int32 ID_R_SHOULDER_PITCH      =1
+int32 ID_L_SHOULDER_PITCH      =2
+int32 ID_R_SHOULDER_ROLL       =3
+int32 ID_L_SHOULDER_ROLL       =4
+int32 ID_R_ELBOW               =5
+int32 ID_L_ELBOW               =6
+int32 ID_R_HIP_YAW             =7
+int32 ID_L_HIP_YAW             =8
+int32 ID_R_HIP_ROLL            =9
+int32 ID_L_HIP_ROLL            =10
+int32 ID_R_HIP_PITCH           =11
+int32 ID_L_HIP_PITCH           =12
+int32 ID_R_KNEE                =13
+int32 ID_L_KNEE                =14
+int32 ID_R_ANKLE_PITCH         =15
+int32 ID_L_ANKLE_PITCH         =16
+int32 ID_R_ANKLE_ROLL          =17
+int32 ID_L_ANKLE_ROLL          =18
+int32 ID_HEAD_PAN              =19
+int32 ID_HEAD_TILT             =20
+int32 ID_R_ELBOW_YAW           =21
+int32 ID_L_ELBOW_YAW           =22
+int32 ID_R_WRIST_YAW           =23
+int32 ID_L_WRIST_YAW           =24
+int32 ID_R_GRIPPER             =25
+int32 ID_L_GRIPPER             =26
+int32 ID_HEAD_TILT_2           =27
+
+
+
+int32 servo_names
 float64[] positions
 
 """
+  # Pseudo-constants
+  ID_R_SHOULDER_PITCH = 1
+  ID_L_SHOULDER_PITCH = 2
+  ID_R_SHOULDER_ROLL = 3
+  ID_L_SHOULDER_ROLL = 4
+  ID_R_ELBOW = 5
+  ID_L_ELBOW = 6
+  ID_R_HIP_YAW = 7
+  ID_L_HIP_YAW = 8
+  ID_R_HIP_ROLL = 9
+  ID_L_HIP_ROLL = 10
+  ID_R_HIP_PITCH = 11
+  ID_L_HIP_PITCH = 12
+  ID_R_KNEE = 13
+  ID_L_KNEE = 14
+  ID_R_ANKLE_PITCH = 15
+  ID_L_ANKLE_PITCH = 16
+  ID_R_ANKLE_ROLL = 17
+  ID_L_ANKLE_ROLL = 18
+  ID_HEAD_PAN = 19
+  ID_HEAD_TILT = 20
+  ID_R_ELBOW_YAW = 21
+  ID_L_ELBOW_YAW = 22
+  ID_R_WRIST_YAW = 23
+  ID_L_WRIST_YAW = 24
+  ID_R_GRIPPER = 25
+  ID_L_GRIPPER = 26
+  ID_HEAD_TILT_2 = 27
+
   __slots__ = ['servo_names','positions']
-  _slot_types = ['string[]','float64[]']
+  _slot_types = ['int32','float64[]']
 
   def __init__(self, *args, **kwds):
     """
@@ -34,11 +93,11 @@ float64[] positions
       super(jimmy_servo, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
       if self.servo_names is None:
-        self.servo_names = []
+        self.servo_names = 0
       if self.positions is None:
         self.positions = []
     else:
-      self.servo_names = []
+      self.servo_names = 0
       self.positions = []
 
   def _get_types(self):
@@ -53,17 +112,7 @@ float64[] positions
     :param buff: buffer, ``StringIO``
     """
     try:
-      length = len(self.servo_names)
-      buff.write(_struct_I.pack(length))
-      for val1 in self.servo_names:
-        length = len(val1)
-        if python3 or type(val1) == unicode:
-          val1 = val1.encode('utf-8')
-          length = len(val1)
-        if python3:
-          buff.write(struct.pack('<I%sB'%length, length, *val1))
-        else:
-          buff.write(struct.pack('<I%ss'%length, length, val1))
+      buff.write(_struct_i.pack(self.servo_names))
       length = len(self.positions)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
@@ -80,19 +129,7 @@ float64[] positions
       end = 0
       start = end
       end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.servo_names = []
-      for i in range(0, length):
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1 = str[start:end].decode('utf-8')
-        else:
-          val1 = str[start:end]
-        self.servo_names.append(val1)
+      (self.servo_names,) = _struct_i.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -112,17 +149,7 @@ float64[] positions
     :param numpy: numpy python module
     """
     try:
-      length = len(self.servo_names)
-      buff.write(_struct_I.pack(length))
-      for val1 in self.servo_names:
-        length = len(val1)
-        if python3 or type(val1) == unicode:
-          val1 = val1.encode('utf-8')
-          length = len(val1)
-        if python3:
-          buff.write(struct.pack('<I%sB'%length, length, *val1))
-        else:
-          buff.write(struct.pack('<I%ss'%length, length, val1))
+      buff.write(_struct_i.pack(self.servo_names))
       length = len(self.positions)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
@@ -140,19 +167,7 @@ float64[] positions
       end = 0
       start = end
       end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.servo_names = []
-      for i in range(0, length):
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1 = str[start:end].decode('utf-8')
-        else:
-          val1 = str[start:end]
-        self.servo_names.append(val1)
+      (self.servo_names,) = _struct_i.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -165,3 +180,4 @@ float64[] positions
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
+_struct_i = struct.Struct("<i")

@@ -22,11 +22,21 @@ int main(int argc, char **argv)
   ros::Publisher pub = rosnode.advertise<jimmy::jimmy_servo>("jimmy_move_servo", 10);
   jimmy::jimmy_servo servos;
 
-  servos.positions.push_back(1.0);
+  int type = atoi(argv[1]);
+  if (type <= jimmy::jimmy_servo::ID_R_KNEE){
+    printf("Bending knees!\n");
+  }
+  else if (type > jimmy::jimmy_servo::ID_R_KNEE){
+    printf("Not bending knees\n");
+  }
+
+/*  servos.positions.push_back(1.0);
   servos.positions.push_back(0.4);
   servos.servo_names.push_back("left_elbow");
   servos.servo_names.push_back("right_elbow");
 
+  getchar();
+  pub.publish(servos);*/
   getchar();
   pub.publish(servos);
 

@@ -22,23 +22,50 @@ struct jimmy_servo_ {
   typedef jimmy_servo_<ContainerAllocator> Type;
 
   jimmy_servo_()
-  : servo_names()
+  : servo_names(0)
   , positions()
   {
   }
 
   jimmy_servo_(const ContainerAllocator& _alloc)
-  : servo_names(_alloc)
+  : servo_names(0)
   , positions(_alloc)
   {
   }
 
-  typedef std::vector<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > , typename ContainerAllocator::template rebind<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::other >  _servo_names_type;
-  std::vector<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > , typename ContainerAllocator::template rebind<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::other >  servo_names;
+  typedef int32_t _servo_names_type;
+  int32_t servo_names;
 
   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _positions_type;
   std::vector<double, typename ContainerAllocator::template rebind<double>::other >  positions;
 
+  enum { ID_R_SHOULDER_PITCH = 1 };
+  enum { ID_L_SHOULDER_PITCH = 2 };
+  enum { ID_R_SHOULDER_ROLL = 3 };
+  enum { ID_L_SHOULDER_ROLL = 4 };
+  enum { ID_R_ELBOW = 5 };
+  enum { ID_L_ELBOW = 6 };
+  enum { ID_R_HIP_YAW = 7 };
+  enum { ID_L_HIP_YAW = 8 };
+  enum { ID_R_HIP_ROLL = 9 };
+  enum { ID_L_HIP_ROLL = 10 };
+  enum { ID_R_HIP_PITCH = 11 };
+  enum { ID_L_HIP_PITCH = 12 };
+  enum { ID_R_KNEE = 13 };
+  enum { ID_L_KNEE = 14 };
+  enum { ID_R_ANKLE_PITCH = 15 };
+  enum { ID_L_ANKLE_PITCH = 16 };
+  enum { ID_R_ANKLE_ROLL = 17 };
+  enum { ID_L_ANKLE_ROLL = 18 };
+  enum { ID_HEAD_PAN = 19 };
+  enum { ID_HEAD_TILT = 20 };
+  enum { ID_R_ELBOW_YAW = 21 };
+  enum { ID_L_ELBOW_YAW = 22 };
+  enum { ID_R_WRIST_YAW = 23 };
+  enum { ID_L_WRIST_YAW = 24 };
+  enum { ID_R_GRIPPER = 25 };
+  enum { ID_L_GRIPPER = 26 };
+  enum { ID_HEAD_TILT_2 = 27 };
 
   typedef boost::shared_ptr< ::jimmy::jimmy_servo_<ContainerAllocator> > Ptr;
   typedef boost::shared_ptr< ::jimmy::jimmy_servo_<ContainerAllocator>  const> ConstPtr;
@@ -68,12 +95,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::jimmy::jimmy_servo_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "38811bf91898e543ed7e7f543da886c8";
+    return "3eb09b780994d9d2bcbc43fd0335a65d";
   }
 
   static const char* value(const  ::jimmy::jimmy_servo_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x38811bf91898e543ULL;
-  static const uint64_t static_value2 = 0xed7e7f543da886c8ULL;
+  static const uint64_t static_value1 = 0x3eb09b780994d9d2ULL;
+  static const uint64_t static_value2 = 0xbcbc43fd0335a65dULL;
 };
 
 template<class ContainerAllocator>
@@ -90,7 +117,37 @@ template<class ContainerAllocator>
 struct Definition< ::jimmy::jimmy_servo_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "string[] servo_names\n\
+    return "int32 ID_R_SHOULDER_PITCH      =1\n\
+int32 ID_L_SHOULDER_PITCH      =2\n\
+int32 ID_R_SHOULDER_ROLL       =3\n\
+int32 ID_L_SHOULDER_ROLL       =4\n\
+int32 ID_R_ELBOW               =5\n\
+int32 ID_L_ELBOW               =6\n\
+int32 ID_R_HIP_YAW             =7\n\
+int32 ID_L_HIP_YAW             =8\n\
+int32 ID_R_HIP_ROLL            =9\n\
+int32 ID_L_HIP_ROLL            =10\n\
+int32 ID_R_HIP_PITCH           =11\n\
+int32 ID_L_HIP_PITCH           =12\n\
+int32 ID_R_KNEE                =13\n\
+int32 ID_L_KNEE                =14\n\
+int32 ID_R_ANKLE_PITCH         =15\n\
+int32 ID_L_ANKLE_PITCH         =16\n\
+int32 ID_R_ANKLE_ROLL          =17\n\
+int32 ID_L_ANKLE_ROLL          =18\n\
+int32 ID_HEAD_PAN              =19\n\
+int32 ID_HEAD_TILT             =20\n\
+int32 ID_R_ELBOW_YAW           =21\n\
+int32 ID_L_ELBOW_YAW           =22\n\
+int32 ID_R_WRIST_YAW           =23\n\
+int32 ID_L_WRIST_YAW           =24\n\
+int32 ID_R_GRIPPER             =25\n\
+int32 ID_L_GRIPPER             =26\n\
+int32 ID_HEAD_TILT_2           =27\n\
+\n\
+\n\
+\n\
+int32 servo_names\n\
 float64[] positions\n\
 \n\
 ";
@@ -130,12 +187,8 @@ struct Printer< ::jimmy::jimmy_servo_<ContainerAllocator> >
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const  ::jimmy::jimmy_servo_<ContainerAllocator> & v) 
   {
-    s << indent << "servo_names[]" << std::endl;
-    for (size_t i = 0; i < v.servo_names.size(); ++i)
-    {
-      s << indent << "  servo_names[" << i << "]: ";
-      Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.servo_names[i]);
-    }
+    s << indent << "servo_names: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.servo_names);
     s << indent << "positions[]" << std::endl;
     for (size_t i = 0; i < v.positions.size(); ++i)
     {

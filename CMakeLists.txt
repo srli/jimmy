@@ -42,8 +42,8 @@ rosbuild_add_executable(jimmy_servos src/jimmy_servos.cpp)
   target_link_libraries(jimmy_servos jimmylib rt dxl)
 
 # static jimmy
-rosbuild_add_executable(test_static src/JimmyWalkStatic.cpp)
-  target_link_libraries(test_static jimmylib rt dxl)
+#rosbuild_add_executable(test_static src/JimmyWalkStatic.cpp)
+ # target_link_libraries(test_static jimmylib rt dxl)
 
 # test servo communication 
 rosbuild_add_executable(test_serial src/test_serial.cpp)

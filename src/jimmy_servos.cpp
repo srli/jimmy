@@ -26,6 +26,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <boost/thread.hpp>
+#include <time.h>
 #include <jimmy/jimmy_servo.h>
 #include <jimmy/jimmy_command.h>
  
@@ -81,17 +82,18 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
   printf("In servo callback\n");
 
   assert(utils.getJoints());
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    printf("Current joints are:\n");
-    printf("%10s %g %d\n", RobotState::jointNames[i].c_str(), utils.joints[i], utils.ticks_from[i]);}  
 //  boost::mutex::scoped_lock lock(r_Lock);
 
   double jointPositions[23];
+
   utils.getJoints(jointPositions);
+
  
+
   for (int i = 0; i < msg.positions.size(); i++) {
   	jointPositions[msg.servo_numbers[i]] = msg.positions[i];
-	std::cout << msg.positions[i] << " : " << msg.servo_numbers[i] << std::endl;
+    printf("setting joints at\n");
+	 std::cout << msg.positions[i] << " : " << msg.servo_numbers[i] << std::endl;
   }
 
   utils.setJoints(jointPositions);
@@ -475,10 +477,16 @@ void init() {
 
 
 void stateMachine() {
-	int command;
+	int command, random_gesture;
 	switch(mode) {
 	case IDLE:
-		command = getCommand();
+    srand (time(NULL)); //seeds random number
+    random_gesture = rand() % 6 + 1;
+    command = getCommand();
+    modeT0 = curTime;
+    mode = GESTURE;
+    initGesture(random_gesture);
+    printf("IDLE to GESTURE\n");
 		//don't want to make this unreadable with a switch inside a switch
 		if(command == 1) {
 			modeT0 = curTime;
@@ -747,7 +755,7 @@ int main( int argc, char **argv )
 		wallClockLast = wallNow;
 		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
 
-		controlLoop();
+		//ControlLoop();
 
 		logger.saveData();
 
@@ -774,7 +782,7 @@ int main( int argc, char **argv )
     // step up quota for the next time step
     if (dt > timeQuota) {
       timeQuota -= (dt - plan.TIME_STEP);
-      printf("takes too long %g\n", dt);
+      //printf("takes too long %g\n", dt);
     }
     else {
       timeQuota = plan.TIME_STEP;

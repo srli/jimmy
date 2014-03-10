@@ -39,33 +39,33 @@ struct jimmy_servo_ {
   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _positions_type;
   std::vector<double, typename ContainerAllocator::template rebind<double>::other >  positions;
 
-  enum { ID_R_SHOULDER_PITCH = 1 };
-  enum { ID_L_SHOULDER_PITCH = 2 };
-  enum { ID_R_SHOULDER_ROLL = 3 };
-  enum { ID_L_SHOULDER_ROLL = 4 };
-  enum { ID_R_ELBOW = 5 };
-  enum { ID_L_ELBOW = 6 };
-  enum { ID_R_HIP_YAW = 7 };
-  enum { ID_L_HIP_YAW = 8 };
-  enum { ID_R_HIP_ROLL = 9 };
-  enum { ID_L_HIP_ROLL = 10 };
-  enum { ID_R_HIP_PITCH = 11 };
-  enum { ID_L_HIP_PITCH = 12 };
-  enum { ID_R_KNEE = 13 };
-  enum { ID_L_KNEE = 14 };
-  enum { ID_R_ANKLE_PITCH = 15 };
-  enum { ID_L_ANKLE_PITCH = 16 };
-  enum { ID_R_ANKLE_ROLL = 17 };
-  enum { ID_L_ANKLE_ROLL = 18 };
-  enum { ID_HEAD_PAN = 19 };
-  enum { ID_HEAD_TILT = 20 };
-  enum { ID_R_ELBOW_YAW = 21 };
-  enum { ID_L_ELBOW_YAW = 22 };
+  enum { ID_R_SHOULDER_PITCH = 16 };
+  enum { ID_L_SHOULDER_PITCH = 12 };
+  enum { ID_R_SHOULDER_ROLL = 17 };
+  enum { ID_L_SHOULDER_ROLL = 13 };
+  enum { ID_R_ELBOW = 19 };
+  enum { ID_L_ELBOW = 15 };
+  enum { ID_R_HIP_YAW = 6 };
+  enum { ID_L_HIP_YAW = 0 };
+  enum { ID_R_HIP_ROLL = 8 };
+  enum { ID_L_HIP_ROLL = 2 };
+  enum { ID_R_HIP_PITCH = 7 };
+  enum { ID_L_HIP_PITCH = 1 };
+  enum { ID_R_KNEE = 9 };
+  enum { ID_L_KNEE = 3 };
+  enum { ID_R_ANKLE_PITCH = 10 };
+  enum { ID_L_ANKLE_PITCH = 4 };
+  enum { ID_R_ANKLE_ROLL = 11 };
+  enum { ID_L_ANKLE_ROLL = 5 };
+  enum { ID_HEAD_PAN = 20 };
+  enum { ID_HEAD_TILT = 21 };
+  enum { ID_R_ELBOW_YAW = 18 };
+  enum { ID_L_ELBOW_YAW = 14 };
   enum { ID_R_WRIST_YAW = 23 };
   enum { ID_L_WRIST_YAW = 24 };
   enum { ID_R_GRIPPER = 25 };
   enum { ID_L_GRIPPER = 26 };
-  enum { ID_HEAD_TILT_2 = 27 };
+  enum { ID_HEAD_TILT_2 = 22 };
 
   typedef boost::shared_ptr< ::jimmy::jimmy_servo_<ContainerAllocator> > Ptr;
   typedef boost::shared_ptr< ::jimmy::jimmy_servo_<ContainerAllocator>  const> ConstPtr;
@@ -95,12 +95,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::jimmy::jimmy_servo_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "2d78e2febebac866912581a526c5b6e3";
+    return "a12069c278d2ca26c24908f496f4482f";
   }
 
   static const char* value(const  ::jimmy::jimmy_servo_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x2d78e2febebac866ULL;
-  static const uint64_t static_value2 = 0x912581a526c5b6e3ULL;
+  static const uint64_t static_value1 = 0xa12069c278d2ca26ULL;
+  static const uint64_t static_value2 = 0xc24908f496f4482fULL;
 };
 
 template<class ContainerAllocator>
@@ -117,39 +117,36 @@ template<class ContainerAllocator>
 struct Definition< ::jimmy::jimmy_servo_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "int32 ID_R_SHOULDER_PITCH      =1\n\
-int32 ID_L_SHOULDER_PITCH      =2\n\
-int32 ID_R_SHOULDER_ROLL       =3\n\
-int32 ID_L_SHOULDER_ROLL       =4\n\
-int32 ID_R_ELBOW               =5\n\
-int32 ID_L_ELBOW               =6\n\
-int32 ID_R_HIP_YAW             =7\n\
-int32 ID_L_HIP_YAW             =8\n\
-int32 ID_R_HIP_ROLL            =9\n\
-int32 ID_L_HIP_ROLL            =10\n\
-int32 ID_R_HIP_PITCH           =11\n\
-int32 ID_L_HIP_PITCH           =12\n\
-int32 ID_R_KNEE                =13\n\
-int32 ID_L_KNEE                =14\n\
-int32 ID_R_ANKLE_PITCH         =15\n\
-int32 ID_L_ANKLE_PITCH         =16\n\
-int32 ID_R_ANKLE_ROLL          =17\n\
-int32 ID_L_ANKLE_ROLL          =18\n\
-int32 ID_HEAD_PAN              =19\n\
-int32 ID_HEAD_TILT             =20\n\
-int32 ID_R_ELBOW_YAW           =21\n\
-int32 ID_L_ELBOW_YAW           =22\n\
-int32 ID_R_WRIST_YAW           =23\n\
-int32 ID_L_WRIST_YAW           =24\n\
-int32 ID_R_GRIPPER             =25\n\
-int32 ID_L_GRIPPER             =26\n\
-int32 ID_HEAD_TILT_2           =27\n\
-\n\
-\n\
+    return "int32 ID_R_SHOULDER_PITCH      = 16\n\
+int32 ID_L_SHOULDER_PITCH      = 12\n\
+int32 ID_R_SHOULDER_ROLL       = 17\n\
+int32 ID_L_SHOULDER_ROLL       = 13\n\
+int32 ID_R_ELBOW               = 19\n\
+int32 ID_L_ELBOW               = 15\n\
+int32 ID_R_HIP_YAW             = 6\n\
+int32 ID_L_HIP_YAW             = 0\n\
+int32 ID_R_HIP_ROLL            = 8\n\
+int32 ID_L_HIP_ROLL            = 2\n\
+int32 ID_R_HIP_PITCH           = 7\n\
+int32 ID_L_HIP_PITCH           = 1\n\
+int32 ID_R_KNEE                = 9\n\
+int32 ID_L_KNEE                = 3\n\
+int32 ID_R_ANKLE_PITCH         = 10\n\
+int32 ID_L_ANKLE_PITCH         = 4\n\
+int32 ID_R_ANKLE_ROLL          = 11\n\
+int32 ID_L_ANKLE_ROLL          = 5\n\
+int32 ID_HEAD_PAN              = 20\n\
+int32 ID_HEAD_TILT             = 21\n\
+int32 ID_R_ELBOW_YAW           = 18\n\
+int32 ID_L_ELBOW_YAW           = 14\n\
+int32 ID_R_WRIST_YAW           = 23\n\
+int32 ID_L_WRIST_YAW           = 24\n\
+int32 ID_R_GRIPPER             = 25\n\
+int32 ID_L_GRIPPER             = 26\n\
+int32 ID_HEAD_TILT_2           = 22\n\
 \n\
 int32[] servo_numbers\n\
 float64[] positions\n\
-\n\
 ";
   }
 

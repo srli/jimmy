@@ -1,32 +1,12 @@
-/*
- * Main controller for Jimmy. 
- * 
- * The main loop runs at 100hz, it can be changed by plan.cf/TIME_STEP. 
- * The controller is open loop, as it plans a motion, generates joint 
- * angles and sends them to the servos. It does not react to perturbations.
- *
- * The main loop does the following on every tick:
- *  1. Processes external command, such as switching modes
- *  2. Generates IK_d based on walking or gesturing behavior, 
- *  3. Uses IK to generate the desired joint angles, q_d. 
- *  4. Sends q_d to servos with sync write.
- *
- * On every tick, we have to send q_d to all the joints. q_d are send to all
- * the servos with sync write. Since there isn't a sync read, and polling 
- * every joint sequentially is too slow, we read 2 joints each tick. Reading
- * current joint angle is only for logging and debugging behavior. 
- */
+/*Basically only listens to input from the ROS servo node
+and writes to servos. */
 
-#include "Plan.h"
-#include "Logger.h"
-#include "IK.h"
 #include "ControlUtils.h"
 #include "Utils.h"
 
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <boost/thread.hpp>
-#include <time.h>
 #include <jimmy/jimmy_servo.h>
 #include <jimmy/jimmy_command.h>
  
@@ -49,7 +29,7 @@ static const int8_t walk_gain[TOTAL_JOINTS] = {
   32, 32, 32
 };
 #ifndef SIMULATION
-ControlUtils utils;         // talks to all the servos
+ControlUtils utils;  // talks to all the servos
 #endif
 ///////////////////////////////////////////////////
 // ros stuff
@@ -90,33 +70,13 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
   
   for (int i = 0; i < msg.positions.size(); i++) {
   	jointPositions[msg.servo_numbers[i]] = msg.positions[i];
-    printf("setting joints at\n");
-	  std::cout << msg.positions[i] << " : " << msg.servo_numbers[i] << std::endl;
+	  std::cout << "setting joint  " << msg.servo_numbers[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;
   }
 
   utils.setJoints(jointPositions);
 }
 ///////////////////////////////////////////////////
 
-Plan plan;                  // walking pattern generator
-Logger logger;              // data logging
-IKcmd IK_d;                 // desired quantities for IK
-IKcon IK;                   // full body IK solver
-
-void spin_wait(double dt)
-{
-  double t0 = get_time();
-  int spin = 1;
-  int ctr = 0;
-  while(spin) {
-    if (get_time() - t0 < dt) {
-      ctr++;
-    }
-    else
-      spin = 0;
-  }
-  return;
-}
 
 int main( int argc, char **argv ) 
 {
@@ -124,17 +84,9 @@ int main( int argc, char **argv )
   // ros stuff
   ros::init(argc, argv, "jimmy_servos", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode = ros::NodeHandle();
-  
+  printf("Ready to listen for commands!\n");
 
-  ros::Time last_ros_time_;
-  bool wait = true;
-  while (wait) {
-    last_ros_time_ = ros::Time::now();
-    if (last_ros_time_.toSec() > 0) {
-      wait = false;
-    }
-  }
-
+  //Subscribes to jimmy_move_servo, which tells us which servos to move
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_servo", 10, jimmyServoCallback);
 	
 
@@ -145,12 +97,6 @@ int main( int argc, char **argv )
      ros::spinOnce();
      sleep(1);
    }
-
-    ///////////////////////////////////////////////
-    // wait
-   ///////////////////////////////////////////////
-
-
 	return 0;
 }
 

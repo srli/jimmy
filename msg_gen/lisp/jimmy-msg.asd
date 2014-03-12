@@ -9,4 +9,6 @@
     (:file "_package_jimmy_servo" :depends-on ("_package"))
     (:file "jimmy_command" :depends-on ("_package_jimmy_command"))
     (:file "_package_jimmy_command" :depends-on ("_package"))
+    (:file "jimmy_gesture" :depends-on ("_package_jimmy_gesture"))
+    (:file "_package_jimmy_gesture" :depends-on ("_package"))
   ))

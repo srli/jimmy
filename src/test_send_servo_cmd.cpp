@@ -28,22 +28,12 @@ int main(int argc, char **argv)
     servos.servo_numbers.push_back(servo_number);
     servos.positions.push_back(servo_position);
   }
-  // int servo_number = atoi(argv[1]);
-  // float servo_position = atof(argv[2]);
 
-  // servos.servo_numbers.push_back(servo_number);
-  // servos.positions.push_back(servo_position);
-
-/*  servos.positions.push_back(1.0);
-  servos.positions.push_back(0.4);
-  servos.servo_names.push_back("left_elbow");
-  servos.servo_names.push_back("right_elbow");*/
   printf("Press enter to send message\n");
   getchar();
-  //sleep(5);
-  //sleep(2);  
-  printf("publishing\n");
+
   pub.publish(servos);
+  printf("publishing\n");
 
   for (int i = 0; i < 10000; i++)
     ros::spinOnce();

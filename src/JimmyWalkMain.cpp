@@ -1,4 +1,3 @@
-
 #include "Plan.h"
 #include "Logger.h"
 #include "IK.h"
@@ -406,7 +405,7 @@ void init() {
 	name = ros::package::getPath("jimmy") + "/conf/IK.cf";
 	IK.readParams(name.c_str());
 	logger.init(plan.TIME_STEP);
-	
+
   char buf[100];
   for (int i = 0; i < TOTAL_JOINTS; i++) {
     sprintf(buf, "RS.joint[%s]", RobotState::jointNames[i].c_str());
@@ -451,7 +450,7 @@ void stateMachine() {
 		mode = GESTURE;
 		initGesture(random_gesture);
 		printf("IDLE to GESTURE\n");
-	
+
 		//printf("IDLE GESTURE\n");
 
 		//don't want to make this unreadable with a switch inside a switch
@@ -468,10 +467,10 @@ void stateMachine() {
       		cleanCommand();
 			printf("IDLE to GESTURE\n");
 		}
-		
+
 		break;
-	
-		
+
+
 	case PRE_WALK:
 		if(modeTime > plan.PRE_PLAN_TIME) {
 			modeT0 = curTime;
@@ -526,7 +525,7 @@ void idleCon() {
 	for(int i = 0; i <3; i++) {
 		IK_d.com[i] += 0.004*(nomPose[i]-(IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0));
 	}
-	
+
 	//foot orientation
 	for(int s = 0; s < 2; s++) {
 		Eigen::Quaterniond desQ = IK_d.footQ[s];
@@ -578,7 +577,7 @@ void controlLoop() {
 #ifndef SIMULATION
   utils.getLegJointsCircular(joints_actual);
 #endif
-	
+
   //do actual control
 	switch(mode) {
 	case IDLE:
@@ -710,10 +709,10 @@ int main( int argc, char **argv )
 
 	wallClockStart = get_time();
 	init();
-	
+
   printf("Starting\n");
   double timeQuota = plan.TIME_STEP;
-	
+
   wallClockLast = get_time();
 	logger.add_datapoint("sleep_time", "us", &sleep_t);
 	logger.add_datapoint("sleep_time_real", "s", &t_real_sleep);
@@ -770,6 +769,3 @@ int main( int argc, char **argv )
 
 	return 0;
 }
-
-
-

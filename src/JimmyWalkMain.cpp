@@ -445,7 +445,7 @@ void stateMachine() {
 	switch(mode) {
 	case IDLE:
 		srand (time(NULL)); //seeds random number
-		random_gesture = rand() % 6 + 1;
+		random_gesture = rand() % 7 + 2;
 		command = getCommand();
 		modeT0 = curTime;
 		mode = GESTURE;

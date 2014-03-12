@@ -87,13 +87,11 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
   double jointPositions[23];
 
   utils.getJoints(jointPositions);
-
- 
-
+  
   for (int i = 0; i < msg.positions.size(); i++) {
   	jointPositions[msg.servo_numbers[i]] = msg.positions[i];
     printf("setting joints at\n");
-	 std::cout << msg.positions[i] << " : " << msg.servo_numbers[i] << std::endl;
+	  std::cout << msg.positions[i] << " : " << msg.servo_numbers[i] << std::endl;
   }
 
   utils.setJoints(jointPositions);

@@ -274,12 +274,12 @@ bool ControlUtils::setJoints(const double a[TOTAL_JOINTS])
   for (int i = 0; i < TOTAL_JOINTS; i++) {
     tmp_tick[i] = rad2tick(a[i], i);
     if (tmp_tick[i] != ticks_to[i]) {
-    printf("changing tick!\n");
-    std::cout << tmp_tick[i] << std::endl;
+    //printf("changing tick!\n");
+    //std::cout << tmp_tick[i] << std::endl;
       vals.push_back(tmp_tick[i]);
       joints.push_back(i);
-      printf("joint being moved\n");
-      std::cout << i << std::endl;
+      //printf("joint being moved\n");
+      //std::cout << i << std::endl;
       ticks_to[i] = tmp_tick[i];
     }
   }

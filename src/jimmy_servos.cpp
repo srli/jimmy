@@ -64,35 +64,83 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
 
   assert(utils.getJoints());
 //  boost::mutex::scoped_lock lock(r_Lock);
-  
-  if (msg.servo_numbers.empty()) {
+
+  if (msg.servo_numbers.empty()){
+    printf("Using servo names as IDs\n");
     for (int i = 0; i < msg.servo_names.size(); i++) {
-      if (msg.servo_names[i] == jimmy::jimmy_servo::R_ELBOW) {
+      if (msg.servo_names[i] == jimmy::jimmy_servo::R_SHOULDER_PITCH) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_SHOULDER_PITCH);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_SHOULDER_PITCH) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_SHOULDER_PITCH);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::R_SHOULDER_ROLL) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_SHOULDER_ROLL);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_SHOULDER_ROLL) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_SHOULDER_ROLL);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::R_ELBOW) {
         servo_ids.push_back(jimmy::jimmy_servo::ID_R_ELBOW);
-      } 
-
-
-
-
-
-
-
-
-
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_ELBOW) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_ELBOW);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::R_HIP_YAW) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_HIP_YAW);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_HIP_YAW) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_HIP_YAW);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::R_HIP_ROLL) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_HIP_ROLL);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_HIP_ROLL) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_HIP_ROLL);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::R_KNEE) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_KNEE);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_KNEE) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_KNEE);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::R_ANKLE_PITCH) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_ANKLE_PITCH);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_ANKLE_PITCH) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_ANKLE_PITCH);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::R_ANKLE_ROLL) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_ANKLE_ROLL);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::L_ANKLE_ROLL) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_L_ANKLE_ROLL);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::HEAD_PAN) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_HEAD_PAN);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::HEAD_TILT) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_HEAD_TILT);
+      }
+      else if (msg.servo_names[i] == jimmy::jimmy_servo::HEAD_TILT_2) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_HEAD_TILT_2);
+      }
       else {
         std::cerr << "Invalid servo name: " << msg.servo_names[i] << std::endl;
         return;
       }
-
+      std::cout << "setting joint name  " << msg.servo_names[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;
+      std::cout << servo_ids[i] << std::endl;
     }
-  } else {
-    servo_ids = msg.servo_numbers;
   }
-/*  for (int i = 0; i < msg.positions.size(); i++) {
-    std::cout << "setting joint  " << msg.servo_numbers[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;
-  }
-  */
-  std::cout << servo_ids.size() << " " << msg.positions.size() << std::endl;
+    else {
+      servo_ids = msg.servo_numbers;
+      for (int i = 0; i < msg.positions.size(); i++) {
+        std::cout << "setting joint id  " << msg.servo_numbers[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;
+      }
+    } 
+  
+  std::cout << "servo ids set:  " << servo_ids.size() << "  servo positions set: " << msg.positions.size() << std::endl;
   utils.setJointSubset(servo_ids, msg.positions);
 }
 ///////////////////////////////////////////////////

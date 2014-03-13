@@ -1,5 +1,6 @@
 #include <jimmy/jimmy_servo.h>
 #include <ros/ros.h>
+#include <typeinfo>
 
 int main(int argc, char **argv)
 {
@@ -20,12 +21,19 @@ int main(int argc, char **argv)
 
   ros::Publisher pub = rosnode.advertise<jimmy::jimmy_servo>("jimmy_move_servo", 10);
   jimmy::jimmy_servo servos;
+  
+
 
   for (int i = 1; i < argc; i+=2)
   {
     float servo_position = atof(argv[i+1]);
-
-    servos.servo_names.push_back(argv[i]);
+    if (typeid(argv[i]) == typeid(1)) {
+      int servonum = atoi(argv[i]);
+      servos.servo_numbers.push_back(servonum);
+    }
+    else {
+      servos.servo_names.push_back(argv[i]);
+    }
     servos.positions.push_back(servo_position);
   }
 

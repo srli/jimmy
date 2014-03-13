@@ -59,21 +59,41 @@ void cleanCommand()
 // gets called by ros, copies ros land commands to cache
 void jimmyServoCallback(const jimmy::jimmy_servo &msg)
 {
+  std::vector<int> servo_ids;
   printf("In servo callback\n");
 
   assert(utils.getJoints());
 //  boost::mutex::scoped_lock lock(r_Lock);
-
-  double jointPositions[23];
-
-  utils.getJoints(jointPositions);
   
-  for (int i = 0; i < msg.positions.size(); i++) {
-  	jointPositions[msg.servo_numbers[i]] = msg.positions[i];
-	  std::cout << "setting joint  " << msg.servo_numbers[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;
-  }
+  if (msg.servo_numbers.empty()) {
+    for (int i = 0; i < msg.servo_names.size(); i++) {
+      if (msg.servo_names[i] == jimmy::jimmy_servo::R_ELBOW) {
+        servo_ids.push_back(jimmy::jimmy_servo::ID_R_ELBOW);
+      } 
 
-  utils.setJoints(jointPositions);
+
+
+
+
+
+
+
+
+      else {
+        std::cerr << "Invalid servo name: " << msg.servo_names[i] << std::endl;
+        return;
+      }
+
+    }
+  } else {
+    servo_ids = msg.servo_numbers;
+  }
+/*  for (int i = 0; i < msg.positions.size(); i++) {
+    std::cout << "setting joint  " << msg.servo_numbers[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;
+  }
+  */
+  std::cout << servo_ids.size() << " " << msg.positions.size() << std::endl;
+  utils.setJointSubset(servo_ids, msg.positions);
 }
 ///////////////////////////////////////////////////
 

@@ -266,6 +266,22 @@ bool ControlUtils::getByte(int8_t *val, int8_t addr, int joint)
   } 
 }
 
+bool ControlUtils::setJointSubset(const std::vector<int>& joints, const std::vector<double>& positions)
+{
+  std::vector<int16_t> positions_to_send;
+  std::vector<int> joints_to_send;
+
+  for (int i = 0; i < positions.size(); i++) {
+    if (rad2tick(positions[i], i) != ticks_to[i]) {
+      joints_to_send.push_back(joints[i]);
+      positions_to_send.push_back(rad2tick(positions[i], i));
+    }
+  }
+  return syncWriteWord(ADDR_GOAL_POSITION_L, joints_to_send, positions_to_send);
+}
+
+
+
 bool ControlUtils::setJoints(const double a[TOTAL_JOINTS])
 {
   int16_t tmp_tick[TOTAL_JOINTS];

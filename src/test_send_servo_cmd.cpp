@@ -22,10 +22,10 @@ int main(int argc, char **argv)
   jimmy::jimmy_servo servos;
 
   for (int i = 1; i < argc; i+=2)
-  { int servo_number = atoi(argv[i]);
+  {
     float servo_position = atof(argv[i+1]);
 
-    servos.servo_numbers.push_back(servo_number);
+    servos.servo_names.push_back(argv[i]);
     servos.positions.push_back(servo_position);
   }
 

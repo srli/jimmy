@@ -26,5 +26,34 @@ int32 ID_R_GRIPPER             = 25
 int32 ID_L_GRIPPER             = 26
 int32 ID_HEAD_TILT_2           = 22
 
+string R_SHOULDER_PITCH      = RightShoulderPitch
+string L_SHOULDER_PITCH      = LeftShoulderPitch
+string R_SHOULDER_ROLL       = RightShoulderRoll
+string L_SHOULDER_ROLL       = LeftShoulderRoll
+string R_ELBOW               = RightElbow
+string L_ELBOW               = LeftElbow
+string R_HIP_YAW             = RightHipYaw
+string L_HIP_YAW             = LeftHipYaw
+string R_HIP_ROLL            = RightHipRoll
+string L_HIP_ROLL            = LeftHipRoll
+string R_HIP_PITCH           = RightHipPitch
+string L_HIP_PITCH           = LeftHipPitch
+string R_KNEE                = RightKnee
+string L_KNEE                = LeftKnee
+string R_ANKLE_PITCH         = RightAnklePitch
+string L_ANKLE_PITCH         = LeftAnklePitch
+string R_ANKLE_ROLL          = RightAnkleRoll
+string L_ANKLE_ROLL          = LeftAnkleRoll
+string HEAD_PAN              = HeadPan
+string HEAD_TILT             = HeadTilt
+string R_ELBOW_YAW           = RightElbowYaw
+string L_ELBOW_YAW           = LeftElbowYaw
+string R_WRIST_YAW           = RightWristYaw
+string L_WRIST_YAW           = LeftWristYaw
+string R_GRIPPER             = RightGripper
+string L_GRIPPER             = LeftGripper
+string HEAD_TILT_2           = HeadTilt2
+
+string[] servo_names
 int32[] servo_numbers
 float64[] positions

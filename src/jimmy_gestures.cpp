@@ -28,7 +28,8 @@ static const int8_t default_gain[TOTAL_JOINTS] =
   32, 32, 32
 };
 
-static const int8_t walk_gain[TOTAL_JOINTS] = {
+static const int8_t walk_gain[TOTAL_JOINTS] = 
+{
   40, 60, 120, 60, 60, 120,
   40, 60, 120, 60, 60, 120,
   32, 32, 32, 32,
@@ -135,76 +136,11 @@ static double modeDur;		//intended duration of current mode
 static double vForward, vLeft, dTheta;
 
 int getCommand() {
-  /*
-	if(curTime > 10)	return -1;
-	if(curTime > 7.0 && curTime < 120)		return 1;
-	if(curTime > 7 && curTime < 7.1)		return 2;
-  */
-
   boost::mutex::scoped_lock lock(r_Lock);
-  if (r_mode == jimmy::jimmy_command::CMD_NECK)
-    return 0;
-  if (r_mode == jimmy::jimmy_command::CMD_SAVE_AND_QUIT)
-c    return -1;
-  if (r_mode == jimmy::jimmy_command::CMD_IDLE)
-    return 0;
-  if (r_mode == jimmy::jimmy_command::CMD_WALK)
-    return 1;
-  if (r_mode >= jimmy::jimmy_command::CMD_GESTURE_START)
-    return r_mode;
-
-  // should never happen
-  return 0;
-}
-
-void getDriveCommand(double *vFwd, double *vLef, double *dYaw) {
-  /*
-	*vFwd = 0.005;
-	*vLef = 0.00;
-	*dYaw = 0.0;
-  */
- 
-  boost::mutex::scoped_lock lock(r_Lock);
-  *vFwd = r_vFwd;
-  *vLef = r_vLeft;
-  *dYaw = r_dTheta;
-}
-
-void constrainDriveCommand(double *vForward, double *vLeft, double *dTheta) {
-	//TODO: limit acceleration
-	//TODO: limit velocities (including in combination)
-}
-
-void getNeckCommand(double *EAs) {
-  /*
-	double EAsd[3] = {0,0,0};		//desired velocities
-	for(int i = 0; i < 3; i++)	EAs[i] += EAsd[i]*plan.TIME_STEP;	//integrate
-	for(int i = 0; i < 3; i++) {						//limit
-		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
-		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
-	}
-  */
-
-  boost::mutex::scoped_lock lock(r_Lock);
-  for(int i = 0; i < 3; i++)	
-    EAs[i] += r_neckEAd[i]*plan.TIME_STEP;	//integrate
-	for(int i = 0; i < 3; i++) {						//limit
-		if(EAs[N_J+i] < neckEAlims[0][i])	EAs[N_J+i] = neckEAlims[0][i];
-		if(EAs[N_J+i] > neckEAlims[1][i])	EAs[N_J+i] = neckEAlims[1][i];
-	}
+  return r_mode
 }
 
 TrajEW spJoints[23];
-
-void initStandPrep() {
-#ifndef SIMULATION
-	utils.getJoints(joints_actual);
-#endif
-	for(int i = 0; i < 23; i++)		
-    spJoints[i].freshMove(joints_actual[i], standPrepPose[i], 5.0);
-	modeDur = 5.0;
-}
-
 TrajEW gestureArms[8];
 TrajEW gestureNeck[3];
 TrajEW gestureCoM[3];
@@ -254,24 +190,6 @@ void initGesture(int gesture) {
 }
 
 static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
-
-void initWalk() {
-	plan.initFeet(IK.ikrs.foot[LEFT][X], IK.ikrs.foot[LEFT][Y], getYaw(IK.ikrs.footQ[LEFT]), IK.ikrs.foot[RIGHT][X], IK.ikrs.foot[RIGHT][Y], getYaw(IK.ikrs.footQ[RIGHT]));
-	for(int i = 0; i < 2; i++) {
-		plan.com[i].push_back(IK.ikrs.com[i]);
-		plan.comd[i].push_back(IK.ikrs.comd[i]);
-	}
-	double startEA[3];
-	quat2EA(IK_d.rootQ, startEA);
-	plan.bodyRoll.addKnot(0, startEA[0], 0);
-	plan.bodyPitch.addKnot(0, startEA[1], 0);
-	for(int s = 0; s < 2; s++)	plan.footPitch[s].addKnot(0, 0, 0);
-	for(int i = 0; i < 23; i++)	plan.jointOffset[i].addKnot(0, 0, 0);
-	for(int i = 0; i < 8; i++)	plan.armTraj[i].addKnot(0, IK_d.armJoints[i], 0);
-	for(int i = 0; i < 8; i++)	plan.armTraj[i].addKnot(plan.DS_TIME/2.0, armsOut[i], 0);	//get clear
-	for(int i = 0; i < 3; i++)	plan.neckTraj[i].addKnot(0, theta_d[i+20], 0);
-	for(int i = 0; i < 3; i++)	plan.neckTraj[i].addKnot(plan.DS_TIME/2.0, 0.0, 0);		//center
-}
 
 void loadPoses() {
 	std::string name = ros::package::getPath("jimmy") + "/conf/poses.cf";
@@ -421,108 +339,16 @@ void init() {
 
 
 void stateMachine() {
-	int command, random_gesture;
-	switch(mode) {
-	case IDLE:
-		srand (time(NULL)); //seeds random number
-		random_gesture = rand() % 7 + 2;
-		command = getCommand();
-		modeT0 = curTime;
-		mode = GESTURE;
-		initGesture(random_gesture);
-		printf("IDLE to GESTURE\n");
+	int command;
+	command = getCommand();
+	std::cout << "Starting gesture  " << command << std::endl;
+	modeT0 = curTime;
+	mode = GESTURE;
+	initGesture(command);
+		cleanCommand();
 
-		//printf("IDLE GESTURE\n");
-
-		//don't want to make this unreadable with a switch inside a switch
-		if(command == 1) {
-			modeT0 = curTime;
-			mode = PRE_WALK;
-			initWalk();
-			printf("IDLE to INIT_WALK\n");
-		}
-		else if(command > 1) {	//each number corresponds to a gesture
-			modeT0 = curTime;
-			mode = GESTURE;
-			initGesture(command);
-      		cleanCommand();
-			printf("IDLE to GESTURE\n");
-		}
-
-		break;
-
-
-	case PRE_WALK:
-		if(modeTime > plan.PRE_PLAN_TIME) {
-			modeT0 = curTime;
-			mode = WALK;
-			printf("PRE_WALK to WALK\n");
-#ifndef SIMULATION
-      assert(utils.setPGains(walk_gain));
-      assert(utils.setStanceGain(2));
-      printf("setting walking gain\n");
-#endif
-		}
-		break;
-	case WALK:
-		if(getCommand() == 0) {
-			plan.stopHere();
-		}
-		if(plan.isDone(modeTime) || modeTime > 36) {
-			modeT0 = curTime;
-			mode = IDLE;
-			printf("WALK to IDLE\n");
-      assert(utils.setPGains(default_gain));
-      printf("setting default gain\n");
-      cleanCommand();
-		}
-		break;
-	case GESTURE:
-		if(modeTime > modeDur) {
-			modeT0 = curTime;
-			mode = IDLE;
-			printf("GESTURE to IDLE\n");
-		}
-		break;
-	case STAND_PREP:
-		if(modeTime > modeDur) {
-			modeT0 = curTime;
-			mode = IDLE;
-			printf("STAND_PREP to IDLE\n");
-		}
-		break;
-	default:
-		printf("Bad mode in stateMachine\n");
-		exit(-1);
-		break;
-	}
-}
 
 double nomPose[3] = {0.0, 0.0, 0.42};
-
-//integrate towards normal body pose
-void idleCon() {
-	//CoM pos
-	for(int i = 0; i <3; i++) {
-		IK_d.com[i] += 0.004*(nomPose[i]-(IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0));
-	}
-
-	//foot orientation
-	for(int s = 0; s < 2; s++) {
-		Eigen::Quaterniond desQ = IK_d.footQ[s];
-		flattenQuat(desQ);
-		IK_d.footQ[s] = mySlerp(IK_d.footQ[s], desQ, 0.004);
-	}
-
-	//torso orientation
-	Eigen::Quaterniond desBodyQ = mySlerp(IK_d.footQ[LEFT], IK_d.footQ[RIGHT], 0.5);
-	IK_d.rootQ = mySlerp(IK_d.rootQ, desBodyQ, 0.004);
-}
-
-void walkCon() {
-	for(int i = 0; i < 3; i++)	neckEAs[i] *= 0.995;
-	plan.fillIK_d(IK_d, modeTime);
-}
 
 void gestureCon() {
 	for(int i = 0; i < 8; i++) 	IK_d.armJoints[i] = gestureArms[i].readPos(modeTime);
@@ -558,93 +384,16 @@ void controlLoop() {
 #ifndef SIMULATION
   utils.getLegJointsCircular(joints_actual);
 #endif
-
-  //do actual control
-	switch(mode) {
-	case IDLE:
-		getNeckCommand(neckEAs);
-		idleCon();
-		break;
-	case PRE_WALK:
-		idleCon();
-		getDriveCommand(&vForward, &vLeft, &dTheta);
-		constrainDriveCommand(&vForward, &vLeft, &dTheta);
-		plan.driveFutureRobot(vForward, vLeft, dTheta);
-		break;
-	case WALK:
-		getDriveCommand(&vForward, &vLeft, &dTheta);
-		constrainDriveCommand(&vForward, &vLeft, &dTheta);
-		plan.driveFutureRobot(vForward, vLeft, dTheta);
-		walkCon();
-		break;
-	case GESTURE:
-		gestureCon();
-		break;
-	case STAND_PREP:
-		standPrepCon();
-		break;
-	default:
-		printf("Bad mode in controlLoop\n");
-		exit(-1);
-		break;
+  gestureCon();
+	for(int i = 0; i < 3; i++){	theta_d[N_J+i] = neckAngs[i];
+		neckEAs[0] = (-neckAngs[2] - neckAngs[1])/2.0;
+		neckEAs[1] = ( neckAngs[2] - neckAngs[1])/2.0;
+		neckEAs[2] = neckAngs[0];
 	}
-
-
-	if(mode != STAND_PREP) {
-		double thetad_d[N_J+3];
-		IK.IK(IK_d, theta_d, thetad_d);
-
-		if(mode == WALK)	for(int i = 0; i < 23; i++)	theta_d[i]+=plan.jointOffset[i].readPos(modeTime);		
-
-		double stance = 2;
-		if(IK_d.foot[LEFT][Z] - IK_d.foot[RIGHT][Z] > 0.01)	stance = RIGHT;
-		if(IK_d.foot[RIGHT][Z] - IK_d.foot[LEFT][Z] > 0.01)	stance = LEFT;
-
-#ifndef SIMULATION
-		if(stance != prevStance)	assert(utils.setStanceGain(stance));
-#endif
-		prevStance = stance;
-
-		//limp ankles
-		for(int s = 0; s < 2; s++) {
-			bool limp = false;
-			if(IK_d.footd[s][Z] < 0)	limp = true;
-			if(limp != prevLimp[s]) {
-				//if(limp)	utils.setTorqueLimit(0, 5+6*s); //utils.setPGain(0, 5+6*s);
-				//else		utils.setTorqueLimit(1023, 5+6*s); //utils.setPGain(120, 5+6*s);
-			}
-			prevLimp[s] = limp;
-		}
-		if(mode == WALK) {
-			for(int i = 0; i < 3; i++)	theta_d[20+i] = plan.neckTraj[i].readPos(modeTime);
-			neckEAs[0] = (-neckAngs[2] - neckAngs[1])/2.0;
-			neckEAs[1] = ( neckAngs[2] - neckAngs[1])/2.0;
-			neckEAs[2] = neckAngs[0];
-		}
-		else if(mode == GESTURE) {
-			for(int i = 0; i < 3; i++)	theta_d[N_J+i] = neckAngs[i];
-			neckEAs[0] = (-neckAngs[2] - neckAngs[1])/2.0;
-			neckEAs[1] = ( neckAngs[2] - neckAngs[1])/2.0;
-			neckEAs[2] = neckAngs[0];
-		}
-		else {
-			//conversion from RPY to angles
-			theta_d[N_J] = neckEAs[2];
-			theta_d[N_J+1] = -neckEAs[1]-neckEAs[0];
-			theta_d[N_J+2] = neckEAs[1]-neckEAs[0];
-		}
-
-		//limit angles
-		for(int i = 0; i < 3; i++) {
-			thetad_d[N_J+i] = 0.0;
-			if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
-			if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
-		}
 #ifndef SIMULATION
 		utils.setJoints(theta_d);
 #endif
 	}
-}
 
 int sleep_t = 1e4;
 double t_pre_sleep = 0;

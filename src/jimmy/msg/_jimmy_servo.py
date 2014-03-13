@@ -6,7 +6,7 @@ import struct
 
 
 class jimmy_servo(genpy.Message):
-  _md5sum = "a12069c278d2ca26c24908f496f4482f"
+  _md5sum = "4ea57b764f702b7be0b6106982510281"
   _type = "jimmy/jimmy_servo"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """int32 ID_R_SHOULDER_PITCH      = 16
@@ -37,6 +37,35 @@ int32 ID_R_GRIPPER             = 25
 int32 ID_L_GRIPPER             = 26
 int32 ID_HEAD_TILT_2           = 22
 
+string R_SHOULDER_PITCH      = RightShoulderPitch
+string L_SHOULDER_PITCH      = LeftShoulderPitch
+string R_SHOULDER_ROLL       = RightShoulderRoll
+string L_SHOULDER_ROLL       = LeftShoulderRoll
+string R_ELBOW               = RightElbow
+string L_ELBOW               = LeftElbow
+string R_HIP_YAW             = RightHipYaw
+string L_HIP_YAW             = LeftHipYaw
+string R_HIP_ROLL            = RightHipRoll
+string L_HIP_ROLL            = LeftHipRoll
+string R_HIP_PITCH           = RightHipPitch
+string L_HIP_PITCH           = LeftHipPitch
+string R_KNEE                = RightKnee
+string L_KNEE                = LeftKnee
+string R_ANKLE_PITCH         = RightAnklePitch
+string L_ANKLE_PITCH         = LeftAnklePitch
+string R_ANKLE_ROLL          = RightAnkleRoll
+string L_ANKLE_ROLL          = LeftAnkleRoll
+string HEAD_PAN              = HeadPan
+string HEAD_TILT             = HeadTilt
+string R_ELBOW_YAW           = RightElbowYaw
+string L_ELBOW_YAW           = LeftElbowYaw
+string R_WRIST_YAW           = RightWristYaw
+string L_WRIST_YAW           = LeftWristYaw
+string R_GRIPPER             = RightGripper
+string L_GRIPPER             = LeftGripper
+string HEAD_TILT_2           = HeadTilt2
+
+string[] servo_names
 int32[] servo_numbers
 float64[] positions
 """
@@ -68,9 +97,36 @@ float64[] positions
   ID_R_GRIPPER = 25
   ID_L_GRIPPER = 26
   ID_HEAD_TILT_2 = 22
+  R_SHOULDER_PITCH = 'RightShoulderPitch'
+  L_SHOULDER_PITCH = 'LeftShoulderPitch'
+  R_SHOULDER_ROLL = 'RightShoulderRoll'
+  L_SHOULDER_ROLL = 'LeftShoulderRoll'
+  R_ELBOW = 'RightElbow'
+  L_ELBOW = 'LeftElbow'
+  R_HIP_YAW = 'RightHipYaw'
+  L_HIP_YAW = 'LeftHipYaw'
+  R_HIP_ROLL = 'RightHipRoll'
+  L_HIP_ROLL = 'LeftHipRoll'
+  R_HIP_PITCH = 'RightHipPitch'
+  L_HIP_PITCH = 'LeftHipPitch'
+  R_KNEE = 'RightKnee'
+  L_KNEE = 'LeftKnee'
+  R_ANKLE_PITCH = 'RightAnklePitch'
+  L_ANKLE_PITCH = 'LeftAnklePitch'
+  R_ANKLE_ROLL = 'RightAnkleRoll'
+  L_ANKLE_ROLL = 'LeftAnkleRoll'
+  HEAD_PAN = 'HeadPan'
+  HEAD_TILT = 'HeadTilt'
+  R_ELBOW_YAW = 'RightElbowYaw'
+  L_ELBOW_YAW = 'LeftElbowYaw'
+  R_WRIST_YAW = 'RightWristYaw'
+  L_WRIST_YAW = 'LeftWristYaw'
+  R_GRIPPER = 'RightGripper'
+  L_GRIPPER = 'LeftGripper'
+  HEAD_TILT_2 = 'HeadTilt2'
 
-  __slots__ = ['servo_numbers','positions']
-  _slot_types = ['int32[]','float64[]']
+  __slots__ = ['servo_names','servo_numbers','positions']
+  _slot_types = ['string[]','int32[]','float64[]']
 
   def __init__(self, *args, **kwds):
     """
@@ -80,7 +136,7 @@ float64[] positions
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       servo_numbers,positions
+       servo_names,servo_numbers,positions
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -89,11 +145,14 @@ float64[] positions
     if args or kwds:
       super(jimmy_servo, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
+      if self.servo_names is None:
+        self.servo_names = []
       if self.servo_numbers is None:
         self.servo_numbers = []
       if self.positions is None:
         self.positions = []
     else:
+      self.servo_names = []
       self.servo_numbers = []
       self.positions = []
 
@@ -109,6 +168,17 @@ float64[] positions
     :param buff: buffer, ``StringIO``
     """
     try:
+      length = len(self.servo_names)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.servo_names:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        if python3:
+          buff.write(struct.pack('<I%sB'%length, length, *val1))
+        else:
+          buff.write(struct.pack('<I%ss'%length, length, val1))
       length = len(self.servo_numbers)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
@@ -127,6 +197,21 @@ float64[] positions
     """
     try:
       end = 0
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.servo_names = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.servo_names.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -153,6 +238,17 @@ float64[] positions
     :param numpy: numpy python module
     """
     try:
+      length = len(self.servo_names)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.servo_names:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        if python3:
+          buff.write(struct.pack('<I%sB'%length, length, *val1))
+        else:
+          buff.write(struct.pack('<I%ss'%length, length, val1))
       length = len(self.servo_numbers)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
@@ -172,6 +268,21 @@ float64[] positions
     """
     try:
       end = 0
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.servo_names = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.servo_names.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])

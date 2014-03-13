@@ -68,6 +68,7 @@ class ControlUtils
 
     bool getJoints() { return getJoints(joints); }
     bool setJoints() { return setJoints(joints_d); }
+    bool setJointSubset(const std::vector<int>& joints, const std::vector<double>& positions);
     
     bool getLegJointsCircular(double j[TOTAL_JOINTS]);
     bool getJoints(double j[TOTAL_JOINTS]);

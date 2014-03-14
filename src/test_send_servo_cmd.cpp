@@ -27,12 +27,14 @@ int main(int argc, char **argv)
   for (int i = 1; i < argc; i+=2)
   {
     float servo_position = atof(argv[i+1]);
-    if (typeid(argv[i]) == typeid(1)) {
-      int servonum = atoi(argv[i]);
-      servos.servo_numbers.push_back(servonum);
+    if (typeid(argv[i]) == typeid("string")) {
+      printf("adding this to servo names\n");
+      servos.servo_names.push_back(argv[i]);
     }
     else {
-      servos.servo_names.push_back(argv[i]);
+      printf("adding this to servo numbers\n");
+      int servonum = atoi(argv[i]);
+      servos.servo_numbers.push_back(servonum);
     }
     servos.positions.push_back(servo_position);
   }

@@ -65,7 +65,7 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
   assert(utils.getJoints());
 //  boost::mutex::scoped_lock lock(r_Lock);
 
-  if (msg.servo_numbers.empty()){
+  if (msg.servo_numbers.empty()) {
     printf("Using servo names as IDs\n");
     for (int i = 0; i < msg.servo_names.size(); i++) {
       if (msg.servo_names[i] == jimmy::jimmy_servo::R_SHOULDER_PITCH) {
@@ -133,11 +133,14 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
       std::cout << servo_ids[i] << std::endl;
     }
   }
-    else {
+    else if (msg.servo_names.empty() && !(msg.servo_numbers.empty())) {
       servo_ids = msg.servo_numbers;
       for (int i = 0; i < msg.positions.size(); i++) {
         std::cout << "setting joint id  " << msg.servo_numbers[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;
       }
+    }
+    else {
+        printf("no servo defined\n");
     } 
   
   std::cout << "servo ids set:  " << servo_ids.size() << "  servo positions set: " << msg.positions.size() << std::endl;

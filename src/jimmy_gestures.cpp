@@ -15,7 +15,6 @@ We should be sending an array size 23 of every one of the joints to the subscrib
 #include <boost/thread.hpp>
 #include <jimmy/jimmy_gesture.h>
 #include <stdlib.h>
-#include <time.h>
  
 //#define SIMULATION
 
@@ -123,7 +122,8 @@ enum ConMode {
 	STAND_PREP
 };
 
-static double wallClockStart, wallClockLast, wallClockDT, wallClockT;
+//static double wallClockStart, wallClockLast;
+static double wallClockDT, wallClockT;
 
 static bool isIdle;
 static ConMode mode;
@@ -137,7 +137,7 @@ static double vForward, vLeft, dTheta;
 
 int getCommand() {
   boost::mutex::scoped_lock lock(r_Lock);
-  return r_mode
+  return r_mode;
 }
 
 TrajEW spJoints[23];
@@ -274,6 +274,15 @@ void loadGestures() {
 	printf("Loaded %d gestures\n",gesture);
 }
 
+void initStandPrep() {
+#ifndef SIMULATION
+	utils.getJoints(joints_actual);
+#endif
+	for(int i = 0; i < 23; i++)		
+    spJoints[i].freshMove(joints_actual[i], standPrepPose[i], 5.0);
+	modeDur = 5.0;
+}
+
 void init() {
 	printf("Start init\n");
 	loadPoses();
@@ -333,22 +342,27 @@ void init() {
 	IK_d.setToRS(IK.ikrs);
 	IK_d.setVel0();
 	mode = STAND_PREP;
-	initStandPrep();
+//	initStandPrep();
 }
 
 
 
 void stateMachine() {
 	int command;
-	command = getCommand();
+	if (r_mode != -2 || 0) {
+	command = r_mode;
+	}
+	else {
+		printf("command error\n");
+	}
 	std::cout << "Starting gesture  " << command << std::endl;
 	modeT0 = curTime;
 	mode = GESTURE;
 	initGesture(command);
 		cleanCommand();
+}
 
-
-double nomPose[3] = {0.0, 0.0, 0.42};
+//double nomPose[3] = {0.0, 0.0, 0.42};
 
 void gestureCon() {
 	for(int i = 0; i < 8; i++) 	IK_d.armJoints[i] = gestureArms[i].readPos(modeTime);
@@ -358,15 +372,18 @@ void gestureCon() {
 		IK_d.com[i] += (IK_d.foot[LEFT][i] + IK_d.foot[RIGHT][i])/2.0;
 	}
 	double rootEA[3];
-	for(int i = 0; i < 3; i++)	rootEA[i] = gestureRootEA[i].readPos(modeTime);
+	for(int i = 0; i < 3; i++){	rootEA[i] = gestureRootEA[i].readPos(modeTime);
 	IK_d.rootQ = EA2quat(rootEA);
-}
+
+}}
+
 
 void standPrepCon() {
 	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
 #ifndef SIMULATION
 	utils.setJoints(theta_d);
 #endif
+
 }
 
 
@@ -413,6 +430,7 @@ void spin_wait(double dt)
     else
       spin = 0;
   }
+
   return;
 }
 
@@ -420,7 +438,7 @@ int main( int argc, char **argv )
 {
   ////////////////////////////////////////////////////
   // ros stuff
-  ros::init(argc, argv, "jimmy_gesture", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "jimmy_walk", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode = ros::NodeHandle();
 
   ros::Time last_ros_time_;
@@ -432,15 +450,15 @@ int main( int argc, char **argv )
     }
   }
 
-  ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
+  ros::Subscriber subcommand = rosnode.subscribe("Jimmy_cmd", 10, jimmyGestureCallback);
   //////////////////////////////////////////////////// 
   /*
   */
 
-	wallClockStart = get_time();
+//	wallClockStart = get_time();
 	init();
 
-  printf("Starting\n");
+/*  printf("Starting\n");
   double timeQuota = plan.TIME_STEP;
 
   wallClockLast = get_time();
@@ -454,13 +472,15 @@ int main( int argc, char **argv )
 		wallClockDT = wallNow-wallClockLast;
 		wallClockLast = wallNow;
 		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
-
+*/
+	while(r_mode != 0) {
 		controlLoop();
+	}
 
-		logger.saveData();
+//		logger.saveData();
 
-		if(getCommand() == -1) {
-#ifndef SIMULATION
+		//if(getCommand() == -1) {
+/*#ifndef SIMULATION
       int8_t temperature[TOTAL_JOINTS];
       utils.getCurTemperature(temperature);
       for (int i = 0; i < TOTAL_JOINTS; i++)
@@ -470,14 +490,19 @@ int main( int argc, char **argv )
 			logger.writeToMRDPLOT();
 			exit(-1);
 		}
-
+*/
     ///////////////////////////////////////////////
     // proc ros msg
-    ros::spinOnce();
+	for (int i = 0; i < 100000; ++i)
+	{
+		ros::spinOnce();
+		sleep(2);
+	}
+    
 
     ///////////////////////////////////////////////
     // wait
-    double wall1 = get_time();
+/*    double wall1 = get_time();
     double dt = wall1 - wallNow;
     // step up quota for the next time step
     if (dt > timeQuota) {
@@ -493,7 +518,7 @@ int main( int argc, char **argv )
       //t_real_sleep = get_time() - t_pre_sleep;
       spin_wait(sleep_t / 1e6);
 #endif
-    }
+    }*/
     ///////////////////////////////////////////////
 	}
 

@@ -349,12 +349,7 @@ void init() {
 
 void stateMachine() {
 	int command;
-	if (r_mode != -2 || 0) {
 	command = r_mode;
-	}
-	else {
-		printf("command error\n");
-	}
 	std::cout << "Starting gesture  " << command << std::endl;
 	modeT0 = curTime;
 	mode = GESTURE;
@@ -450,7 +445,7 @@ int main( int argc, char **argv )
     }
   }
 
-  ros::Subscriber subcommand = rosnode.subscribe("Jimmy_cmd", 10, jimmyGestureCallback);
+  ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
   //////////////////////////////////////////////////// 
   /*
   */
@@ -496,7 +491,7 @@ int main( int argc, char **argv )
 	for (int i = 0; i < 100000; ++i)
 	{
 		ros::spinOnce();
-		sleep(2);
+		//sleep(2);
 	}
     
 
@@ -520,7 +515,5 @@ int main( int argc, char **argv )
 #endif
     }*/
     ///////////////////////////////////////////////
-	}
-
 	return 0;
-}
+	}

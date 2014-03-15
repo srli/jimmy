@@ -199,7 +199,7 @@ void loadPoses() {
 	int i = 0;
 	while (true) {
 		in >> poses[pose][i];
-		std::cout << i << " " << poses[pose][i] << std::endl;
+		//std::cout << i << " " << poses[pose][i] << std::endl;
 		i++;
 		if(i >= N_VALS_PER_POSE) {
 			i = 0;
@@ -229,12 +229,12 @@ void loadPoses() {
 	for(int p = 0; p < pose; p++) {
 		for(int i = 0; i < N_VALS_PER_POSE; i++) {
 			if(poses[p][i] < poseLimits[0][i]) {
-				printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[0][i]);
+				//printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[0][i]);
 				poses[p][i] = poseLimits[0][i];
 
 			}
 			if(poses[p][i] > poseLimits[1][i]) {
-				printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[1][i]);
+				//printf("Limiting pose %d value %d from %g to %g\n", p, i, poses[p][i], poseLimits[1][i]);
 				poses[p][i] = poseLimits[1][i];
 			}
 		}
@@ -271,7 +271,7 @@ void loadGestures() {
 		}
 		gesture++;
 	}
-	printf("Loaded %d gestures\n",gesture);
+	//printf("Loaded %d gestures\n",gesture);
 }
 
 void initStandPrep() {
@@ -342,19 +342,21 @@ void init() {
 	IK_d.setToRS(IK.ikrs);
 	IK_d.setVel0();
 	mode = STAND_PREP;
-//	initStandPrep();
+	initStandPrep();
 }
 
 
 
 void stateMachine() {
 	int command;
-	command = r_mode;
-	std::cout << "Starting gesture  " << command << std::endl;
+	command = getCommand();
+	if (command != 0) {
+	std::cout << "Registered command  " << command << std::endl;
 	modeT0 = curTime;
 	mode = GESTURE;
 	initGesture(command);
-		cleanCommand();
+	cleanCommand();
+}
 }
 
 //double nomPose[3] = {0.0, 0.0, 0.42};
@@ -376,7 +378,7 @@ void gestureCon() {
 void standPrepCon() {
 	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
 #ifndef SIMULATION
-	utils.setJoints(theta_d);
+	//utils.setJoints(theta_d);
 #endif
 
 }
@@ -431,89 +433,24 @@ void spin_wait(double dt)
 
 int main( int argc, char **argv ) 
 {
+	init();
   ////////////////////////////////////////////////////
   // ros stuff
-  ros::init(argc, argv, "jimmy_walk", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "jimmy_gestures", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode = ros::NodeHandle();
-
-  ros::Time last_ros_time_;
-  bool wait = true;
-  while (wait) {
-    last_ros_time_ = ros::Time::now();
-    if (last_ros_time_.toSec() > 0) {
-      wait = false;
-    }
-  }
-
-  ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
-  //////////////////////////////////////////////////// 
-  /*
-  */
-
-//	wallClockStart = get_time();
-	init();
-
-/*  printf("Starting\n");
-  double timeQuota = plan.TIME_STEP;
-
-  wallClockLast = get_time();
-	logger.add_datapoint("sleep_time", "us", &sleep_t);
-	logger.add_datapoint("sleep_time_real", "s", &t_real_sleep);
-
-
-  while(true) {
-		double wallNow = get_time();
-		wallClockT = wallNow-wallClockStart;
-		wallClockDT = wallNow-wallClockLast;
-		wallClockLast = wallNow;
-		curTime += plan.TIME_STEP;		//maybe do this off a real clock if we're not getting true real time accurately
-*/
-	while(r_mode != 0) {
-		controlLoop();
+  printf("Ready to listen for commands!\n");
+ 
+  	ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
+  	//////////////////////////////////////////////////// 
+while(r_mode != 0) {
+	controlLoop();
 	}
 
-//		logger.saveData();
-
-		//if(getCommand() == -1) {
-/*#ifndef SIMULATION
-      int8_t temperature[TOTAL_JOINTS];
-      utils.getCurTemperature(temperature);
-      for (int i = 0; i < TOTAL_JOINTS; i++)
-        printf("%10s temp %d\n", RobotState::jointNames[i].c_str(), temperature[i]);
-#endif
-
-			logger.writeToMRDPLOT();
-			exit(-1);
-		}
-*/
-    ///////////////////////////////////////////////
-    // proc ros msg
-	for (int i = 0; i < 100000; ++i)
-	{
-		ros::spinOnce();
-		//sleep(2);
-	}
-    
-
-    ///////////////////////////////////////////////
-    // wait
-/*    double wall1 = get_time();
-    double dt = wall1 - wallNow;
-    // step up quota for the next time step
-    if (dt > timeQuota) {
-      timeQuota -= (dt - plan.TIME_STEP);
-      printf("takes too long %g\n", dt);
-    }
-    else {
-      timeQuota = plan.TIME_STEP;
-      sleep_t = (int)((plan.TIME_STEP - dt)*1e6);
-#ifndef SIMULATION      
-      //t_pre_sleep = get_time();
-      //usleep(sleep_t);
-      //t_real_sleep = get_time() - t_pre_sleep;
-      spin_wait(sleep_t / 1e6);
-#endif
-    }*/
-    ///////////////////////////////////////////////
+   	for (;;) {
+	//printf("Spinning!\n");
+     ros::spinOnce();
+     sleep(1);
+   }
+	
 	return 0;
-	}
+}

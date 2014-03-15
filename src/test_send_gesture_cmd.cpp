@@ -14,15 +14,6 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "test_gesture", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode = ros::NodeHandle();
 
-  ros::Time last_ros_time_;
-  bool wait = true;
-  while (wait) {
-    last_ros_time_ = ros::Time::now();
-    if (last_ros_time_.toSec() > 0) {
-      wait = false;
-    }
-  }
-
   ros::Publisher pub = rosnode.advertise<jimmy::jimmy_gesture>("jimmy_send_gesture", 10);
   jimmy::jimmy_gesture gestures;
 

@@ -133,7 +133,7 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
       std::cout << servo_ids[i] << std::endl;
     }
   }
-    else if (msg.servo_names.empty() && !(msg.servo_numbers.empty())) {
+    else if (msg.servo_names.empty()) {
       servo_ids = msg.servo_numbers;
       for (int i = 0; i < msg.positions.size(); i++) {
         std::cout << "setting joint id  " << msg.servo_numbers[i] << "  at position  " << msg.positions[i] << "  in radians" << std::endl;

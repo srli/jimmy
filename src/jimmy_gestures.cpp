@@ -49,25 +49,22 @@ ros::Publisher pub_feedback;
 
 void cleanCommand()
 {
-  boost::mutex::scoped_lock lock(r_Lock);
+  printf("starting clean command\n");
+  //boost::mutex::scoped_lock lock(r_Lock);
+  printf("boost clear\n");
   r_vFwd = 0;
   r_vLeft = 0;
   r_dTheta = 0;
+  printf("roll yaw tilt clear\n");
   r_mode = 0;
   r_neckEAd[0] = 0; 
   r_neckEAd[1] = 0; 
   r_neckEAd[2] = 0; 
+  printf("neck EAs clear\n");
 }
 
-void jimmyGestureCallback(const jimmy::jimmy_gesture &msg)
-{
-  boost::mutex::scoped_lock lock(r_Lock);
-  
-  int newMode = msg.cmd;
-  std::cout << "received command  " << newMode << std::endl;
-  r_mode = newMode;
-  
-}
+
+
 ///////////////////////////////////////////////////
  
 Plan plan;
@@ -137,6 +134,7 @@ static double vForward, vLeft, dTheta;
 
 int getCommand() {
   boost::mutex::scoped_lock lock(r_Lock);
+  printf("currently getting command\n");
   return r_mode;
 }
 
@@ -154,15 +152,18 @@ void initGesture(int gesture) {
 		gestureArms[i].clear();
 		gestureArms[i].addKnot(0, IK_d.armJoints[i], 0, 0);
 	}
+	printf("init arms clear\n");
 	for(int i = 0; i < 3; i++) {
 		gestureNeck[i].clear();
 		gestureNeck[i].addKnot(0, neckEAs[i], 0, 0);
 	}
+	printf("init neck clear\n");
 	for(int i = 0; i < 3; i++) {
 		gestureCoM[i].clear();
 		gestureCoM[i].addKnot(0, IK_d.com[i]-(IK_d.foot[LEFT][i]+IK_d.foot[RIGHT][i])/2.0, 0, 0);
 	}
 	double rootEA[3];
+	printf("init feet clear\n");
 	quat2EA(IK_d.rootQ, rootEA);
 	for(int i = 0; i < 3; i++) {
 		gestureRootEA[i].clear();
@@ -176,6 +177,7 @@ void initGesture(int gesture) {
 
 	double totTime = 0;
 	//add the poses to the trajectories
+	printf("adding poses to trajectories\n");
 	for(int p = 0; p < gestureNpose[gesture]; p++) {
 		totTime += gestureTime[gesture][p];
 		int pose = gestureSeq[gesture][p];
@@ -184,12 +186,14 @@ void initGesture(int gesture) {
 		for(int i = 0; i < 3; i++)	gestureCoM[i].addKnot(totTime, poses[pose][i+11], 0, 0);
 		for(int i = 0; i < 2; i++)	gestureRootEA[i].addKnot(totTime, poses[pose][i+14], 0, 0);
 						gestureRootEA[2].addKnot(totTime, footYaw+poses[pose][16], 0, 0);
+					printf("added 1 pose\n");
 	}
+	printf("init gesture clear\n");
 	//when the gesture ends and returns to IDLE
-	modeDur = totTime;
+	//modeDur = totTime;
 }
 
-static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
+//static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
 
 void loadPoses() {
 	std::string name = ros::package::getPath("jimmy") + "/conf/poses.cf";
@@ -348,29 +352,34 @@ void init() {
 
 
 void stateMachine() {
-	int command;
-	command = getCommand();
-	if (command != 0) {
+	int command = r_mode;
+	printf("command recieved\n");
 	std::cout << "Registered command  " << command << std::endl;
 	modeT0 = curTime;
 	mode = GESTURE;
 	initGesture(command);
+	printf("statemachine init gesture clear\n");
 	cleanCommand();
-}
+	printf("clean command clear\n");
 }
 
 //double nomPose[3] = {0.0, 0.0, 0.42};
 
 void gestureCon() {
+	printf("starting gestureCon\n");
 	for(int i = 0; i < 8; i++) 	IK_d.armJoints[i] = gestureArms[i].readPos(modeTime);
+	printf("finish IK for arms\n");
 	for(int i = 0; i < 3; i++)	neckAngs[i] = gestureNeck[i].readPos(modeTime);
+	printf("finish IK for neck\n");
 	for(int i = 0; i < 3; i++) {
 		gestureCoM[i].read(modeTime, &(IK_d.com[i]), &(IK_d.comd[i]), NULL);
 		IK_d.com[i] += (IK_d.foot[LEFT][i] + IK_d.foot[RIGHT][i])/2.0;
 	}
 	double rootEA[3];
+	printf("finish IK for feet\n");
 	for(int i = 0; i < 3; i++){	rootEA[i] = gestureRootEA[i].readPos(modeTime);
 	IK_d.rootQ = EA2quat(rootEA);
+	printf("finished gestureCon\n");
 
 }}
 
@@ -378,13 +387,13 @@ void gestureCon() {
 void standPrepCon() {
 	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
 #ifndef SIMULATION
-	//utils.setJoints(theta_d);
+	utils.setJoints(theta_d);
 #endif
 
 }
 
 
-void controlLoop() {
+/*void controlLoop() {
 
 	//handle mode switching
 	stateMachine();
@@ -406,6 +415,43 @@ void controlLoop() {
 	}
 #ifndef SIMULATION
 		utils.setJoints(theta_d);
+#endif
+	}*/
+
+void jimmyGestureCallback(const jimmy::jimmy_gesture &msg)
+{
+  boost::mutex::scoped_lock lock(r_Lock);
+  int newMode = msg.cmd;
+  std::cout << "received command  " << newMode << std::endl;
+  r_mode = newMode;
+  std::cout << "r_mode is  " << r_mode << std::endl;
+
+  stateMachine();
+  printf("stateMachine clear\n");
+	//modeTime = curTime-modeT0;
+
+	//whipe out record values
+	vForward = vLeft = dTheta = 0.0;
+	plan.clearForRecord();
+	printf("clear for record clear\n");
+#ifndef SIMULATION
+  utils.getLegJointsCircular(joints_actual);
+  printf("get joints circular clear\n");
+#endif
+  
+  gestureCon();
+	for(int i = 0; i < 3; i++){	theta_d[N_J+i] = neckAngs[i];
+		neckEAs[0] = (-neckAngs[2] - neckAngs[1])/2.0;
+		neckEAs[1] = ( neckAngs[2] - neckAngs[1])/2.0;
+		neckEAs[2] = neckAngs[0];
+	}
+#ifndef SIMULATION
+		utils.setJoints(theta_d);
+	for (int i = 0; i < 20; ++i)
+	{
+		std::cout<< "joint value  " << theta_d[i] << std::endl;
+	}
+		printf("joints set\n");
 #endif
 	}
 
@@ -442,11 +488,11 @@ int main( int argc, char **argv )
  
   	ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
   	//////////////////////////////////////////////////// 
-while(r_mode != 0) {
-	controlLoop();
-	}
-
+	
+	
    	for (;;) {
+   	//controlLoop();
+   	//printf("control loop is spinning\n");
 	//printf("Spinning!\n");
      ros::spinOnce();
      sleep(1);

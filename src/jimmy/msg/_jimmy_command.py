@@ -98,10 +98,7 @@ string frame_id
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
-      if python3:
-        buff.write(struct.pack('<I%sB'%length, length, *_x))
-      else:
-        buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       buff.write(_struct_i.pack(self.cmd))
       length = len(self.param)
       buff.write(_struct_I.pack(length))
@@ -161,10 +158,7 @@ string frame_id
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
-      if python3:
-        buff.write(struct.pack('<I%sB'%length, length, *_x))
-      else:
-        buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       buff.write(_struct_i.pack(self.cmd))
       length = len(self.param)
       buff.write(_struct_I.pack(length))

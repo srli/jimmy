@@ -3,12 +3,6 @@
 
 int main(int argc, char **argv)
 {
-// {
-//   if (argc < 2) {
-//     printf("argc > 2\n");
-//     exit(-1);
-//   }
-
   ////////////////////////////////////////////////////
   // ros stuff
   ros::init(argc, argv, "test_gesture", ros::init_options::NoSigintHandler);

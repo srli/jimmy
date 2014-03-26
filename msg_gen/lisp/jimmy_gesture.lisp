@@ -36,14 +36,6 @@
 (cl:defmethod param-val ((m <jimmy_gesture>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader jimmy-msg:param-val is deprecated.  Use jimmy-msg:param instead.")
   (param m))
-(cl:defmethod roslisp-msg-protocol:symbol-codes ((msg-type (cl:eql '<jimmy_gesture>)))
-    "Constants for message type '<jimmy_gesture>"
-  '((:CMD_GESTURE_START . 2))
-)
-(cl:defmethod roslisp-msg-protocol:symbol-codes ((msg-type (cl:eql 'jimmy_gesture)))
-    "Constants for message type 'jimmy_gesture"
-  '((:CMD_GESTURE_START . 2))
-)
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <jimmy_gesture>) ostream)
   "Serializes a message object of type '<jimmy_gesture>"
   (cl:let* ((signed (cl:slot-value msg 'cmd)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
@@ -104,16 +96,16 @@
   "jimmy/jimmy_gesture")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<jimmy_gesture>)))
   "Returns md5sum for a message object of type '<jimmy_gesture>"
-  "713b071403fea17f55bf116fad96f5cd")
+  "a965d31aafc3ca30eff567cfc7155caf")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'jimmy_gesture)))
   "Returns md5sum for a message object of type 'jimmy_gesture"
-  "713b071403fea17f55bf116fad96f5cd")
+  "a965d31aafc3ca30eff567cfc7155caf")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<jimmy_gesture>)))
   "Returns full string definition for message of type '<jimmy_gesture>"
-  (cl:format cl:nil "#basically a list of gestures as noted in config file~%~%int32 CMD_GESTURE_START       = 2~%~%int32 cmd~%float64[] param  ~%~%~%"))
+  (cl:format cl:nil "#basically a list of gestures as noted in config file~%~%int32 cmd~%float64[] param  ~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'jimmy_gesture)))
   "Returns full string definition for message of type 'jimmy_gesture"
-  (cl:format cl:nil "#basically a list of gestures as noted in config file~%~%int32 CMD_GESTURE_START       = 2~%~%int32 cmd~%float64[] param  ~%~%~%"))
+  (cl:format cl:nil "#basically a list of gestures as noted in config file~%~%int32 cmd~%float64[] param  ~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <jimmy_gesture>))
   (cl:+ 0
      4

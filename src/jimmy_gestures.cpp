@@ -145,7 +145,7 @@ TrajEW gestureCoM[3];
 TrajEW gestureRootEA[3];
 
 void initGesture(int gesture) {
-	gesture-=2;
+	//gesture-=2;
 	printf("Starting gesture %d\n", gesture);
 	//initialize with current state
 	for(int i = 0; i < 8; i++) {
@@ -190,7 +190,7 @@ void initGesture(int gesture) {
 	}
 	printf("init gesture clear\n");
 	//when the gesture ends and returns to IDLE
-	//modeDur = totTime;
+	modeDur = totTime;
 }
 
 //static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
@@ -275,7 +275,7 @@ void loadGestures() {
 		}
 		gesture++;
 	}
-	//printf("Loaded %d gestures\n",gesture);
+	printf("Loaded %d gestures\n",gesture);
 }
 
 void initStandPrep() {
@@ -345,35 +345,127 @@ void init() {
   }
 	IK_d.setToRS(IK.ikrs);
 	IK_d.setVel0();
-	mode = STAND_PREP;
-	initStandPrep();
+	mode = IDLE;
+	//initStandPrep();
+}
+
+void stateMachine() {
+	int command; //, random_gesture;
+	printf("INSTATEMACHINE\n");
+	printf("MODE IS %d\n",mode);
+	switch(mode) {
+	case IDLE:
+		printf("IDLEMODE");
+/*		srand (time(NULL)); //seeds random number
+		random_gesture = rand() % 7 + 2;*/
+		command = getCommand();
+/*		modeT0 = curTime;
+		mode = GESTURE;
+		initGesture(random_gesture);
+		printf("IDLE to GESTURE\n");*/
+
+		//printf("IDLE GESTURE\n");
+
+		//don't want to make this unreadable with a switch inside a switch
+		if(command != 0) {	//each number corresponds to a gesture
+			modeT0 = curTime;
+			mode = GESTURE;
+			initGesture(command);
+      		cleanCommand();
+			printf("IDLE to GESTURE\n");
+		}
+
+		break;
+
+
+	case PRE_WALK:
+		if(modeTime > plan.PRE_PLAN_TIME) {
+			modeT0 = curTime;
+			mode = WALK;
+			printf("PRE_WALK to WALK\n");
+#ifndef SIMULATION
+      assert(utils.setPGains(walk_gain));
+      assert(utils.setStanceGain(2));
+      printf("setting walking gain\n");
+#endif
+		}
+		break;
+	case WALK:
+		if(getCommand() == 0) {
+			plan.stopHere();
+		}
+		if(plan.isDone(modeTime) || modeTime > 36) {
+			modeT0 = curTime;
+			mode = IDLE;
+			printf("WALK to IDLE\n");
+      assert(utils.setPGains(default_gain));
+      printf("setting default gain\n");
+      cleanCommand();
+		}
+		break;
+	case GESTURE:
+		if(modeTime > modeDur) {
+			modeT0 = curTime;
+			mode = IDLE;
+			printf("GESTURE to IDLE\n");
+		}
+		break;
+	case STAND_PREP:
+		if(modeTime > modeDur) {
+			modeT0 = curTime;
+			mode = IDLE;
+			printf("STAND_PREP to IDLE\n");
+		}
+		break;
+	default:
+		printf("Bad mode in stateMachine\n");
+		exit(-1);
+		break;
+	}
 }
 
 
-
+#if 0
 void stateMachine() {
 	int command = r_mode;
 	printf("command recieved\n");
 	std::cout << "Registered command  " << command << std::endl;
-	modeT0 = curTime;
-	mode = GESTURE;
-	initGesture(command);
-	printf("statemachine init gesture clear\n");
-	cleanCommand();
+	if (command != 0) {
+		mode = GESTURE;
+		initGesture(command);
+	} else {
+		mode = IDLE;
+	}
+//	printf("statemachine init gesture clear\n");
+//	cleanCommand();
 	printf("clean command clear\n");
+	if(modeTime > modeDur) {
+		modeT0 = curTime;
+		mode = IDLE;
+	}
 }
-
+#endif
 //double nomPose[3] = {0.0, 0.0, 0.42};
 
 void gestureCon() {
 	printf("starting gestureCon\n");
-	for(int i = 0; i < 8; i++) 	IK_d.armJoints[i] = gestureArms[i].readPos(modeTime);
+	for(int i = 0; i < 8; i++) 	{
+		IK_d.armJoints[i] = gestureArms[i].readPos(modeTime);
+		std::cout << "read position arms  "<< gestureArms[i].readPos(modeTime) << std::endl;
+		std::cout << "IK arms  "<< IK_d.armJoints[i] << std::endl;
+	}
 	printf("finish IK for arms\n");
-	for(int i = 0; i < 3; i++)	neckAngs[i] = gestureNeck[i].readPos(modeTime);
+	
+	for(int i = 0; i < 3; i++){
+		neckAngs[i] = gestureNeck[i].readPos(modeTime);
+		std::cout << "read position neck  "<< gestureNeck[i].readPos(modeTime) << std::endl;
+		std::cout << "neckAngs  "<< neckAngs[i] << std::endl;
+	}
 	printf("finish IK for neck\n");
 	for(int i = 0; i < 3; i++) {
 		gestureCoM[i].read(modeTime, &(IK_d.com[i]), &(IK_d.comd[i]), NULL);
 		IK_d.com[i] += (IK_d.foot[LEFT][i] + IK_d.foot[RIGHT][i])/2.0;
+		std::cout << "foot angs  "<< IK_d.com[i] << std::endl;
 	}
 	double rootEA[3];
 	printf("finish IK for feet\n");
@@ -393,7 +485,7 @@ void standPrepCon() {
 }
 
 
-/*void controlLoop() {
+void controlLoop() {
 
 	//handle mode switching
 	stateMachine();
@@ -416,8 +508,17 @@ void standPrepCon() {
 #ifndef SIMULATION
 		utils.setJoints(theta_d);
 #endif
-	}*/
+	}
 
+void jimmyGestureCallback(const jimmy::jimmy_gesture &msg)
+{
+  boost::mutex::scoped_lock lock(r_Lock);
+  
+  r_mode = msg.cmd;
+  printf("%d\n",r_mode);
+}
+
+#if 0
 void jimmyGestureCallback(const jimmy::jimmy_gesture &msg)
 {
   boost::mutex::scoped_lock lock(r_Lock);
@@ -428,7 +529,7 @@ void jimmyGestureCallback(const jimmy::jimmy_gesture &msg)
 
   stateMachine();
   printf("stateMachine clear\n");
-	//modeTime = curTime-modeT0;
+  modeTime = curTime-modeT0;
 
 	//whipe out record values
 	vForward = vLeft = dTheta = 0.0;
@@ -440,6 +541,10 @@ void jimmyGestureCallback(const jimmy::jimmy_gesture &msg)
 #endif
   
   gestureCon();
+  	for (int i = 0; i < 20; ++i)
+	{
+		std::cout<< "gestureCon joint value  " << theta_d[i] << std::endl;
+	}
 	for(int i = 0; i < 3; i++){	theta_d[N_J+i] = neckAngs[i];
 		neckEAs[0] = (-neckAngs[2] - neckAngs[1])/2.0;
 		neckEAs[1] = ( neckAngs[2] - neckAngs[1])/2.0;
@@ -449,11 +554,12 @@ void jimmyGestureCallback(const jimmy::jimmy_gesture &msg)
 		utils.setJoints(theta_d);
 	for (int i = 0; i < 20; ++i)
 	{
-		std::cout<< "joint value  " << theta_d[i] << std::endl;
+		std::cout<< "setjoint value  " << theta_d[i] << std::endl;
 	}
 		printf("joints set\n");
 #endif
 	}
+#endif
 
 int sleep_t = 1e4;
 double t_pre_sleep = 0;
@@ -491,7 +597,7 @@ int main( int argc, char **argv )
 	
 	
    	for (;;) {
-   	//controlLoop();
+   	 controlLoop();
    	//printf("control loop is spinning\n");
 	//printf("Spinning!\n");
      ros::spinOnce();

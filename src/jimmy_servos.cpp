@@ -159,6 +159,7 @@ int main( int argc, char **argv )
 
   //Subscribes to jimmy_move_servo, which tells us which servos to move
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_servo", 10, jimmyServoCallback);
+  //ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_servo_py", 10, jimmyServoCallback);
 	
 
     ///////////////////////////////////////////////

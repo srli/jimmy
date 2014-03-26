@@ -6,20 +6,15 @@ import struct
 
 
 class jimmy_gesture(genpy.Message):
-  _md5sum = "713b071403fea17f55bf116fad96f5cd"
+  _md5sum = "a965d31aafc3ca30eff567cfc7155caf"
   _type = "jimmy/jimmy_gesture"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """#basically a list of gestures as noted in config file
-
-int32 CMD_GESTURE_START       = 2
 
 int32 cmd
 float64[] param  
 
 """
-  # Pseudo-constants
-  CMD_GESTURE_START = 2
-
   __slots__ = ['cmd','param']
   _slot_types = ['int32','float64[]']
 

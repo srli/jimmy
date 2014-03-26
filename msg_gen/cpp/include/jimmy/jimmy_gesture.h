@@ -39,7 +39,6 @@ struct jimmy_gesture_ {
   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _param_type;
   std::vector<double, typename ContainerAllocator::template rebind<double>::other >  param;
 
-  enum { CMD_GESTURE_START = 2 };
 
   typedef boost::shared_ptr< ::jimmy::jimmy_gesture_<ContainerAllocator> > Ptr;
   typedef boost::shared_ptr< ::jimmy::jimmy_gesture_<ContainerAllocator>  const> ConstPtr;
@@ -69,12 +68,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::jimmy::jimmy_gesture_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "713b071403fea17f55bf116fad96f5cd";
+    return "a965d31aafc3ca30eff567cfc7155caf";
   }
 
   static const char* value(const  ::jimmy::jimmy_gesture_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x713b071403fea17fULL;
-  static const uint64_t static_value2 = 0x55bf116fad96f5cdULL;
+  static const uint64_t static_value1 = 0xa965d31aafc3ca30ULL;
+  static const uint64_t static_value2 = 0xeff567cfc7155cafULL;
 };
 
 template<class ContainerAllocator>
@@ -92,8 +91,6 @@ struct Definition< ::jimmy::jimmy_gesture_<ContainerAllocator> > {
   static const char* value() 
   {
     return "#basically a list of gestures as noted in config file\n\
-\n\
-int32 CMD_GESTURE_START       = 2\n\
 \n\
 int32 cmd\n\
 float64[] param  \n\

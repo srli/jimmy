@@ -559,7 +559,7 @@ void standPrepCon() {
 	for(int i = 0; i < 23; i++)		theta_d[i] = spJoints[i].readPos(modeTime);
 #ifndef SIMULATION
 	utils.setJoints(theta_d);
-#endif
+	#endif
 }
 
 
@@ -660,6 +660,7 @@ void controlLoop() {
 			if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
 		}
 #ifndef SIMULATION
+		//std::cout << "joint number 1 set at  " << theta_d[1] << std::endl;
 		utils.setJoints(theta_d);
 #endif
 	}

@@ -9,9 +9,6 @@ def talker():
     print "Hello! My name is Jimmy. How are you?"
     while not rospy.is_shutdown():
         sentance = str(raw_input("What would you like to say?    "))
-        if sentance == "end":
-            rospy.is_shutdown()
-        rospy.loginfo(sentance)
         pub.publish(sentance)
         r.sleep()
 

@@ -9,6 +9,7 @@ and writes to servos. */
 #include <boost/thread.hpp>
 #include <jimmy/jimmy_servo.h>
 #include <jimmy/jimmy_command.h>
+#include <jimmy/jimmy_setJoints.h>
  
 //#define SIMULATION
 
@@ -148,6 +149,16 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
 }
 ///////////////////////////////////////////////////
 
+/*void jimmyGestureCallback(jimmy::jimmy_setJoints &msg){
+  std::vector<float> servo_positions;
+  assert(utils.getJoints());
+
+  for(int i = 0; i < msg.positions.size(); i+){
+    servo_positions.push_back(msg.positions[i]);
+  }
+  utils.setJoints(servo_positions);
+
+}*/
 
 int main( int argc, char **argv ) 
 {
@@ -159,7 +170,7 @@ int main( int argc, char **argv )
 
   //Subscribes to jimmy_move_servo, which tells us which servos to move
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_servo", 10, jimmyServoCallback);
-  //ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_servo_py", 10, jimmyServoCallback);
+  //ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_gesture", 10, jimmyGestureCallback);
 	
 
     ///////////////////////////////////////////////
@@ -167,7 +178,7 @@ int main( int argc, char **argv )
    for (;;) {
      //printf("Spinning!\n");
      ros::spinOnce();
-     sleep(1);
+     sleep(0.0001);
    }
 	return 0;
 }

@@ -329,8 +329,8 @@ void initGesture(int gesture) {
 	modeDur = totTime;
 }
 
-//static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
-static const double armsOut[8] = {0,0,0,0,0,0,0,0};
+static const double armsOut[8] = {-0.33, -0.2, 1.03, 0, -0.33, 0.2, 1.03, 0};
+//static const double armsOut[8] = {0,0,0,0,0,0,0,0};
 
 void initWalk() {
 	plan.initFeet(IK.ikrs.foot[LEFT][X], IK.ikrs.foot[LEFT][Y], getYaw(IK.ikrs.footQ[LEFT]), IK.ikrs.foot[RIGHT][X], IK.ikrs.foot[RIGHT][Y], getYaw(IK.ikrs.footQ[RIGHT]));
@@ -773,6 +773,7 @@ int main( int argc, char **argv )
   //Subscribes to jimmy_move_servo, which tells us which servos to move
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
   ros::Subscriber sub = rosnode.subscribe("jimmy_move_servo", 10, jimmyServoCallback);
+  ros::Subscriber sub_idle = rosnode.subscribe("jimmy_idle", 2, jimmyGestureCallback);
   //ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_gesture", 10, jimmyGestureCallback);
 	
 

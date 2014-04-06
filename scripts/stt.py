@@ -38,6 +38,8 @@ THRESHOLD = 4500
 def Setup(threshold):
     "Setting up minimals"
     global THRESHOLD
+    if threshold < 3000:
+        threshold = 3500
     THRESHOLD = threshold + 100  # The threshold intensity that defines silence
                       # and noise signal (an int. lower than THRESHOLD is silence).
 
@@ -209,6 +211,7 @@ if(__name__ == '__main__'):
 #        global THRESHOLD
 #        THRESHOLD = 4700
         Setup(audio_int())  # To measure your mic levels
+        print "Speech threshold is set at ", THRESHOLD
         listen_for_speech()  # listen to mic.
 #    print stt_google_wav('output_1396413797.flac')
     #print stt_google_wav('hello.flac')  # translate audio file

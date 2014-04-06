@@ -2,6 +2,7 @@
 
 import roslib; roslib.load_manifest('jimmy')
 import rospy
+import random
 from std_msgs.msg import String
 from espeak import espeak
 from jimmy.msg import *
@@ -15,20 +16,25 @@ def callback(data):
     raw = str(data)
     sentance = raw.split(' ',1)[1]
     print sentance
-    if 'hello' in sentance:
-        say("Hi! My name is Jimmy")
-        movegesture(13)
+#    say(sentance)
+    if 'hello' in sentance:      
+        movegesture(random.randint(1,13))
+        say("Hi! How are you?")
+    if 'thank' in sentance:
+        movegesture(random.randint(1,6))
+        say("You're welcome.")        
     if 'work' in sentance:
+        movegesture(random.randint(1,6))
         say("Yes, I'm ready to work. What should we do?")
     if 'move' in sentance:
-        say("Sure")
+        say("I can do that.")
         move("RightElbow", 0.5)
         print "Moving!"
     if 'back' in sentance:
-        say("Sure")
+        say("I can do that.")
         move("RightElbow", 0)
-    else:
-        say("what, I don't understand")
+#    else:
+#        say("What? I don't understand")
 
 #        r.sleep()
 #    say(sentance)
@@ -60,6 +66,8 @@ if __name__ == '__main__':
     try:
         espeak.set_parameter(espeak.Parameter.Rate,150)
         espeak.set_parameter(espeak.Parameter.Pitch,99)
+#        espeak.set_parameter(espeak.Parameter.Wordgap,)
+        espeak.set_voice("en-sc")
         print "Ready to speak!"
         listener()
     except rospy.ROSInterruptException: pass

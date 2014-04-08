@@ -14,7 +14,7 @@ def callback(data):
     sleep(15)
     idle = False
     print "exit callback"
-    #sleep(15) #wait 5 seconds when we hear input from somewhere else
+    #wait 15 seconds when we hear input from somewhere else
     
 def listener():
     rospy.init_node('idle_node', anonymous=True)

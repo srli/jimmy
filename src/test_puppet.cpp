@@ -36,7 +36,7 @@ int main()
       ticks.push_back(utils.rad2tick(j0[i] + t * (standPrepPose[i] - j0[i]), i));
     }
     assert(utils.syncWriteWord(ADDR_GOAL_POSITION_L, joints, ticks));    
-
+    std::cout << "Finished standing" << std::endl;
     if (t > 1)
       break;
     usleep(1e4);

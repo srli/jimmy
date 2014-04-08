@@ -70,6 +70,7 @@ void jimmyServoCallback(const jimmy::jimmy_servo &msg)
   printf("In servo callback\n");
 
   assert(utils.getJoints());
+
 //  boost::mutex::scoped_lock lock(r_Lock);
 
   if (msg.servo_numbers.empty()) {

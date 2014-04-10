@@ -13,7 +13,7 @@ def say(something):
 
 def callback(data):
 #    while not rospy.is_shutdown():
-    raw = str(data)
+    raw = str(data).lower()
     sentance = raw.split(' ',1)[1]
     print sentance
 #    say(sentance)
@@ -22,13 +22,17 @@ def callback(data):
         sleep(2)
         say("Hi! How are you.")
     if 'thank' in sentance:
-        movegesture(random.randint(1,6))
+        movegesture(16)
         sleep(2)
         say("You're welcome.")        
     if 'work' in sentance:
-        movegesture(random.randint(1,6))
+        movegesture(random.randint(2,6))
         sleep(1)
         say("Yes, I'm ready to work. What should we do.")
+    if "mushroom" in sentance:
+        movegesture(17)
+        sleep(1)
+        say("No thanks.")
     if 'move' in sentance:
         say("I can do that.")
         move("RightElbow", 0.5)
@@ -68,7 +72,7 @@ def listener():
 if __name__ == '__main__':
     try:
         espeak.set_parameter(espeak.Parameter.Rate,150)
-        espeak.set_parameter(espeak.Parameter.Pitch,60)
+        espeak.set_parameter(espeak.Parameter.Pitch,99)
 #        espeak.set_parameter(espeak.Parameter.Wordgap,)
         espeak.set_voice("en")
         print "Ready to speak!"

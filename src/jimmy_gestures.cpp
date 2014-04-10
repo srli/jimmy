@@ -8,7 +8,7 @@
 #include <ros/package.h>
 #include <boost/thread.hpp>
 #include <jimmy/jimmy_gesture.h>
-#include <jimmy/jimmy_setJoints.h>
+#include <jimmy/jimmy_servo.h>
 #include <stdlib.h>
  
 //#define SIMULATION
@@ -39,6 +39,7 @@ static double r_dTheta = 0;
 static int r_mode = 0;
 static double r_neckEAd[3] = {0};
 
+ros::Publisher pub_servos;
 ros::Publisher pub_feedback;
 
 void cleanCommand()
@@ -615,22 +616,24 @@ void controlLoop() {
 			if(theta_d[N_J+i] < neckLims[0][i])	theta_d[N_J+i] = neckLims[0][i];
 			if(theta_d[N_J+i] > neckLims[1][i])	theta_d[N_J+i] = neckLims[1][i];
 		}
-/*#ifndef SIMULATION
+#ifndef SIMULATION
+		jimmy::jimmy_servo msg;
 
 		//std::cout << "joint number 1 set at  " << theta_d[1] << std::endl;
 		//float setjoints.positions;
-		for(int i = 0; i < 23; i++){
-			setjoints.positions.push_back(theta_d[i]);
+		for(int i = 0; i < TOTAL_JOINTS; i++){
+			msg.positions.push_back(theta_d[i]);
+			msg.servo_numbers.push_back(i);
 		}
-		pub.publish(setjoints);
-		ros.spinOnce();
+		pub_servos.publish(msg);
+		//ros.spinOnce();
 
 		//utils.setJoints(theta_d);
-#endif*/
-		/*for(int i = 0; i < 23; i++){
+#endif
+		for(int i = 0; i < 23; i++){
 		std::cout << "Theta change  " << theta_d[i] << std::endl;
-		}*/
-		utils.setJoints(theta_d);
+		}
+		//utils.setJoints(theta_d);
 	}
 }
 
@@ -672,7 +675,7 @@ int main( int argc, char **argv )
   }
 
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
-  //   ros::Publisher pub = rosnode.advertise<jimmy::jimmy_setJoints>("jimmy_move_gesture", 10);
+  pub_servos = rosnode.advertise<jimmy::jimmy_servo>("jimmy_move_servo", 10);
 //   jimmy::jimmy_setJoints setjoints;
 //   //////////////////////////////////////////////////// 
 

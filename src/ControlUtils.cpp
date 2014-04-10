@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <iostream> 
+#include <jimmy/jimmy_servo.h>
 
 // servo pot ranges from 0 to 4096, -pi to pi
 #define TICK_MIN          0
@@ -382,6 +383,7 @@ const int ControlUtils::_id[TOTAL_JOINTS] = {
   ID_R_SHOULDER_PITCH, ID_R_SHOULDER_ROLL, ID_R_ELBOW_YAW, ID_R_ELBOW, 
   ID_HEAD_PAN, ID_HEAD_TILT, ID_HEAD_TILT_2
 };
+
 
 const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
 	2048, 2048, 2048, 2048, 2048, 2048,

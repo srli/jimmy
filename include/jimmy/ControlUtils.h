@@ -36,12 +36,13 @@ class ControlUtils
 {
   private:
     bool sendCommand();
-    static const int _id[TOTAL_JOINTS]; 
   
     int _legIdx;
 
     
   public:
+    static const int _id[TOTAL_JOINTS]; 
+
     enum CMD_TYPE {
       D_GAIN = 0,
       I_GAIN,

@@ -618,15 +618,11 @@ void controlLoop() {
 		}
 #ifndef SIMULATION
 		jimmy::jimmy_servo msg;
-
-		//std::cout << "joint number 1 set at  " << theta_d[1] << std::endl;
-		//float setjoints.positions;
 		for(int i = 0; i < TOTAL_JOINTS; i++){
 			msg.positions.push_back(theta_d[i]);
 			msg.servo_numbers.push_back(i);
 		}
 		pub_servos.publish(msg);
-		//ros.spinOnce();
 
 		//utils.setJoints(theta_d);
 #endif

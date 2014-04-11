@@ -9,7 +9,6 @@ and writes to servos. */
 #include <boost/thread.hpp>
 #include <jimmy/jimmy_servo.h>
 #include <jimmy/jimmy_command.h>
-#include <jimmy/jimmy_setJoints.h>
  
 //#define SIMULATION
 

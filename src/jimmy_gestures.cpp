@@ -626,9 +626,9 @@ void controlLoop() {
 
 		//utils.setJoints(theta_d);
 #endif
-		for(int i = 0; i < 23; i++){
-		std::cout << "Theta change  " << theta_d[i] << std::endl;
-		}
+		// for(int i = 0; i < 23; i++){
+		// std::cout << "Theta change  " << theta_d[i] << std::endl;
+		// }
 		//utils.setJoints(theta_d);
 	}
 }
@@ -671,6 +671,8 @@ int main( int argc, char **argv )
   }
 
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
+  ros::Subscriber sub = rosnode.subscribe("jimmy_idle", 10, jimmyGestureCallback);
+
   pub_servos = rosnode.advertise<jimmy::jimmy_servo>("jimmy_move_servo", 10);
 //   jimmy::jimmy_setJoints setjoints;
 //   //////////////////////////////////////////////////// 

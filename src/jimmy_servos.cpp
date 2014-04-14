@@ -9,6 +9,7 @@ and writes to servos. */
 #include <boost/thread.hpp>
 #include <jimmy/jimmy_servo.h>
 #include <jimmy/jimmy_command.h>
+#include <std_msgs/String.h>
  
 //#define SIMULATION
 
@@ -165,7 +166,13 @@ int main( int argc, char **argv )
   // ros stuff
   ros::init(argc, argv, "jimmy_servos", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode = ros::NodeHandle();
+  ros::Publisher pub = rosnode.advertise<std_msgs::String>("systemsounds", 10);
+  std_msgs::String str;
+
   printf("Ready to listen for commands!\n");
+  str.data = "start";
+  pub.publish(str);
+  printf("Published start sound\n");
 
   //Subscribes to jimmy_move_servo, which tells us which servos to move
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_servo", 10, jimmyServoCallback);

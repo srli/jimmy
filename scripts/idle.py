@@ -14,6 +14,22 @@ def callback(data):
     print "Registered idle interrupt message"
     last_message_received_time = time.time() 
     
+def idle_gesture(last_message_received_time, pub, r):       
+    if time.time() - last_message_received_time > randint(10,20):
+        msg = jimmy_gesture()
+        msg.cmd = randint(2,8)
+        if msg.cmd == 8:
+            sleep(8)
+        print "published gesture", msg.cmd
+        pub.publish(msg)
+        time.sleep(7)
+        print "Gesture published"
+        last_message_received_time = time.time()
+        r.sleep()
+    else:
+        return
+    
+    
 def listener():
     global last_message_received_time
     rospy.init_node('idle_node', anonymous=True)
@@ -24,17 +40,21 @@ def listener():
     
     pub = rospy.Publisher("jimmy_idle", jimmy_gesture)
     r = rospy.Rate(10)
+    
     while True:
+        idle_gesture(last_message_received_time, pub, r)
 
-        if time.time() - last_message_received_time > 15:
-            # send a gesture here
-            msg = jimmy_gesture()
-            msg.cmd = randint(3,8)
-            print "published gesture", msg.cmd
-            pub.publish(msg)
-            print "Gesture published"
-            last_message_received_time = time.time()
-        r.sleep()
+#    while True:
+ #
+#        if time.time() - last_message_received_time > 10:
+#            # send a gesture here
+#            msg = jimmy_gesture()
+#            msg.cmd = randint(3,8)
+#            print "published gesture", msg.cmd
+#            pub.publish(msg) 
+#            print "Gesture published"
+#            last_message_received_time = time.time()
+#        r.sleep()
 
 if __name__ == '__main__':
     try:

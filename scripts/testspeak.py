@@ -41,7 +41,7 @@ def callback(data):
         say("I can do that.")
         move("RightElbow", 0)
 #    else:
-#        say("What? I don't understand")
+#        say(sentance)
 
 #        r.sleep()
 #    say(sentance)

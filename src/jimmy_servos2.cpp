@@ -11,7 +11,6 @@
 #include <jimmy/jimmy_gesture.h>
 //#include <jimmy/jimmy_setJoints.h>
 #include <stdlib.h>
- 
 //#define SIMULATION
 
 static const int8_t default_gain[TOTAL_JOINTS] = 
@@ -774,7 +773,6 @@ int main( int argc, char **argv )
   //Subscribes to jimmy_move_servo, which tells us which servos to move
   ros::Subscriber subcommand = rosnode.subscribe("jimmy_send_gesture", 10, jimmyGestureCallback);
   ros::Subscriber sub = rosnode.subscribe("jimmy_move_servo", 10, jimmyServoCallback);
-  ros::Subscriber sub_idle = rosnode.subscribe("jimmy_idle", 2, jimmyGestureCallback);
   //ros::Subscriber subcommand = rosnode.subscribe("jimmy_move_gesture", 10, jimmyGestureCallback);
 	
 

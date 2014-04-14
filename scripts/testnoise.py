@@ -27,9 +27,18 @@ def callback(data):
         while pygame.mixer.music.get_busy(): 
             pygame.time.Clock().tick(1)
 
+def system(data):
+    print "in system"
+    print str(data)
+    if "start" in str(data):
+        pygame.mixer.music.load(load('startup.mp3'))
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy(): 
+            pygame.time.Clock().tick(1)
     
 def listener():
     rospy.init_node('listener', anonymous=True)
+    rospy.Subscriber("systemsounds", String, system)
     rospy.Subscriber("conversation", String, callback)
     rospy.spin()
         

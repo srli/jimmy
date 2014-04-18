@@ -77,74 +77,75 @@ def listen_for_speech(threshold=THRESHOLD, num_phrases=-1):
     how many phrases to process before finishing the listening process 
     (-1 for infinite). 
     """
-    #Open stream
-    p = pyaudio.PyAudio()
-
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    frames_per_buffer=CHUNK)
-
-    print "* Listening mic. "
-    audio2send = []
-    cur_data = ''  # current chunk  of audio data
-    rel = RATE/CHUNK
-    slid_win = deque(maxlen=SILENCE_LIMIT * rel)
-    #Prepend audio from 0.5 seconds before noise was detected
-    prev_audio = deque(maxlen=PREV_AUDIO * rel) 
-    started = False
-    n = num_phrases
-    response = []
-    pub = rospy.Publisher("conversation", String)
-    rospy.init_node('human_talker', anonymous=True)
-    r = rospy.Rate(10) # 10hz
-
-    while (num_phrases == -1 or n > 0):
-        cur_data = stream.read(CHUNK)
-        slid_win.append(math.sqrt(abs(audioop.avg(cur_data, 4))))
-        #print slid_win[-1]
-        if(sum([x > THRESHOLD for x in slid_win]) > 0):
-            if(not started):
-                print "Starting record of phrase"
-                started = True
-            audio2send.append(cur_data)
-        elif (started is True):
-            print "Finished"
-            # The limit was reached, finish capture and deliver.
-            filename = save_speech(list(prev_audio) + audio2send, p)
-            # Send file to Google and get response
-            r = stt_google_wav(filename) 
-            if num_phrases == -1:
-#                print len(r)
-                if type(r) == list and len(r) > 0:
-                    res = r[0]
-                    speech_result = res['utterance']
-                    print "Most confident result", speech_result
-                    pub.publish(speech_result)
+    while not rospy.is_shutdown():
+        #Open stream
+        p = pyaudio.PyAudio()
+        
+        stream = p.open(format=FORMAT,
+                        channels=CHANNELS,
+                        rate=RATE,
+                        input=True,
+                        frames_per_buffer=CHUNK)
+        
+        print "* Listening mic. "
+        audio2send = []
+        cur_data = ''  # current chunk  of audio data
+        rel = RATE/CHUNK
+        slid_win = deque(maxlen=SILENCE_LIMIT * rel)
+        #Prepend audio from 0.5 seconds before noise was detected
+        prev_audio = deque(maxlen=PREV_AUDIO * rel) 
+        started = False
+        n = num_phrases
+        response = []
+        pub = rospy.Publisher("conversation", String)
+        rospy.init_node('human_talker', anonymous=True)
+        r = rospy.Rate(10) # 10hz
+        
+        while (num_phrases == -1 or n > 0):
+            cur_data = stream.read(CHUNK)
+            slid_win.append(math.sqrt(abs(audioop.avg(cur_data, 4))))
+            #print slid_win[-1]
+            if(sum([x > THRESHOLD for x in slid_win]) > 0):
+                if(not started):
+                    print "Starting record of phrase"
+                    started = True
+                audio2send.append(cur_data)
+            elif (started is True):
+                print "Finished"
+                # The limit was reached, finish capture and deliver.
+                filename = save_speech(list(prev_audio) + audio2send, p)
+                # Send file to Google and get response
+                r = stt_google_wav(filename) 
+                if num_phrases == -1:
+        #                print len(r)
+                    if type(r) == list and len(r) > 0:
+                        res = r[0]
+                        speech_result = res['utterance']
+                        print "Most confident result", speech_result
+                        pub.publish(speech_result)
+                        
+        #                    r.sleep()
+        #                print len(response)
+        #                res = response[0]
+                    print "Total response", r
                     
-#                    r.sleep()
-#                print len(response)
-#                res = response[0]
-                print "Total response", r
-                
+                else:
+                    response.append(r)
+                # Remove temp file. Comment line to review.
+                os.remove(filename)
+                # Reset all
+                started = False
+                slid_win = deque(maxlen=SILENCE_LIMIT * rel)
+                prev_audio = deque(maxlen=0.5 * rel) 
+                audio2send = []
+                n -= 1
+                print "Listening ..."
             else:
-                response.append(r)
-            # Remove temp file. Comment line to review.
-            os.remove(filename)
-            # Reset all
-            started = False
-            slid_win = deque(maxlen=SILENCE_LIMIT * rel)
-            prev_audio = deque(maxlen=0.5 * rel) 
-            audio2send = []
-            n -= 1
-            print "Listening ..."
-        else:
-            prev_audio.append(cur_data)
-
-    print "* Done recording"
-    stream.close()
-    p.terminate()
+                prev_audio.append(cur_data)
+        
+        print "* Done recording"
+        stream.close()
+        p.terminate()
 
     return response
 

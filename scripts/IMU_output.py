@@ -26,7 +26,6 @@ def publisher():
     rospy.init_node('axis_tilt', anonymous=True)
 
     pub = rospy.Publisher("axis_tilt", String)
-    r = rospy.Rate(10)
     while not rospy.is_shutdown():
         lines = []
         for i in range(0,2):
@@ -38,7 +37,6 @@ def publisher():
         result = str(result)
     #    print result
         pub.publish(result)
-        r.sleep()
 	 
     
     
@@ -46,6 +44,8 @@ def publisher():
  
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyACM0',9600)
+#    x = ser.readline()
+#    print x
 
 #	ser = serial.Serial('/dev/ttyusb0', 9600)
     publisher()

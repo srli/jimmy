@@ -18,33 +18,33 @@ def callback(data):
     print sentance
 #    say(sentance)
     if 'hello' in sentance:      
-        movegesture(13)
-        sleep(2)
-        say("Hi! How are you.")
-    if 'thank' in sentance:
         movegesture(16)
         sleep(2)
-        say("You're welcome.")        
+        say("Hello! How are you.")
+        return
+    if 'thank' in sentance:
+        movegesture(18)
+        sleep(2)
+        say("You're welcome.")    
+        return
     if 'work' in sentance:
         movegesture(random.randint(2,6))
         sleep(1)
         say("Yes, I'm ready to work. What should we do.")
-    if "mushroom" in sentance:
-        movegesture(17)
+        return
+    else:
+        say("I'm sorry.")
+        movegesture(19)
         sleep(1)
-        say("No thanks.")
-    if 'move' in sentance:
-        say("I can do that.")
-        move("RightElbow", 0.5)
-        print "Moving!"
-    if 'back' in sentance:
-        say("I can do that.")
-        move("RightElbow", 0)
-#    else:
-#        say(sentance)
-
-#        r.sleep()
-#    say(sentance)
+        say("I do not understand.")
+        return
+#    if 'move' in sentance:
+#        say("I can do that.")
+#        move("RightElbow", 0.5)
+#        print "Moving!"
+#    if 'back' in sentance:
+#        say("I can do that.")
+#        move("RightElbow", 0)
 
 def move(servo, position):
     pub = rospy.Publisher("jimmy_move_servo", jimmy_servo)

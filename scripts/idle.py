@@ -15,11 +15,11 @@ def callback(data):
     last_message_received_time = time.time() 
     
 def idle_gesture(last_message_received_time, pub, r):       
-    if time.time() - last_message_received_time > randint(10,20):
+    if time.time() - last_message_received_time > 15:
         msg = jimmy_gesture()
         msg.cmd = randint(2,8)
         if msg.cmd == 8:
-            sleep(8)
+            time.sleep(8)
         print "published gesture", msg.cmd
         pub.publish(msg)
         time.sleep(7)
@@ -31,6 +31,7 @@ def idle_gesture(last_message_received_time, pub, r):
     
     
 def listener():
+    print "Starting to idle!"
     global last_message_received_time
     rospy.init_node('idle_node', anonymous=True)
 
@@ -41,7 +42,7 @@ def listener():
     pub = rospy.Publisher("jimmy_idle", jimmy_gesture)
     r = rospy.Rate(10)
     
-    while True:
+    while not rospy.is_shutdown():
         idle_gesture(last_message_received_time, pub, r)
 
 #    while True:

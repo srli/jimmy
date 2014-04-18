@@ -156,8 +156,8 @@ def setMotors(motors, target):
     
     
 def send_ros():
-    pub = rospy.Publisher('jimmy_move_gesture', String)
     rospy.init_node('test_send_gesture_cmd_py')
+    pub = rospy.Publisher('jimmy_move_servo', String)
     r = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         servos_set = get_servos()

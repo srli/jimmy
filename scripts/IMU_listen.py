@@ -8,6 +8,7 @@ def callback(data):
     pub = rospy.Publisher("jimmy_move_servo", jimmy_servo)
     r = rospy.Rate(10)
     global ideal_position
+    global change_rate
 
 #    note output values are in order of x, y, z
 #    while not rospy.is_shutdown():
@@ -26,12 +27,12 @@ def callback(data):
 #        ideal_position = 0
 
     if x_pos > 1.5:
-        ideal_position -= 0.03
+        ideal_position -= change_rate
         x_pos = 1.25
         print "ideal position is", ideal_position
         #move servo up
     elif x_pos < 0.75:
-        ideal_position += 0.03
+        ideal_position += change_rate
         x_pos = 1.25
         print "ideal position is", ideal_position
 #            
@@ -49,5 +50,6 @@ def IMU_listen():
 if __name__ == '__main__':
     try:
         ideal_position = 0
+        change_rate = 0.03 #you can change this to make arm move faster or slower        
         IMU_listen()
     except rospy.ROSInterruptException: pass

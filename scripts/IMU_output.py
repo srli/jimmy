@@ -35,7 +35,7 @@ def publisher():
 #        for line in lines:
         result.append(filter(lines[1]))
         result = str(result)
-    #    print result
+        print result
         pub.publish(result)
 	 
     

@@ -658,7 +658,7 @@ int main( int argc, char **argv )
 {
   ////////////////////////////////////////////////////
   // ros stuff
-  ros::init(argc, argv, "jimmy_walk", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "jimmy_gesture", ros::init_options::NoSigintHandler);
   ros::NodeHandle rosnode = ros::NodeHandle();
 
   ros::Time last_ros_time_;

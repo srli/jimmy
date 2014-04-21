@@ -6,13 +6,14 @@ A simple echo client
 
 import socket 
 
-host = 'localhost' 
+host = "208.91.53.169"
 port = 50000 
-size = 1024 
-#while(1):
+size = 1024
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 s.connect((host,port)) 
-s.send('Hello, world') 
-data = s.recv(size) 
-s.close() 
-print 'Received:', data
+while(1):
+    s.send('test string to ensure client is waiting') 
+    data = s.recv(size) 
+    print 'Received:', data
+    if data == "end":
+        s.close() 

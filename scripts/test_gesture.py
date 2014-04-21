@@ -2,8 +2,8 @@
 from math import *
 import roslib; roslib.load_manifest('jimmy')
 import rospy
-from std_msgs.msg import String
-#from jimmy.msg import *
+#from std_msgs.msg import String
+from jimmy.msg import *
 
 
 """
@@ -55,6 +55,7 @@ def get_servos():
         if command == 'stand':
             target = [0,0,0,0,0,0,0,0,0,0,0,0]
             servos_set = setMotors(legmotors, target)
+#            print servos_set.positions
             return servos_set
             
         elif command == 'crouch':
@@ -62,22 +63,32 @@ def get_servos():
             servos = setMotors(legmotors,target)
             return servos
 
-        elif command == 'balance':
+        elif command == 'balance1':
             #Stand Up
             target = [0,0,0,0,0,0,0,0,0,0,0,0]
             servos = setMotors(legmotors,target)
+            return servos
+
             #Shift Arms and Head
-            command = raw_input('step (hit enter to proceed)')
+        elif command == 'balance2':
             target = [radians(39.8), radians(1.6), radians(13.98), radians(35.87), radians(-70.2), radians(-6.8), radians(-5.3), radians(17.7), radians(156.3), radians(-83.9), radians(6.3)]
             servos = setMotors(legmotors,target)
+            return servos
+
             #Shift onto Left Foot
-            command = raw_input('step (hit enter to proceed)')
+        elif command == 'balance3':
+#            command = raw_input('step (hit enter to proceed)')
             target = [0,0,radians(13),radians(5),0,0,0,0,0,0,radians(-13),radians(-20)]
             servos = setMotors(legmotors,target)
+            return servos
+
             #Lift Right Leg
-            command = raw_input('step (hit enter to proceed)')
+        elif command == 'balance3':
+#            command = raw_input('step (hit enter to proceed)')
             target = [0,0,radians(13),radians(5),radians(20),0,radians(-40),0,radians(-20),0,radians(-13),radians(-20)]
             servos = setMotors(legmotors,target)
+            return servos
+
         
         elif command == 'limparm':
             for motor in torsomotors:
@@ -145,23 +156,23 @@ def get_servos():
         command = raw_input('Next Command? ')     
         
 def setMotors(motors, target):
-    servo_move = []
+    msg = jimmy_servo()
     i = 0
-    while i < len(motors):
-        servo_move.append(str(motors[i]))
-        servo_move.append(str(target[i]))
+    while i < len(target):
+        msg.servo_numbers.append(int(motors[i]))
+        msg.positions.append(float(target[i]))
         i += 1
-    string = ' '.join(servo_move)
-    return string
+#    string = ' '.join(servo_move)
+    return msg
     
     
 def send_ros():
     rospy.init_node('test_send_gesture_cmd_py')
-    pub = rospy.Publisher('jimmy_move_servo', String)
+    pub = rospy.Publisher('jimmy_move_servo', jimmy_servo)
     r = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
-        servos_set = get_servos()
-        pub.publish(servos_set)
+        msg = get_servos()
+        pub.publish(msg)
         r.sleep()
         
 

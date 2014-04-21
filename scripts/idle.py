@@ -38,6 +38,8 @@ def listener():
     rospy.Subscriber("conversation", String, callback)
     rospy.Subscriber("jimmy_send_gesture", jimmy_gesture, callback)
     rospy.Subscriber("jimmy_send_servo", jimmy_servo, callback)
+    rospy.Subscriber("axis_tilt", String, callback)
+
     
     pub = rospy.Publisher("jimmy_idle", jimmy_gesture)
     r = rospy.Rate(10)

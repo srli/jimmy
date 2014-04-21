@@ -6,7 +6,7 @@ A simple echo server
 
 import socket 
 
-host = "208.91.53.169"
+host = "" #fill this in for appropriate server
 port = 50000 
 backlog = 5 
 size = 1024 

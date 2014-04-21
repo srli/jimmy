@@ -10,7 +10,14 @@ from jimmy.msg import *
 
 def say(something):
     espeak.synth(something)
-
+    
+def remote_say(data):
+    print "in remote_say"
+    raw = str(data).lower()
+    sentance = raw.split(' ',1)[1]
+    print sentance
+    say(sentance)
+    
 def callback(data):
 #    while not rospy.is_shutdown():
     raw = str(data).lower()
@@ -67,6 +74,7 @@ def movegesture(gesture):
 def listener():
     rospy.init_node('listener', anonymous=True)
     rospy.Subscriber("conversation", String, callback)
+    rospy.Subscriber("remote_speech", String, remote_say)
     rospy.spin()
 
 if __name__ == '__main__':

@@ -5,14 +5,10 @@ from std_msgs.msg import String
 from jimmy.msg import *
 
 def callback(data):
-    pub = rospy.Publisher("jimmy_move_servo", jimmy_servo)
-    r = rospy.Rate(10)
-    global ideal_position
-    global change_rate
+    global x_pos
 
 #    note output values are in order of x, y, z
-#    while not rospy.is_shutdown():
-    
+  
     raw_data = str(data)
     x_pos = float(raw_data[9:13])
     y_pos = float(raw_data[15:19])
@@ -21,35 +17,29 @@ def callback(data):
     print [x_pos, y_pos, z_pos]
 
     
-    msg = jimmy_servo()
-
-    msg.servo_names.append("LeftElbow")
-#        ideal_position = 0
-
-    if x_pos > 1.5:
-        ideal_position -= change_rate
-        x_pos = 1.25
-        print "ideal position is", ideal_position
-        #move servo up
-    elif x_pos < 0.75:
-        ideal_position += change_rate
-        x_pos = 1.25
-        print "ideal position is", ideal_position
-#            
-#    else:
-#        msg.positions.append(0)
-    msg.positions.append(ideal_position)
-    pub.publish(msg)
-#    r.sleep()
-    
 def IMU_listen():
+    global x_pos
+    global change_rate
+    global ideal_position
     rospy.init_node('IMU_listen', anonymous=True)
+    r = rospy.Rate(100)
+    pub = rospy.Publisher("jimmy_move_servo", jimmy_servo)
     rospy.Subscriber("axis_tilt", String, callback)
-    rospy.spin()
+    while not rospy.is_shutdown():
+        msg = jimmy_servo()
+        msg.servo_names.append("LeftElbow")
+        ideal_position -= (x_pos - 1.5)*change_rate
+        msg.positions.append(ideal_position)
+        pub.publish(msg)
+#        print "in here"
+        r.sleep()
+#    rospy.spin()
         
 if __name__ == '__main__':
     try:
-        ideal_position = 0
-        change_rate = 0.03 #you can change this to make arm move faster or slower        
+        ideal_position = -.9
+        x_pos = 1.5
+        change_rate = 0.02 #you can change this to make arm move faster or slower        
         IMU_listen()
+
     except rospy.ROSInterruptException: pass

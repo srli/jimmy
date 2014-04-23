@@ -39,6 +39,11 @@ def callback(data):
         sleep(1)
         say("Yes, I'm ready to work. What should we do.")
         return
+    if "haha" in sentance:
+        movegesture(18)
+        sleep(2)
+        say("haha, i am laughing")
+        return
     else:
         say("I'm sorry.")
         movegesture(19)

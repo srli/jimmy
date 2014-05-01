@@ -103,14 +103,20 @@ bool ControlUtils::getJoints(double *a)
     // Read present position
     ticks_from[i] = dxl_read_word(_id[i], ADDR_PRESENT_POSITION_L);
     int CommStatus = dxl_get_result();
-
-    if(CommStatus == COMM_RXSUCCESS)
+    std::cout << "Joint " << i << "comm status " << CommStatus << std::endl;
+    if(CommStatus == COMM_RXSUCCESS){
       a[i] = tick2rad(ticks_from[i], i);
-    else
-      return false;
-
-    //usleep(5000);
+      std::cout << "com success" << std::endl;
+    }
+    else if(CommStatus == COMM_RXFAIL | CommStatus == COMM_RXWAITING){
+      //return false;
+      std::cout << "com failure" << std::endl;
+    }
   }
+   /* else
+      return false;
+    //usleep(5000);
+  }*/
 
   return true;
 }

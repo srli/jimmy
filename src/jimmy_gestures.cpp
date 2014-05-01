@@ -181,6 +181,10 @@ TrajEW spJoints[23];
 void initStandPrep() {
 #ifndef SIMULATION
 	utils.getJoints(joints_actual);
+	printf("Joints succesfully retrieved!\n");
+	for (int i = 0; i < TOTAL_JOINTS; i++) {
+      printf("%10s %g\n", RobotState::jointNames[i].c_str(), joints_actual[i]);  
+    }
 #endif
 	for(int i = 0; i < 23; i++)		
     spJoints[i].freshMove(joints_actual[i], standPrepPose[i], 5.0);

@@ -93,7 +93,7 @@ def publisher():
             if len(faces) != 0:
                 face = faces[0]        
                 print "top face at:" + str(face.midx) + ", "+ str(face.midy)
-                pup.publish(str(face.midx)+','+str(face.midy))
+                pub.publish(str(face.midx)+","+str(face.midy))
             cv.ShowImage("face detection test", image)
  
 if __name__ == "__main__":

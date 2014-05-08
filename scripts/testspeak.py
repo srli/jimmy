@@ -34,10 +34,10 @@ def callback(data):
         sleep(2)
         say("You're welcome.")    
         return
-    if 'work' in sentance:
+    if 'your name' in sentance:
         movegesture(random.randint(2,6))
         sleep(1)
-        say("Yes, I'm ready to work. What should we do.")
+        say("My name is Jimmy.")
         return
     if "haha" in sentance:
         movegesture(18)

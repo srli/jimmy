@@ -26,7 +26,7 @@ def callback(data):
 #    say(sentance)
     if 'hello' in sentance:      
         movegesture(16)
-        sleep(2)
+        sleep(2)                                                                                                                                                                                                                                                                                                                                                                                                                
         say("Hello! How are you.")
         return
     if 'thank' in sentance:

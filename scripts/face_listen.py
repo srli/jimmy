@@ -28,13 +28,13 @@ def face_listen():
     position_y = 0
     while not rospy.is_shutdown():
         msg = jimmy_servo()
-        msg.servo_names.append("HeadTilt2")
+        msg.servo_names.append("HeadPan")
         position_x -= (x_pos - ideal_position_x)*change_rate_x
         msg.positions.append(-position_x) # ideal_position_y)
-        msg.servo_names.append("HeadPan")
+        msg.servo_names.append("HeadTilt")
         position_y -= (y_pos - ideal_position_y)*change_rate_y
         msg.positions.append(position_y)
-        msg.servo_names.append("HeadTilt")
+        msg.servo_names.append("HeadTilt2")
         msg.positions.append(position_y)
         pub.publish(msg)
 #        print "in here"

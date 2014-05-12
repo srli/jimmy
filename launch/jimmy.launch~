@@ -4,5 +4,6 @@
 <node name="jimmy_gestures" pkg="jimmy" type="jimmy_gestures" />
 <node name="jimmy_speak" pkg="jimmy" type="testspeak.py" />
 <node name="jimmy_idle" pkg="jimmy" type="idle.py" />
+<node name="jimmy_idle" pkg="jimmy" type="idle.py" />
 
 </launch>

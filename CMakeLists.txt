@@ -47,8 +47,8 @@ rosbuild_add_executable(jimmy_servos src/jimmy_servos.cpp)
   target_link_libraries(jimmy_servos jimmylib rt dxl)
 
 #reading joint positions
-rosbuild_add_executable(jimmy_joint_positions src/jimmy_joint_positions.cpp)
-  target_link_libraries(jimmy_joint_positions jimmylib rt dxl)
+#rosbuild_add_executable(jimmy_joint_positions src/jimmy_joint_positions.cpp)
+ # target_link_libraries(jimmy_joint_positions jimmylib rt dxl)
 
 # static jimmy
 #rosbuild_add_executable(test_static src/JimmyWalkStatic.cpp)

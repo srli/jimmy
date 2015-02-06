@@ -175,7 +175,10 @@ float64[] positions
         if python3 or type(val1) == unicode:
           val1 = val1.encode('utf-8')
           length = len(val1)
-        buff.write(struct.pack('<I%ss'%length, length, val1))
+        if python3:
+          buff.write(struct.pack('<I%sB'%length, length, *val1))
+        else:
+          buff.write(struct.pack('<I%ss'%length, length, val1))
       length = len(self.servo_numbers)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
@@ -242,7 +245,10 @@ float64[] positions
         if python3 or type(val1) == unicode:
           val1 = val1.encode('utf-8')
           length = len(val1)
-        buff.write(struct.pack('<I%ss'%length, length, val1))
+        if python3:
+          buff.write(struct.pack('<I%sB'%length, length, *val1))
+        else:
+          buff.write(struct.pack('<I%ss'%length, length, val1))
       length = len(self.servo_numbers)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length

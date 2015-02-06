@@ -1,6 +1,6 @@
 /*
- * Handles communication with the servos. 
- * Tick / radiant conversion is also handled here. 
+ * Handles communication with the servos.
+ * Tick / radiant conversion is also handled here.
  * Use sync write for multiple joints for faster speed.
  */
 
@@ -8,7 +8,7 @@
 #include "Utils.h"
 #include <stdlib.h>
 #include <math.h>
-#include <iostream> 
+#include <iostream>
 #include <jimmy/jimmy_servo.h>
 
 // servo pot ranges from 0 to 4096, -pi to pi
@@ -34,7 +34,7 @@ bool ControlUtils::getLegJointsCircular(double a[TOTAL_JOINTS])
       a[_legIdx] = tick2rad(ticks_from[_legIdx], _legIdx);
     else
       return false;
-    
+
     _legIdx++;
     if (_legIdx > R_AAA)
       _legIdx = L_HZ;
@@ -51,8 +51,8 @@ bool ControlUtils::setAllBytes(const int8_t val[TOTAL_JOINTS], int8_t addr)
     joints.push_back(i);
     vals.push_back(val[i]);
   }
-  
-  return syncWriteByte(addr, joints, vals); 
+
+  return syncWriteByte(addr, joints, vals);
 }
 
 bool ControlUtils::getAllBytes(int8_t val[TOTAL_JOINTS], int8_t addr)
@@ -66,7 +66,7 @@ bool ControlUtils::getAllBytes(int8_t val[TOTAL_JOINTS], int8_t addr)
 }
 
 /*
-bool ControlUtils::getLoads(double *a) 
+bool ControlUtils::getLoads(double *a)
 {
   for (int i = 0; i < TOTAL_JOINTS; i++) {
     // Read present position
@@ -145,12 +145,12 @@ bool ControlUtils::setStanceGain(int side)
     joints.push_back(L_AFE);
     joints.push_back(R_AFE);
     vals.push_back(100);
-    vals.push_back(100); 
+    vals.push_back(100);
     printf("set DS gains\n");
   }
-  
-  bool ret = syncWriteByte(ADDR_P_GAIN, joints, vals); 
-  
+
+  bool ret = syncWriteByte(ADDR_P_GAIN, joints, vals);
+
   /*
   // hip roll i gain
   // ankle pitch i gain
@@ -186,8 +186,8 @@ bool ControlUtils::setStanceGain(int side)
     vals.push_back(5);
     vals.push_back(5);
   }
-  
-  ret &= syncWriteByte(ADDR_I_GAIN, joints, vals); 
+
+  ret &= syncWriteByte(ADDR_I_GAIN, joints, vals);
   */
 
   return ret;
@@ -208,7 +208,7 @@ bool ControlUtils::syncWriteByte(int8_t addr, const std::vector<int> &joints, co
   dxl_set_txpacket_parameter(1, 1);
   for (size_t i = 0; i < joints.size(); i++) {
     dxl_set_txpacket_parameter(2+2*i, _id[joints[i]]);
-    
+
     dxl_set_txpacket_parameter(2+2*i+1, val[i]);
   }
   dxl_set_txpacket_length((1+1)*joints.size()+4);
@@ -224,7 +224,7 @@ bool ControlUtils::syncWriteWord(int8_t addr, const std::vector<int> &joints, co
 {
   if (joints.size() != val.size())
     return false;
-  
+
   if (joints.empty())
     return true;
 
@@ -235,7 +235,7 @@ bool ControlUtils::syncWriteWord(int8_t addr, const std::vector<int> &joints, co
   dxl_set_txpacket_parameter(1, 2);
   for (size_t i = 0; i < joints.size(); i++) {
     dxl_set_txpacket_parameter(2+3*i, _id[joints[i]]);
-    
+
     dxl_set_txpacket_parameter(2+3*i+1, dxl_get_lowbyte(val[i]));
     dxl_set_txpacket_parameter(2+3*i+2, dxl_get_highbyte(val[i]));
   }
@@ -245,14 +245,14 @@ bool ControlUtils::syncWriteWord(int8_t addr, const std::vector<int> &joints, co
   if(dxl_get_result() == COMM_RXSUCCESS)
     return true;
   else
-    return false; 
+    return false;
 }
 
 bool ControlUtils::setByte(int8_t val, int8_t addr, int joint)
-{  
+{
   dxl_write_byte(_id[joint], addr, val);
   if (dxl_get_result() == COMM_RXSUCCESS) {
-    return true;  
+    return true;
   }
   else {
     printf("faled to write byte to %d at %d\n", addr, joint);
@@ -262,7 +262,7 @@ bool ControlUtils::setByte(int8_t val, int8_t addr, int joint)
 
 bool ControlUtils::getByte(int8_t *val, int8_t addr, int joint)
 {
-  int8_t tmp = dxl_read_byte(_id[joint], addr); 
+  int8_t tmp = dxl_read_byte(_id[joint], addr);
   if(dxl_get_result() == COMM_RXSUCCESS) {
     *val = tmp;
     return true;
@@ -270,7 +270,7 @@ bool ControlUtils::getByte(int8_t *val, int8_t addr, int joint)
   else {
     printf("faled to get byte from %d at %d\n", addr, joint);
     return false;
-  } 
+  }
 }
 
 bool ControlUtils::setJointSubset(const std::vector<int>& joints, const std::vector<double>& positions)
@@ -309,7 +309,7 @@ bool ControlUtils::setJoints(const double a[TOTAL_JOINTS])
       ticks_to[i] = tmp_tick[i];
     }
   }
-                                                               
+
   return syncWriteWord(ADDR_GOAL_POSITION_L, joints, vals);
 }
 
@@ -319,7 +319,7 @@ ControlUtils::ControlUtils()
   vec_set(joints, 0., TOTAL_JOINTS);
   vec_set(jointsd, 0., TOTAL_JOINTS);
   vec_set(joints_d, 0., TOTAL_JOINTS);
-  
+
   if( dxl_initialize(0, 1) == 0 )
 	{
 		printf( "Failed to open USB2Dynamixel!\n" );
@@ -328,7 +328,7 @@ ControlUtils::ControlUtils()
 	  exit(-1);
   }
 	else
-		printf( "Succeed to open USB2Dynamixel!\n" ); 
+		printf( "Succeed to open USB2Dynamixel!\n" );
 
   _legIdx = 0;
 }
@@ -385,8 +385,8 @@ const double ControlUtils::ticks_per_rad = (TICK_MAX-TICK_MIN) / (2*M_PI);
 const int ControlUtils::_id[TOTAL_JOINTS] = {
   ID_L_HIP_YAW, ID_L_HIP_PITCH, ID_L_HIP_ROLL, ID_L_KNEE, ID_L_ANKLE_PITCH, ID_L_ANKLE_ROLL,
   ID_R_HIP_YAW, ID_R_HIP_PITCH, ID_R_HIP_ROLL, ID_R_KNEE, ID_R_ANKLE_PITCH, ID_R_ANKLE_ROLL,
-  ID_L_SHOULDER_PITCH, ID_L_SHOULDER_ROLL, ID_L_ELBOW_YAW, ID_L_ELBOW, 
-  ID_R_SHOULDER_PITCH, ID_R_SHOULDER_ROLL, ID_R_ELBOW_YAW, ID_R_ELBOW, 
+  ID_L_SHOULDER_PITCH, ID_L_SHOULDER_ROLL, ID_L_ELBOW_YAW, ID_L_ELBOW,
+  ID_R_SHOULDER_PITCH, ID_R_SHOULDER_ROLL, ID_R_ELBOW_YAW, ID_R_ELBOW,
   ID_HEAD_PAN, ID_HEAD_TILT, ID_HEAD_TILT_2
 };
 
@@ -406,4 +406,3 @@ const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
 	-1,  1,  1, -1,
    1,  1,  1
 };
- 

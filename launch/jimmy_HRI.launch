@@ -1,0 +1,6 @@
+<launch>
+
+<node name="jimmy_speak" pkg="jimmy" type="testspeak.py" />
+<node name="jimmy_face_detect" pkg="jimmy" type="rosFaceDetect.py" />
+
+</launch>

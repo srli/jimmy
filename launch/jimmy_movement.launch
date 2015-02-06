@@ -1,0 +1,7 @@
+<launch>
+
+<node name="jimmy_servos" pkg="jimmy" type="jimmy_servos" />
+<node name="jimmy_gestures" pkg="jimmy" type="jimmy_gestures" />
+<node name="jimmy_idle" pkg="jimmy" type="idle.py" />
+
+</launch>

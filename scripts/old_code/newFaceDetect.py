@@ -72,7 +72,7 @@ def DetectFace(image, faceCascade):
  
 if __name__ == "__main__":
  
-    capture = cv.CaptureFromCAM(1)
+    capture = cv.CaptureFromCAM(0)
     #capture = cv.CaptureFromFile("test.avi")
      
     #faceCascade = cv.Load("haarcascades/haarcascade_frontalface_default.xml")

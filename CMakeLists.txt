@@ -51,17 +51,17 @@ include_directories(${catkin_INCLUDEDIR}
 include_directories("nite/Include")
 include_directories("nite/Source/XnCommon")
 include_directories("${PROJECT_SOURCE_DIR}/include/jimmy")
-include_directories("${PROJECT_SOURCE_DIR}/lib")
+link_directories("${PROJECT_SOURCE_DIR}/lib")
 
 add_library(jimmylib SHARED "src/IK.cpp" "src/lipm_planner.cpp" "src/Plan.cpp" "src/SDModel_common.cpp" "src/Jimmy.cpp" "src/Logger.cpp" "src/RobotState.cpp" "src/TrajEW.cpp" "src/mrdplot.c" "src/sdlib.c" "src/ControlUtils.cpp")
   set_target_properties(jimmylib PROPERTIES COMPILE_FLAGS "-O4")
+
 
 
 link_directories(${catkin_LIBRARY_DIRS})
 link_directories(${orocos_kdl_LIBRARY_DIRS}
 		 ${GLUT_LIBRARIES}
 )
-
 
 add_executable(test_jimmy src/JimmyWalkMain.cpp)
 add_dependencies(test_jimmy geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
@@ -70,7 +70,7 @@ target_link_libraries(test_jimmy
 				   ${OpenNI_LIBRARIES}
 				   ${orocos_kdl_LIBRARIES}
 				   ${OpenGL_INCLUDE_DIRS} 
-				jimmylib rt dxl -lXnVNite_1_5_2)
+				jimmylib rt dxl -lXnVNite_1_5_2) #dxl
 
 install(TARGETS test_jimmy
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

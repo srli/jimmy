@@ -27,11 +27,12 @@ add_message_files(
 	jimmy_command.msg
 	jimmy_gesture.msg
 	jimmy_servo.msg
+	pointerpos.msg
+	gestures.msg
 )
 
 generate_messages(
-	DEPENDENCIES
-	#pointerpos
+	DEPENDENCIES	
 	geometry_msgs
 	std_msgs
 	sensor_msgs
@@ -72,7 +73,15 @@ target_link_libraries(test_jimmy
 				   ${OpenGL_INCLUDE_DIRS} 
 				jimmylib rt dxl -lXnVNite_1_5_2) #dxl
 
-install(TARGETS test_jimmy
+add_executable(detectfinger src/SingleControl/main.cpp)
+add_dependencies(detectfinger geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(detectfinger ${catkin_LIBRARIES}
+				   ${OpenNI_LIBRARIES}
+				   ${orocos_kdl_LIBRARIES}
+				   ${OpenGL_INCLUDE_DIRS} -lXnVNite_1_5_2)
+
+
+install(TARGETS test_jimmy detectfinger
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY include/${PROJECT_NAME}/

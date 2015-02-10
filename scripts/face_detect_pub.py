@@ -74,7 +74,7 @@ def DetectFace(image, faceCascade):
 
 def publisher():
     rospy.init_node("face_location",anonymous = True)
-    capture = cv.CaptureFromCAM(0)
+    capture = cv.CaptureFromCAM(1)
     #capture = cv.CaptureFromFile("test.avi")
 
     #faceCascade = cv.Load("haarcascades/haarcascade_frontalface_default.xml")

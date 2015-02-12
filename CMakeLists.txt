@@ -81,7 +81,11 @@ target_link_libraries(detectfinger ${catkin_LIBRARIES}
 				   ${OpenGL_INCLUDE_DIRS} -lXnVNite_1_5_2)
 
 
-install(TARGETS test_jimmy detectfinger
+add_executable(testmsg src/SingleControl/test_msg.cpp)
+add_dependencies(testmsg geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
+target_link_libraries(testmsg ${catkin_LIBRARIES})
+
+install(TARGETS test_jimmy detectfinger testmsg
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY include/${PROJECT_NAME}/

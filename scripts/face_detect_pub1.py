@@ -28,15 +28,10 @@ def largestFaceIndex(faces):
 
 def publisher():
     rospy.init_node("face_location",anonymous = True)
-<<<<<<< HEAD
     
     cap = cv2.VideoCapture(0)
 
     face_cascade = cv2.CascadeClassifier('/home/skelly1/opencv-2.4.10/data/haarcascades/haarcascade_frontalface_alt.xml')
-=======
-    capture = cv.CaptureFromCAM(
-    #capture = cv.CaptureFromFile("test.avi")
->>>>>>> 1983dc1e1766917259dd4b68fe473720b1bf3486
 
     pub = rospy.Publisher('face_location', String)
     while not rospy.is_shutdown():

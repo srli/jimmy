@@ -14,7 +14,7 @@ def interaction_callback(data):
     #our message fields are all booleans so we can do easy if statements
     if wave:
         print "waved!"
-        message = 12#random.randint(8, 11) #sets messages as desired as reponses to detected gestures
+        message = 6#random.randint(8, 11) #sets messages as desired as reponses to detected gestures
     if hello:
         print "hello!"
         message = 13
@@ -33,7 +33,7 @@ def publisher():
     pub = rospy.Publisher('/jimmy_idle', jimmy_gesture)
     r = rospy.Rate(20)
     while not rospy.is_shutdown():
-        if message == 11:
+        if message == 6:
             msg = message
             pub.publish(msg)
         r.sleep()

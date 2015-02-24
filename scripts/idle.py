@@ -16,9 +16,9 @@ def say(something):
 def callback(data):
     global last_message_received_time
     print "Registered idle interrupt message"
-    last_message_received_time = time.time() 
-    
-def idle_gesture(last_message_received_time, pub, r):       
+    last_message_received_time = time.time()
+
+def idle_gesture(last_message_received_time, pub, r):
     if time.time() - last_message_received_time > 15:
         msg = jimmy_gesture()
         msg.cmd = randint(2,8)
@@ -41,8 +41,8 @@ def idle_gesture(last_message_received_time, pub, r):
         r.sleep()
     else:
         return
-    
-    
+
+
 def listener():
     print "Starting to idle!"
     global last_message_received_time
@@ -53,10 +53,10 @@ def listener():
     rospy.Subscriber("jimmy_send_servo", jimmy_servo, callback)
     rospy.Subscriber("axis_tilt", String, callback)
 
-    
+
     pub = rospy.Publisher("jimmy_idle", jimmy_gesture)
     r = rospy.Rate(10)
-    
+
     while not rospy.is_shutdown():
         idle_gesture(last_message_received_time, pub, r)
 
@@ -67,7 +67,7 @@ def listener():
 #            msg = jimmy_gesture()
 #            msg.cmd = randint(3,8)
 #            print "published gesture", msg.cmd
-#            pub.publish(msg) 
+#            pub.publish(msg)
 #            print "Gesture published"
 #            last_message_received_time = time.time()
 #        r.sleep()

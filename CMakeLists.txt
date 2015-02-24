@@ -5,6 +5,7 @@ project(jimmy)
 find_package(orocos_kdl REQUIRED)
 find_package(catkin REQUIRED COMPONENTS geometry_msgs
 					roscpp
+					rospy
 					roslib
 					tf
 					rospy
@@ -23,16 +24,17 @@ pkg_check_modules(OpenNI REQUIRED libopenni)
 find_package(GLUT REQUIRED)
 
 add_message_files(
+	DIRECTORY
+	msg
 	FILES
 	jimmy_command.msg
 	jimmy_gesture.msg
 	jimmy_servo.msg
 	pointerpos.msg
-	gestures.msg
-)
+	)
 
 generate_messages(
-	DEPENDENCIES	
+	DEPENDENCIES
 	geometry_msgs
 	std_msgs
 	sensor_msgs
@@ -68,24 +70,49 @@ add_executable(test_jimmy src/JimmyWalkMain.cpp)
 add_dependencies(test_jimmy geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries(test_jimmy 
 				   ${catkin_LIBRARIES}
-				   ${OpenNI_LIBRARIES}
-				   ${orocos_kdl_LIBRARIES}
-				   ${OpenGL_INCLUDE_DIRS} 
-				jimmylib rt dxl -lXnVNite_1_5_2) #dxl
+				  jimmylib rt dxl) #dxl
 
-add_executable(detectfinger src/SingleControl/main.cpp)
-add_dependencies(detectfinger geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-target_link_libraries(detectfinger ${catkin_LIBRARIES}
-				   ${OpenNI_LIBRARIES}
-				   ${orocos_kdl_LIBRARIES}
-				   ${OpenGL_INCLUDE_DIRS} -lXnVNite_1_5_2)
+add_executable(jimmy_servos src/jimmy_servos.cpp)
+add_dependencies(jimmy_servos geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(jimmy_servos 
+				   ${catkin_LIBRARIES}
+				  jimmylib rt dxl) #dxl
+
+add_executable(jimmy_gestures src/jimmy_gestures.cpp)
+add_dependencies(jimmy_gestures geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(jimmy_gestures 
+				   ${catkin_LIBRARIES}
+				  jimmylib rt dxl) #dxl
+
+add_executable(test_send_gestures src/test_send_gesture_cmd.cpp)
+add_dependencies(test_send_gestures geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(test_send_gestures
+				   ${catkin_LIBRARIES}
+				  jimmylib rt dxl) #dxl
 
 
-add_executable(testmsg src/SingleControl/test_msg.cpp)
-add_dependencies(testmsg geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
-target_link_libraries(testmsg ${catkin_LIBRARIES})
 
-install(TARGETS test_jimmy detectfinger testmsg
+#add_executable(detectfinger src/SingleControl/main.cpp)
+#add_dependencies(detectfinger geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+#target_link_libraries(detectfinger ${catkin_LIBRARIES}
+#				   ${OpenNI_LIBRARIES}
+#				   ${orocos_kdl_LIBRARIES}
+#				   ${OpenGL_INCLUDE_DIRS} -lXnVNite_1_5_2)
+
+
+
+add_executable(test_send_servo_cmd src/test_send_servo_cmd.cpp)
+add_dependencies(test_send_servo_cmd geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(test_send_servo_cmd
+				   ${catkin_LIBRARIES}
+				  jimmylib rt dxl) #dxl
+
+
+#add_executable(testmsg src/SingleControl/test_msg.cpp)
+#add_dependencies(testmsg geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
+#target_link_libraries(testmsg ${catkin_LIBRARIES})
+
+install(TARGETS test_jimmy jimmy_servos test_send_gestures test_send_servo_cmd jimmy_gestures
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY include/${PROJECT_NAME}/

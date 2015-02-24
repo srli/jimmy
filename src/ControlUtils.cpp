@@ -394,8 +394,8 @@ const int ControlUtils::_id[TOTAL_JOINTS] = {
 const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
 	2048, 2048, 2048, 2048, 2048, 2048,
 	2048, 2048, 2048, 2048, 2048, 2048,
-	2048, 2560, 1024, 1707,
-	2048, 1536, 3072, 2389,
+	2048, 2500, 3072, 1707,
+	2048, 2048, 1024, 2389,
   2048, 2048, 2048
 };
 
@@ -406,3 +406,23 @@ const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
 	-1,  1,  1, -1,
    1,  1,  1
 };
+
+
+
+/*THESE ARE FOR DOC*/
+/*const int16_t ControlUtils::tick_zeros[TOTAL_JOINTS] = {
+  2048, 2048, 2048, 2048, 2048, 2048,
+  2048, 2048, 2048, 2048, 2048, 2048,
+  2048, 2500, 3072, 1707,
+  2048, 2048, 1024, 2389,
+  2048, 2048, 2048
+};
+
+const int16_t ControlUtils::tick_sign[TOTAL_JOINTS] = {
+  -1,  1, -1, -1,  1, -1,
+  -1, -1, -1, -1,  1, -1,
+   1,  1, -1, -1,
+  -1,  1,  1, -1,
+   1,  1,  1
+};
+*/

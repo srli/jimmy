@@ -22,7 +22,7 @@ def face_listen():
     global ideal_position_x, ideal_position_y
     rospy.init_node('face_listen', anonymous=True)
     r = rospy.Rate(200)
-    pub = rospy.Publisher("jimmy_move_servo", jimmy_servo)
+    pub = rospy.Publisher("jimmy_move_servo", jimmy_servo, queue_size = 10)
     rospy.Subscriber("face_location", String, callback)
     position_x = 0
     position_y = 0
@@ -43,11 +43,15 @@ def face_listen():
         
 if __name__ == '__main__':
     try:
-        x_pos = 150
-        y_pos = 108
-        ideal_position_x = 150
-        ideal_position_y = 108
-        change_rate_x = 0.00002 #you can change this to make arm move faster or slower        
+        x_pos = 215
+        y_pos = 120
+        ideal_position_x = 215
+        #150 old
+        ideal_position_y = 120
+        #108 old
+        #change_rate_x = 0.00002 #you can change this to make arm move faster or slower
+        change_rate_x = 0.00002
+        #change_rate_y = 0.00004
         change_rate_y = 0.00004
         face_listen()
 

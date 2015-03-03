@@ -18,6 +18,8 @@ class Face:
         self.midy = y + h/2
 
 def largestFaceIndex(faces):
+    """Takes in a list of faces and returns the largest face index"""
+    
     largestIndex = 0;
     largest = 0
     for index, face in enumerate(faces):
@@ -27,16 +29,13 @@ def largestFaceIndex(faces):
     return largestIndex
 
 def publisher():
+    """Scans for faces, publishes the position of the largest face"""
+
     rospy.init_node("face_location",anonymous = True)
-<<<<<<< HEAD
     
     cap = cv2.VideoCapture(0)
 
     face_cascade = cv2.CascadeClassifier('/home/skelly1/opencv-2.4.10/data/haarcascades/haarcascade_frontalface_alt.xml')
-=======
-    capture = cv.CaptureFromCAM(
-    #capture = cv.CaptureFromFile("test.avi")
->>>>>>> 1983dc1e1766917259dd4b68fe473720b1bf3486
 
     pub = rospy.Publisher('face_location', String)
     while not rospy.is_shutdown():
@@ -52,7 +51,6 @@ def publisher():
                 cv2.rectangle(frame,(x,y),(x+w,y+h),(0,0,255))
 
             # Display the resulting frame
-            # face = faces[largestFaceIndex(faces)]
             if len(faceObjects) != 0:
                 face = faceObjects[largestFaceIndex(faceObjects)]
                 print "largest face at:"+str(face.midx)+", "+str(face.midy)

@@ -28,17 +28,14 @@ def largestFaceIndex(faces):
 
 def publisher():
     rospy.init_node("face_location",anonymous = True)
-<<<<<<< HEAD
     
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
+    cap.set(3, 480)
+    cap.set(4, 360)
 
     face_cascade = cv2.CascadeClassifier('/home/skelly1/opencv-2.4.10/data/haarcascades/haarcascade_frontalface_alt.xml')
-=======
-    capture = cv.CaptureFromCAM(
-    #capture = cv.CaptureFromFile("test.avi")
->>>>>>> 1983dc1e1766917259dd4b68fe473720b1bf3486
 
-    pub = rospy.Publisher('face_location', String)
+    pub = rospy.Publisher('face_location', String, queue_size = 10)
     while not rospy.is_shutdown():
         ret, frame = cap.read()
 
@@ -51,12 +48,12 @@ def publisher():
             for (x,y,w,h) in faces:
                 cv2.rectangle(frame,(x,y),(x+w,y+h),(0,0,255))
 
-            # Display the resulting frame
-            # face = faces[largestFaceIndex(faces)]
-            if len(faceObjects) != 0:
-                face = faceObjects[largestFaceIndex(faceObjects)]
-                print "largest face at:"+str(face.midx)+", "+str(face.midy)
-                pub.publish(str(face.midx)+","+str(face.midy))
+            face = faceObjects[largestFaceIndex(faceObjects)]
+            print "largest face at:"+str(face.midx)+", "+str(face.midy)
+            pub.publish(str(face.midx)+","+str(face.midy))
+        else:
+            print "no face detected: returning (x,y) = (300,250)"
+            pub.publish(str(300)+","+str(250))
         cv2.imshow('frame',frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

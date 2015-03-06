@@ -15,14 +15,14 @@ def callback(data):
     y_pos = int(positions[1])
     print [x_pos, y_pos]
 
-def face_listen():
+def color_listen():
     global x_pos, y_pos
     global change_rate_x, change_rate_y
     global ideal_position_x, ideal_position_y
-    rospy.init_node('face_listen', anonymous=True)
+    rospy.init_node('color_listen', anonymous=True)
     r = rospy.Rate(200)
-    pub = rospy.Publisher("jimmy_move_servo", jimmy_servo)
-    rospy.Subscriber("face_location", String, callback)
+    pub = rospy.Publisher("jimmy_move_servo", jimmy_servo, queue_size = 10)
+    rospy.Subscriber("color_location", String, callback)
     position_x = 0
     position_y = 0
     while not rospy.is_shutdown():
@@ -46,6 +46,6 @@ if __name__ == '__main__':
         ideal_position_y = 108
         change_rate_x = 0.00002 #you can change this to make arm move faster or slower        
         change_rate_y = 0.00004
-        face_listen()
+        color_listen()
 
     except rospy.ROSInterruptException: pass

@@ -65,37 +65,6 @@ bool ControlUtils::getAllBytes(int8_t val[TOTAL_JOINTS], int8_t addr)
   return true;
 }
 
-/*
-bool ControlUtils::getLoads(double *a)
-{
-  for (int i = 0; i < TOTAL_JOINTS; i++) {
-    // Read present position
-    int16_t ret = dxl_read_word(_id[i], ADDR_PRESENT_LOAD_L);
-    int CommStatus = dxl_get_result();
-    int sign = 1;
-    // It means currently applied load.
-    // The range of the value is 0~2047, and the unit is about 0.1%.
-    // If the value is 0~1023, it means the load works to the CCW direction.
-    // If the value is 1024~2047, it means the load works to the CW direction.
-    // That is, the 10th bit becomes the direction bit to control the direction, and 1024 is equal to 0.
-    // For example, the value is 512, it means the load is detected in the direction of CCW about 50% of the maximum torque.
-    if(CommStatus == COMM_RXSUCCESS) {
-      if (ret >= 1024) {
-        ret -= 1024;
-        sign = -1;
-      }
-      else {
-        sign = 1;
-      }
-      a[i] = ((double)ret / 1024.) * sign * tick_sign[i];
-    }
-    else
-      return false;
-
-    usleep(5000);
-  }
-}
-*/
 
 bool ControlUtils::getJoints(double *a)
 {
@@ -150,46 +119,6 @@ bool ControlUtils::setStanceGain(int side)
   }
 
   bool ret = syncWriteByte(ADDR_P_GAIN, joints, vals);
-
-  /*
-  // hip roll i gain
-  // ankle pitch i gain
-  joints.clear();
-  vals.clear();
-  if (side == 0) {
-    joints.push_back(L_HAA);
-    joints.push_back(L_AFE);
-    joints.push_back(R_HAA);
-    joints.push_back(R_AFE);
-    vals.push_back(5);
-    vals.push_back(5);
-    vals.push_back(0);
-    vals.push_back(0);
-  }
-  else if (side == 1) {
-    joints.push_back(R_HAA);
-    joints.push_back(R_AFE);
-    joints.push_back(L_HAA);
-    joints.push_back(L_AFE);
-    vals.push_back(5);
-    vals.push_back(5);
-    vals.push_back(0);
-    vals.push_back(0);
-  }
-  else {
-    joints.push_back(R_HAA);
-    joints.push_back(R_AFE);
-    joints.push_back(L_HAA);
-    joints.push_back(L_AFE);
-    vals.push_back(5);
-    vals.push_back(5);
-    vals.push_back(5);
-    vals.push_back(5);
-  }
-
-  ret &= syncWriteByte(ADDR_I_GAIN, joints, vals);
-  */
-
   return ret;
 }
 

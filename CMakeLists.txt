@@ -14,7 +14,8 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs
 					cv_bridge
 					image_transport
 					message_generation
-					)
+					rosserial_arduino				             rosserial_client					
+)
 
 # Find OpenNI
 find_package(PkgConfig)
@@ -111,6 +112,19 @@ target_link_libraries(test_send_servo_cmd
 #add_executable(testmsg src/SingleControl/test_msg.cpp)
 #add_dependencies(testmsg geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
 #target_link_libraries(testmsg ${catkin_LIBRARIES})
+
+#rosserial_generate_ros_lib(
+#	PACKAGE rosserial_arduino
+#SCRIPT make_libraries.py
+#)
+
+#rosserial_configure_client(
+#	DIRECTORY firmware
+#	TOOLCHAIN_FILE ${ROSSERIAL_ARDUINO_TOOLCHAIN}
+#)
+
+#rosserial_add_client_target(firmware hello ALL)
+#rosserial_add_client_target(firmware hello-upload)
 
 install(TARGETS test_jimmy jimmy_servos test_send_gestures test_send_servo_cmd jimmy_gestures
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

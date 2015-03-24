@@ -10,36 +10,36 @@ from jimmy.msg import *
 
 def say(something):
     espeak.synth(something)
-    
+
 def remote_say(data):
     print "in remote_say"
     raw = str(data).lower()
-    sentance = raw.split(' ',1)[1]
-    print sentance
-    say(sentance)
-    
+    sentence = raw.split(' ',1)[1]
+    print sentence
+    say(sentence)
+
 def callback(data):
 #    while not rospy.is_shutdown():
     raw = str(data).lower()
-    sentance = raw.split(' ',1)[1]
-    print sentance
-#    say(sentance)
-    if 'hello' in sentance:      
+    sentence = raw.split(' ',1)[1]
+    print sentence
+#    say(sentence)
+    if 'hello' in sentence:      
         movegesture(16)
         sleep(2)                                                                                                                                                                                                                                                                                                                                                                                                                
         say("Hello! How are you.")
         return
-    if 'thank' in sentance:
+    if 'thank' in sentence:
         movegesture(18)
         sleep(2)
         say("You're welcome.")    
         return
-    if 'your name' in sentance:
+    if 'your name' in sentence:
         movegesture(random.randint(2,6))
         sleep(1)
         say("My name is Jimmy.")
         return
-    if "haha" in sentance:
+    if "haha" in sentence:
         movegesture(18)
         sleep(2)
         say("haha, i am laughing")
@@ -50,11 +50,11 @@ def callback(data):
         sleep(1)
         say("I do not understand.")
         return
-#    if 'move' in sentance:
+#    if 'move' in sentence:
 #        say("I can do that.")
 #        move("RightElbow", 0.5)
 #        print "Moving!"
-#    if 'back' in sentance:
+#    if 'back' in sentence:
 #        say("I can do that.")
 #        move("RightElbow", 0)
 
@@ -67,7 +67,7 @@ def move(servo, position):
     pub.publish(msg)
 #    rospy.spin()
     print "Message published!"
-   
+
 def movegesture(gesture):
     pub = rospy.Publisher("jimmy_send_gesture", jimmy_gesture)
     r = rospy.Rate(10)
@@ -75,10 +75,10 @@ def movegesture(gesture):
     msg.cmd = gesture
     pub.publish(msg)
     print "Gesture published"
-    
+
 def listener():
     rospy.init_node('listener', anonymous=True)
-    rospy.Subscriber("conversation", String, callback)
+    rospy.Subscriber("textConversation", String, callback)
     rospy.Subscriber("remote_speech", String, remote_say)
     rospy.spin()
 

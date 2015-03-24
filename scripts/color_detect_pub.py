@@ -13,7 +13,7 @@ def publisher():
     rospy.init_node("color_location",anonymous = True)
 
     #Start cam stream
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     #Initialize publish
     pub = rospy.Publisher('color_location', String, queue_size = 10)
@@ -30,8 +30,8 @@ def publisher():
         # hsv = cv2.cvtColor(blurframe, cv2.COLOR_BGR2HSV)
 
         #Define color range in BGR
-        lower_blue = np.array([50, 200, 50])
-        upper_blue = np.array([150, 255, 150])
+        lower_blue = np.array([50, 50, 100])
+        upper_blue = np.array([255, 255, 255])
 
         # Threshold the HSV image to get only the selected colors
         # cv2.medianBlur(blurframe, 3)
@@ -53,7 +53,7 @@ def publisher():
             pub.publish(str(x)+","+str(y))
 
         #Display the final image
-        cv2.imshow('frame', frame)
+        # cv2.imshow('frame', frame)
         cv2.imshow('blur', blurframe)
 
         #If ESC pressed, quit the program

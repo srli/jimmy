@@ -33,14 +33,15 @@ PREV_AUDIO = 0.5  # Previous audio (in seconds) to prepend. When noise
                   # prepended. This helps to prevent chopping the beggining
                   # of the phrase.
 
-THRESHOLD = 4500
-                     
+THRESHOLD = 5000
+
+
 def Setup(threshold):
     "Setting up minimals"
     global THRESHOLD
-    if threshold < 3000:
-        threshold = 3500
-    THRESHOLD = threshold + 100  # The threshold intensity that defines silence
+    # if threshold < 3000:
+    #     threshold = 3500
+    # THRESHOLD = threshold + 100  # The threshold intensity that defines silence
                       # and noise signal (an int. lower than THRESHOLD is silence).
 
 def audio_int(num_samples=50):
@@ -97,7 +98,7 @@ def listen_for_speech(threshold=THRESHOLD, num_phrases=-1):
         started = False
         n = num_phrases
         response = []
-        pub = rospy.Publisher("conversation", String)
+        pub = rospy.Publisher("conversation", String, queue_size = 10)
         rospy.init_node('human_talker', anonymous=True)
         r = rospy.Rate(10) # 10hz
         

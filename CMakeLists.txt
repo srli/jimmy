@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs
 					rospy
 					roslib
 					tf
-					rospy
 					std_msgs
 					sensor_msgs
 					cv_bridge
@@ -31,6 +30,7 @@ add_message_files(
 	jimmy_command.msg
 	jimmy_gesture.msg
 	jimmy_servo.msg
+	jimmy_servo_nums.msg
 	pointerpos.msg
 	)
 

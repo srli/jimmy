@@ -26,15 +26,13 @@ char hello[13] = "hello world!";
 char received[13] = "mreceived";
 char badvoltage[13] = "bad volts";
 
-boolean start = true;
-
 void message_callback( const std_msgs::Int16& servo_msg){
 //  Serial.println("message received!");
   data = servo_msg.data;
   digitalWrite(13, HIGH-digitalRead(13));   // blink the led
   str_msg.data = received;
   chatter.publish(&str_msg);
-  
+  SERVO_test(data);
   LED_test(data);
 }
 
@@ -54,13 +52,7 @@ void setup(){
 
 void loop(){
   //Moved setup scripts into loop.TODO: Decide if necessary
-  if (start){
-  Check_Voltage();
-  Move_Center();
-  }  
-  
-  node_handle.spinOnce();
-  start = false;
+   node_handle.spinOnce();
   delay(500); //delay for a bit
 }
 
@@ -93,11 +85,41 @@ void LED_test(int input){
   chatter.publish(&str_msg);
   id = input;
     ax12SetRegister(id, 25, 1);
-    Serial.println(id);
     delay(3000);
     ax12SetRegister(id, 25, 0);  
-    Serial.println(id);    
     delay(3000);    
   }
     
+
+void MoveTest(int input){
+  id = input;
+  pos = 2048;
+  while(id <= SERVOCOUNT){
+  Serial.print("Moving Servo ID: ");
+  Serial.println(id);  
+
+  while(pos >= 1950){  
+  SetPosition(id, pos);
+  pos = pos--;
+  delay(10);
+  }
+
+  Serial.println("Recentering");
+
+  while(pos <= 2048){  
+  SetPosition(id, pos);
+  pos = pos++;
+  delay(10);
+  }
+
+  //iterate to next servo ID
+  id = id++;
+  Serial.println("moving to next servo");
+
+  }
+    if (RunCheck == 1){
+   MenuOptions();
+  }
+  
+}
 

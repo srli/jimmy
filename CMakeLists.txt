@@ -92,7 +92,6 @@ target_link_libraries(test_send_gestures
 				  jimmylib rt dxl) #dxl
 
 
-
 #add_executable(detectfinger src/SingleControl/main.cpp)
 #add_dependencies(detectfinger geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 #target_link_libraries(detectfinger ${catkin_LIBRARIES}

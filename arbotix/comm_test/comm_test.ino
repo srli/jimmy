@@ -4,7 +4,7 @@
 
 BioloidController bioloid = BioloidController(1000000);
 
-const int SERVOCOUNT = 27;
+const int SERVOCOUNT = 9;
 
 int id;
 int pos;

@@ -20,12 +20,12 @@ std_msgs::String str_msg;
 ros::Publisher info_stream("info_stream", &str_msg);
 
 void right_wave(){
-  str_msg.data="hello";
-  info_stream.publish(&str_msg);
   delay(100);
   bioloid.readPose();
   bioloid.playSeq(r_wave);
+  while (bioloid.playing){
   bioloid.play();
+  }
   delay(100);
 }    
 
@@ -43,6 +43,14 @@ ros::Subscriber<std_msgs::Int16> sub("single_servo", &message_callback); //only 
 void setup(){
   pinMode(0,OUTPUT); //output pin for the dynamixels
   //pinMode(13, OUTPUT); //toggle LED on pin 1 of arduino when message has been received   
+
+  bioloid.loadPose(rest);   // load the pose from FLASH, into the nextPose buffer
+  bioloid.readPose();            // read in current servo positions to the curPose buffer
+  bioloid.interpolateSetup(500); // setup for interpolation from current->next over 1/2 a second
+  while(bioloid.interpolating > 0){  // do this while we have not reached our new pose
+      bioloid.interpolateStep();     // move servos, if necessary. 
+      delay(3);
+  }
 
   node_handle.initNode();
   node_handle.subscribe(sub);

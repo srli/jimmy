@@ -92,12 +92,12 @@ target_link_libraries(test_send_gestures
 				  jimmylib rt dxl) #dxl
 
 
-#add_executable(detectfinger src/SingleControl/main.cpp)
-#add_dependencies(detectfinger geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-#target_link_libraries(detectfinger ${catkin_LIBRARIES}
-#				   ${OpenNI_LIBRARIES}
-#				   ${orocos_kdl_LIBRARIES}
-#				   ${OpenGL_INCLUDE_DIRS} -lXnVNite_1_5_2)
+add_executable(jimmy_wave src/SingleControl/main.cpp)
+add_dependencies(jimmy_wave geometry_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(jimmy_wave ${catkin_LIBRARIES}
+				   ${OpenNI_LIBRARIES}
+				   ${orocos_kdl_LIBRARIES}
+				   ${OpenGL_INCLUDE_DIRS} -lXnVNite_1_5_2)
 
 
 
@@ -125,7 +125,7 @@ target_link_libraries(test_send_servo_cmd
 #rosserial_add_client_target(firmware hello ALL)
 #rosserial_add_client_target(firmware hello-upload)
 
-install(TARGETS test_jimmy jimmy_servos test_send_gestures test_send_servo_cmd jimmy_gestures
+install(TARGETS test_jimmy jimmy_servos test_send_gestures test_send_servo_cmd jimmy_gestures jimmy_wave
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY include/${PROJECT_NAME}/

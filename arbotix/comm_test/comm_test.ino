@@ -27,14 +27,6 @@ void setup(){
 
   //Check Lipo Battery Voltage
   CheckVoltage();
-
-  MoveCenter();
-  
-  //Scan Servos, return position.
-  //ScanServo();
-  
-  //MoveTest();
-  
   
   MenuOptions();
  
@@ -228,26 +220,3 @@ void RelaxServos(){
       MenuOptions();
   }
 }
-
-void LEDTest(){
-    id = 1;
-  Serial.println("###########################");
-  Serial.println("Running LED Test");
-  Serial.println("###########################");    
-  while(id <= SERVOCOUNT){
-    ax12SetRegister(id, 25, 1);
-    Serial.print("LED ON - Servo ID: ");
-    Serial.println(id);
-    delay(3000);
-    ax12SetRegister(id, 25, 0);  
-    Serial.print("LED OFF - Servo ID: ");
-    Serial.println(id);    
-    delay(3000);    
-    id = id++;
-  }
-  
-   if (RunCheck == 1){
-      MenuOptions();
-  }
-}
-    

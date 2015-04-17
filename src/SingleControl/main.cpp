@@ -24,9 +24,11 @@
 #include <stdlib.h>
 #include "std_msgs/String.h"
 #include "std_msgs/Bool.h"
-#include <jimmy/pointerpos.h>
-#include <jimmy/gestures.h>
+#include "std_msgs/Int16.h"
 
+/*#include <jimmy/pointerpos.h>
+#include <jimmy/gestures.h>
+*/
 #include <sstream>
 
 
@@ -180,12 +182,15 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "pointcontrol", ros::init_options::NoSigintHandler);
   	ros::NodeHandle rosnode = ros::NodeHandle();
 
-  	ros::Publisher pub = rosnode.advertise<jimmy::pointerpos>("point_location", 10); //publisher for hand XYZ positions
+/*  	ros::Publisher pub = rosnode.advertise<jimmy::pointerpos>("point_location", 10); //publisher for hand XYZ positions
   	jimmy::pointerpos msg;
 
   	ros::Publisher pub_gestures = rosnode.advertise<jimmy::gestures>("detected_gestures", 10); //publisher for gesture booleans
   	jimmy::gestures msg_gestures;
+*/
 
+  	ros::Publisher pub_single_servo = rosnode.advertise<std_msgs::Int16>("single_servo", 10); //publisher for gesture booleans
+  	std_msgs::Int16 msg_single_servo;
 
 	// Main loop
 	while (!xnOSWasKeyboardHit())
@@ -200,7 +205,7 @@ int main(int argc, char** argv)
 			((XnVSessionManager*)pSessionGenerator)->Update(&context);
 
 			//fill out the custom message fields with the placeholders we've previously defined
-			msg.positionx = xpos;
+/*			msg.positionx = xpos;
 			msg.positiony = ypos;
 			msg.positionz = zpos;
 			pub.publish(msg);
@@ -209,6 +214,12 @@ int main(int argc, char** argv)
 			msg_gestures.hello = sess_start;
 			msg_gestures.goodbye = sess_end;
 			pub_gestures.publish(msg_gestures);
+*/
+			if(wave){
+				int num = 1;
+				msg_single_servo.data = num;
+				pub_single_servo.publish(msg_single_servo);
+			}
 
 			//set gesture booleans back to false for re-initialization again
 			wave = false;

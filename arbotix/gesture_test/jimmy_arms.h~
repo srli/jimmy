@@ -14,7 +14,7 @@ PROGMEM prog_uint16_t rest[] = {8, 2089, 2750, 2824, 2813, 1871, 1849, 1435, 236
 PROGMEM prog_uint16_t r_wave1[] = {8, 2062, 512, 2580, 512, 589, 512, 533, 512};
 PROGMEM prog_uint16_t r_wave2[] = {8, 2050, 512, 2597, 512, 1076, 512, 515, 512};
 
-PROGMEM transition_t r_wave[] = {{0,7} ,{rest,1000} ,{r_elbow_up,2000} ,{r_wave1,2000} ,{r_wave2,2000} ,{r_wave1,2000} ,{r_elbow_up,2000} ,{rest,2000} };
+PROGMEM transition_t r_wave[] = {{0,7} ,{rest,5000} ,{r_elbow_up,5000} ,{r_wave1,5000} ,{r_wave2,5000} ,{r_wave1,5000} ,{r_elbow_up,5000} ,{rest,5000} };
 PROGMEM transition_t l_wave[] = {{0,7} ,{rest,500} ,{l_elbow_up,500} ,{l_wave1,500} ,{l_wave2,500} ,{l_wave3,500} ,{l_wave4,500} ,{l_wave5,500} };
 
 #endif

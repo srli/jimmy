@@ -4,7 +4,7 @@
 #include "jimmy_arms.h"
 
 BioloidController bioloid = BioloidController(1000000);
-
+idle_gestures
 void setup(){
    pinMode(0,OUTPUT);  
    
@@ -74,6 +74,18 @@ void right_wave(){
   }
   delay(100);
 }
+
+void random_gesture(){
+  delay(100);
+  randint = random(10)
+  bioloid.readPose();
+  bioloid.playSeq(r_wave);
+  while (bioloid.playing){
+    bioloid.play();
+  }
+  delay(100);
+}
+
 
 void MenuOptions(){
   

@@ -82,8 +82,16 @@ void idle_callback(const std_msgs::Int16& idle_msg){
   case 5:
     bioloid.loadPose(con2);
     break;
-//  case 6:
-  //  bioloid.loadPose(rest);
+  case 6:
+    bioloid.loadPose(ran1);
+    break;
+  case 7:
+    bioloid.loadPose(ran2);
+    break;
+  case 8:
+    bioloid.loadPose(ran3);    
+    break;
+
   default:
     bioloid.loadPose(rest);
   }

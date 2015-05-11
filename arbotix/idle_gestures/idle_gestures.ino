@@ -4,7 +4,7 @@
 #include <ax12.h>
 #include <BioloidController.h>
 #include "poses.h"
-#include "jimmy_arms.h"
+//#include "jimmy_arms.h"
 #include <ros.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/String.h>
@@ -30,36 +30,64 @@ void left_wave(){
 }    
 
 
+void right_wave(){
+  delay(100);
+  bioloid.readPose();
+  bioloid.playSeq(r_wave);
+  while (bioloid.playing){
+  bioloid.play();
+  }
+  delay(100);
+}    
+
+
 void action_callback( const std_msgs::Int16& servo_msg){
-  data_field = servo_msg.data;
-  //digitalWrite(13, HIGH-digitalRead(13));   // blink the led
-  left_wave();
+  int action_num = servo_msg.data;
+  switch(action_num){
+  case 1:
+    right_wave();
+    break;
+  case 2:
+    left_wave();
+    break;
+  default:
+    bioloid.loadPose(rest);   // load the pose from FLASH, into the nextPose buffer
+    bioloid.readPose();            // read in current servo positions to the curPose buffer
+    bioloid.interpolateSetup(1500); // setup for interpolation from current->next over 1/2 a second
+    while(bioloid.interpolating > 0){  // do this while we have not reached our new pose
+        bioloid.interpolateStep();     // move servos, if necessary. 
+        delay(3);
+    }    
+  }
 }
 
 //TO DO: FIX THIS IDLE CALLBACK
 //not latching to messages properly, maybe wrong use of switch statements or improper interpolation
 void idle_callback(const std_msgs::Int16& idle_msg){
   delay(100);
-  int randint = idle_msg.data; //random(4); //generates random number we use to select random gesture
-  bioloid.readPose();
-  switch(randint){
+  int pose_num = idle_msg.data;//idle_msg.data; //random(4); //generates random number we use to select random gesture
+  switch(pose_num){
   case 1:
     bioloid.loadPose(ran1);
+    break;
   case 2:
     bioloid.loadPose(ran2);
+    break;
   case 3:
     bioloid.loadPose(ran3);    
+    break;
   case 4:
     bioloid.loadPose(con1);
+    break;
   case 5:
     bioloid.loadPose(con2);
-  case 6:
-  case 7:
-  case 8:
-  case 9:
-  case 10:
+    break;
+//  case 6:
+  //  bioloid.loadPose(rest);
+  default:
     bioloid.loadPose(rest);
   }
+  bioloid.readPose();
   bioloid.interpolateSetup(random(10,30)*100);
   while (bioloid.interpolating > 0){
     bioloid.interpolateStep();
@@ -78,7 +106,7 @@ void setup(){
 
   bioloid.loadPose(rest);   // load the pose from FLASH, into the nextPose buffer
   bioloid.readPose();            // read in current servo positions to the curPose buffer
-  bioloid.interpolateSetup(500); // setup for interpolation from current->next over 1/2 a second
+  bioloid.interpolateSetup(1500); // setup for interpolation from current->next over 1/2 a second
   while(bioloid.interpolating > 0){  // do this while we have not reached our new pose
       bioloid.interpolateStep();     // move servos, if necessary. 
       delay(3);

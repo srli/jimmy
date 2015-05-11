@@ -22,5 +22,6 @@ PROGMEM prog_uint16_t r_wave2[] = {8, 2067, 2016, 2749, 2829, 1014, 1781, 742, 7
 PROGMEM transition_t yay[] = {{0,5} ,{rest,1000} ,{yay2,2000} ,{yay3,1500} ,{yay2,2000} ,{rest,1500} };
 PROGMEM transition_t l_wave[] = {{0,9} ,{rest,1000} ,{l_elbow_up1,1500} ,{l_wave1,1500} ,{l_wave2,1500} ,{l_wave1,1000} ,{l_wave2,1000} ,{l_wave1,1000} ,{l_elbow_up1,2000} ,{rest,1500} };
 PROGMEM transition_t penguin[] = {{0,5} ,{rest,500} ,{ran1,1000} ,{rest,500} ,{ran2,1000} ,{rest,1500} };
+PROGMEM transition_t r_wave[] = {{0,7} ,{rest,1000} ,{r_elbow_up,2000} ,{r_wave1,2000} ,{r_wave2,2000} ,{r_wave1,2000} ,{r_elbow_up,2000} ,{rest,2000} };
 
 #endif
